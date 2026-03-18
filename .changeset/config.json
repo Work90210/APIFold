@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "kylefuhri/model-translator" }
+    { "repo": "Work90210/model-translator" }
   ],
   "commit": false,
   "fixed": [],
