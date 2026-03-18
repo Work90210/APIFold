@@ -1,39 +1,74 @@
 name: Feature Request
-description: Suggest a feature for Model Translator
+description: Suggest a new feature or improvement
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
-      value: Thanks for suggesting a feature.
+      value: |
+        Thanks for suggesting a feature! Please fill out the sections below so we can evaluate and prioritize it.
+
+        **Before submitting**, please search [existing issues](https://github.com/Work90210/model-translator/issues?q=label%3Aenhancement) and [discussions](https://github.com/Work90210/model-translator/discussions) to avoid duplicates.
+
   - type: textarea
     id: problem
     attributes:
       label: Problem statement
-      description: What problem does this feature solve?
+      description: What problem does this feature solve? What's the use case?
+      placeholder: I'm always frustrated when I have to manually...
     validations:
       required: true
+
   - type: textarea
     id: solution
     attributes:
       label: Proposed solution
-      description: Describe the solution you'd like.
+      description: Describe the solution you'd like. Be as specific as possible.
     validations:
       required: true
+
   - type: textarea
     id: alternatives
     attributes:
       label: Alternatives considered
-      description: Any alternative solutions or features you've considered.
+      description: Any alternative solutions, workarounds, or features you've considered.
+
   - type: dropdown
-    id: scope
+    id: component
     attributes:
-      label: Scope
+      label: Component
+      description: Which part of Model Translator does this affect?
       options:
-        - Transformer (MIT library)
-        - Web UI
-        - Runtime (MCP server)
-        - Infrastructure
+        - Transformer (npm library)
+        - Web App (Dashboard / API)
+        - Runtime (MCP server / SSE)
         - Documentation
+        - Docker / Self-hosting
+        - CLI
+        - Other
     validations:
       required: true
+
+  - type: dropdown
+    id: importance
+    attributes:
+      label: How important is this feature to you?
+      options:
+        - Nice to have
+        - Important — I can work around it
+        - Critical — blocking my use case
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context, mockups, screenshots, or examples.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to submit a PR for this feature

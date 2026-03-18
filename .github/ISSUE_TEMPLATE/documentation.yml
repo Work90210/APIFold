@@ -1,0 +1,53 @@
+name: Documentation Issue
+description: Report incorrect, missing, or unclear documentation
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve our documentation. Whether it's a typo, missing guide, or unclear explanation — we want to know.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of issue
+      options:
+        - Incorrect information
+        - Missing documentation
+        - Unclear or confusing
+        - Outdated content
+        - Typo or formatting
+        - Broken link
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: Page or section
+      description: Link to the page or describe where the issue is.
+      placeholder: https://... or "Self-Hosting Guide > TLS Setup"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's wrong or missing? What would be better?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: If you know what the correct content should be, share it here.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to submit a PR to fix this
