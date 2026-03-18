@@ -1,0 +1,161 @@
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+.pnpm-store/
+.pnpm-debug.log
+
+# ============================================
+# Build outputs
+# ============================================
+dist/
+build/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+
+# ============================================
+# Environment & Secrets
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.cert
+credentials.json
+service-account*.json
+
+# ============================================
+# OS artifacts
+# ============================================
+.DS_Store
+Desktop.ini
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ============================================
+# IDE & Editor
+# ============================================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# LLM / AI Agent artifacts
+# ============================================
+
+# Claude Code
+.claude/
+.claude.json
+CLAUDE.md
+
+# Cursor
+.cursorrules
+.cursorignore
+.cursor/
+
+# GitHub Copilot
+.copilot/
+.github/copilot/
+
+# Aider
+.aider*
+.aider.conf.yml
+.aider.tags.cache.v3/
+
+# Continue.dev
+.continue/
+.continuerc.json
+
+# Cody (Sourcegraph)
+.cody/
+
+# Windsurf
+.windsurfrules
+
+# Vector databases & embeddings
+vectors.db
+vectors.db-shm
+vectors.db-wal
+*.vectordb
+*.embeddings
+*.faiss
+*.pkl
+*.annoy
+*.hnsw
+chromadb/
+.chroma/
+qdrant_storage/
+weaviate_data/
+pinecone_index/
+
+# Code graph / RAG indexes
+.codegraph/
+.rag/
+code-graph-rag/
+.index/
+.semantic/
+
+# LLM logs & sessions
+logs_llm/
+.llm_logs/
+.ai_sessions/
+.prompt_cache/
+
+# Python (often present in LLM tooling)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ============================================
+# Docker persistent volumes (local dev)
+# ============================================
+postgres_data/
+redis_data/
+certbot_data/
+docker-data/
+
+# ============================================
+# Test & Coverage
+# ============================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# ============================================
+# Logs
+# ============================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# Internal project specs
+# ============================================
+model-translator-spec.md
+
+# ============================================
+# Misc
+# ============================================
+.vercel/
+.netlify/
+.cache/
+tmp/
+temp/

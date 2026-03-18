@@ -1,0 +1,15 @@
+node_modules/
+.git/
+.github/
+.claude/
+.cursor/
+*.md
+!README.md
+coverage/
+e2e/
+docs/
+.env*
+!.env.example
+vectors.db*
+logs_llm/
+.turbo/

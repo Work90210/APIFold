@@ -1,0 +1,5 @@
+{
+  "extends": "@model-translator/tsconfig/nextjs.json",
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

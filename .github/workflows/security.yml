@@ -1,0 +1,20 @@
+name: Security
+on:
+  pull_request:
+  schedule:
+    - cron: "0 8 * * 1"
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - run: pnpm audit --audit-level=high
+      - uses: zricethezav/gitleaks-action@b6c5bf4c5c0b50bfadfdce0cd388ec84e7100b3a # v2.3.7
+      - uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # v0.31.0
+        with:
+          scan-type: "fs"
+          severity: "HIGH,CRITICAL"
