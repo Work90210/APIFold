@@ -114,27 +114,19 @@ Once you've imported a spec and created an MCP server through the dashboard:
 
 ## Architecture
 
-```
-                    ┌──────────────────────────────────────────────┐
-                    │              Model Translator                │
-┌──────────┐       │                                              │       ┌──────────────┐
-│ OpenAPI/ │       │  ┌─────────────┐       ┌─────────────────┐  │       │ Upstream API │
-│ Swagger  │──────▶│  │ Transformer │──────▶│ Runtime (MCP)   │──┼──────▶│ (Stripe,     │
-│ Spec     │       │  │ (MIT lib)   │       │ Express + SSE   │  │       │  GitHub, etc)│
-└──────────┘       │  └─────────────┘       └────────▲────────┘  │       └──────────────┘
-                    │                                 │           │
-                    │  ┌─────────────┐       ┌───────┴────────┐  │
-                    │  │ Web App     │       │ Postgres 16    │  │
-                    │  │ (Next.js)   │       │ Redis 7        │  │
-                    │  └─────────────┘       └────────────────┘  │
-                    └──────────────────────────────────────────────┘
-                                             ▲
-                                             │ MCP / SSE
-                                    ┌────────┴────────┐
-                                    │   AI Agent      │
-                                    │ Claude, Cursor  │
-                                    │ Copilot, etc.   │
-                                    └─────────────────┘
+```mermaid
+graph LR
+    Spec["OpenAPI / Swagger\nSpec"] --> Transformer
+
+    subgraph MT["Model Translator"]
+        Transformer["Transformer\n(MIT lib)"]
+        Transformer --> Runtime["Runtime\nExpress + SSE"]
+        Web["Web App\nNext.js"] --> DB["Postgres 16\nRedis 7"]
+        Runtime --> DB
+    end
+
+    Runtime --> Upstream["Upstream API\n(Stripe, GitHub, etc.)"]
+    Agent["AI Agent\nClaude, Cursor,\nCopilot, etc."] -- "MCP / SSE" --> Runtime
 ```
 
 Model Translator uses a monorepo architecture built with [Turborepo](https://turbo.build) and [pnpm workspaces](https://pnpm.io/workspaces):
