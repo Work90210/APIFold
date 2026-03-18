@@ -17,7 +17,7 @@
     "@model-translator/transformer": "workspace:*",
     "@model-translator/types": "workspace:*",
     "express": "^4.21.0",
-    "express-rate-limit": "^7.5.0",
+    "express-rate-limit": "^8.3.1",
     "helmet": "^8.0.0"
   },
   "devDependencies": {
