@@ -1,0 +1,39 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Circular Refs API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/categories": {
+      "get": {
+        "operationId": "listCategories",
+        "summary": "List categories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Category" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "subcategories": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Category" }
+          }
+        }
+      }
+    }
+  }
+}

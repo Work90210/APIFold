@@ -1,0 +1,283 @@
+{
+  "tools": [
+    {
+      "name": "listpets",
+      "description": "List all pets",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 100,
+            "exclusiveMinimum": 0,
+            "description": "How many items to return at one time (max 100)"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/pets",
+        "paramMap": {
+          "limit": "query",
+          "cursor": "query"
+        },
+        "tags": [
+          "pets"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createpet",
+      "description": "Create a pet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tag": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "species": {
+                "type": "string",
+                "enum": [
+                  "dog",
+                  "cat",
+                  "bird",
+                  "fish",
+                  "reptile"
+                ]
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/pets",
+        "paramMap": {},
+        "tags": [
+          "pets"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "showpetbyid",
+      "description": "Info for a specific pet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "string",
+            "description": "The id of the pet to retrieve"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/pets/{petId}",
+        "paramMap": {
+          "petId": "path"
+        },
+        "tags": [
+          "pets"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "updatepet",
+      "description": "Update a pet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tag": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "species": {
+                "type": "string",
+                "enum": [
+                  "dog",
+                  "cat",
+                  "bird",
+                  "fish",
+                  "reptile"
+                ]
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        "required": [
+          "petId",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "put",
+        "pathTemplate": "/pets/{petId}",
+        "paramMap": {
+          "petId": "path"
+        },
+        "tags": [
+          "pets"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletepet",
+      "description": "Delete a pet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/pets/{petId}",
+        "paramMap": {
+          "petId": "path"
+        },
+        "tags": [
+          "pets"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "listpetvaccinations",
+      "description": "List vaccinations for a pet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "petId"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/pets/{petId}/vaccinations",
+        "paramMap": {
+          "petId": "path"
+        },
+        "tags": [
+          "vaccinations"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "addpetvaccination",
+      "description": "Record a vaccination for a pet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "name",
+              "administeredAt"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "administeredAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "petId",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/pets/{petId}/vaccinations",
+        "paramMap": {
+          "petId": "path"
+        },
+        "tags": [
+          "vaccinations"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Petstore",
+    "specVersion": "1.0.0",
+    "openApiVersion": "3.1",
+    "totalOperations": 7,
+    "transformedCount": 7,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

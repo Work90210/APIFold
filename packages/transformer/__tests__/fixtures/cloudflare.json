@@ -1,0 +1,186 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Cloudflare API (Subset)", "version": "4.0" },
+  "paths": {
+    "/zones": {
+      "get": {
+        "operationId": "zone-list",
+        "summary": "List zones",
+        "tags": ["zones"],
+        "parameters": [
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "pending", "initializing", "moved", "deleted", "deactivated"] } },
+          { "name": "account.id", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "order", "in": "query", "schema": { "type": "string", "enum": ["name", "status", "account.id", "account.name"] } },
+          { "name": "direction", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] } }
+        ],
+        "responses": { "200": { "description": "Zones list" } }
+      },
+      "post": {
+        "operationId": "zone-create",
+        "summary": "Create a zone",
+        "tags": ["zones"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["name", "account"],
+          "properties": {
+            "name": { "type": "string" },
+            "account": { "type": "object", "properties": { "id": { "type": "string" } } },
+            "jump_start": { "type": "boolean" },
+            "type": { "type": "string", "enum": ["full", "partial"] }
+          }
+        } } } },
+        "responses": { "200": { "description": "Zone created" } }
+      }
+    },
+    "/zones/{zone_id}": {
+      "get": {
+        "operationId": "zone-get",
+        "summary": "Get zone details",
+        "tags": ["zones"],
+        "parameters": [ { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Zone details" } }
+      },
+      "patch": {
+        "operationId": "zone-update",
+        "summary": "Update a zone",
+        "tags": ["zones"],
+        "parameters": [ { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "content": { "application/json": { "schema": {
+          "type": "object", "properties": { "paused": { "type": "boolean" }, "plan": { "type": "object", "properties": { "id": { "type": "string" } } } }
+        } } } },
+        "responses": { "200": { "description": "Zone updated" } }
+      },
+      "delete": {
+        "operationId": "zone-delete",
+        "summary": "Delete a zone",
+        "tags": ["zones"],
+        "parameters": [ { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Zone deleted" } }
+      }
+    },
+    "/zones/{zone_id}/dns_records": {
+      "get": {
+        "operationId": "dns-records-list",
+        "summary": "List DNS records",
+        "tags": ["dns"],
+        "parameters": [
+          { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV"] } },
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "content", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "DNS records" } }
+      },
+      "post": {
+        "operationId": "dns-records-create",
+        "summary": "Create a DNS record",
+        "tags": ["dns"],
+        "parameters": [ { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DNSRecord" } } } },
+        "responses": { "200": { "description": "DNS record created" } }
+      }
+    },
+    "/zones/{zone_id}/dns_records/{dns_record_id}": {
+      "get": {
+        "operationId": "dns-records-get",
+        "summary": "Get DNS record",
+        "tags": ["dns"],
+        "parameters": [
+          { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "dns_record_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "DNS record details" } }
+      },
+      "put": {
+        "operationId": "dns-records-update",
+        "summary": "Update DNS record",
+        "tags": ["dns"],
+        "parameters": [
+          { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "dns_record_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DNSRecord" } } } },
+        "responses": { "200": { "description": "DNS record updated" } }
+      },
+      "delete": {
+        "operationId": "dns-records-delete",
+        "summary": "Delete DNS record",
+        "tags": ["dns"],
+        "parameters": [
+          { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "dns_record_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "DNS record deleted" } }
+      }
+    },
+    "/zones/{zone_id}/purge_cache": {
+      "post": {
+        "operationId": "zone-purge-cache",
+        "summary": "Purge cached content",
+        "tags": ["zones"],
+        "parameters": [ { "name": "zone_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "content": { "application/json": { "schema": {
+          "type": "object",
+          "properties": {
+            "purge_everything": { "type": "boolean" },
+            "files": { "type": "array", "items": { "type": "string", "format": "uri" } },
+            "tags": { "type": "array", "items": { "type": "string" } },
+            "hosts": { "type": "array", "items": { "type": "string" } }
+          }
+        } } } },
+        "responses": { "200": { "description": "Cache purged" } }
+      }
+    },
+    "/accounts/{account_id}/workers/scripts": {
+      "get": {
+        "operationId": "workers-list",
+        "summary": "List Workers scripts",
+        "tags": ["workers"],
+        "parameters": [ { "name": "account_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Workers scripts list" } }
+      }
+    },
+    "/accounts/{account_id}/workers/scripts/{script_name}": {
+      "get": {
+        "operationId": "workers-get",
+        "summary": "Get a Workers script",
+        "tags": ["workers"],
+        "parameters": [
+          { "name": "account_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "script_name", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Worker script content" } }
+      },
+      "delete": {
+        "operationId": "workers-delete",
+        "summary": "Delete a Workers script",
+        "tags": ["workers"],
+        "parameters": [
+          { "name": "account_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "script_name", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Worker deleted" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DNSRecord": {
+        "type": "object",
+        "required": ["type", "name", "content"],
+        "properties": {
+          "type": { "type": "string", "enum": ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV"] },
+          "name": { "type": "string" },
+          "content": { "type": "string" },
+          "ttl": { "type": "integer", "minimum": 1 },
+          "priority": { "type": "integer" },
+          "proxied": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

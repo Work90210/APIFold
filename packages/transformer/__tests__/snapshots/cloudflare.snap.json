@@ -1,0 +1,619 @@
+{
+  "tools": [
+    {
+      "name": "zone_list",
+      "description": "List zones",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "initializing",
+              "moved",
+              "deleted",
+              "deactivated"
+            ]
+          },
+          "account.id": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 20
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "name",
+              "status",
+              "account.id",
+              "account.name"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/zones",
+        "paramMap": {
+          "name": "query",
+          "status": "query",
+          "account.id": "query",
+          "page": "query",
+          "per_page": "query",
+          "order": "query",
+          "direction": "query"
+        },
+        "tags": [
+          "zones"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "zone_create",
+      "description": "Create a zone",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "name",
+              "account"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "account": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              },
+              "jump_start": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "full",
+                  "partial"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/zones",
+        "paramMap": {},
+        "tags": [
+          "zones"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "zone_get",
+      "description": "Get zone details",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/zones/{zone_id}",
+        "paramMap": {
+          "zone_id": "path"
+        },
+        "tags": [
+          "zones"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "zone_delete",
+      "description": "Delete a zone",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/zones/{zone_id}",
+        "paramMap": {
+          "zone_id": "path"
+        },
+        "tags": [
+          "zones"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "zone_update",
+      "description": "Update a zone",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "paused": {
+                "type": "boolean"
+              },
+              "plan": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "zone_id"
+        ]
+      },
+      "_meta": {
+        "method": "patch",
+        "pathTemplate": "/zones/{zone_id}",
+        "paramMap": {
+          "zone_id": "path"
+        },
+        "tags": [
+          "zones"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "dns_records_list",
+      "description": "List DNS records",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "A",
+              "AAAA",
+              "CNAME",
+              "TXT",
+              "MX",
+              "NS",
+              "SRV"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "zone_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/zones/{zone_id}/dns_records",
+        "paramMap": {
+          "zone_id": "path",
+          "type": "query",
+          "name": "query",
+          "content": "query",
+          "page": "query",
+          "per_page": "query"
+        },
+        "tags": [
+          "dns"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "dns_records_create",
+      "description": "Create a DNS record",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "type",
+              "name",
+              "content"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "AAAA",
+                  "CNAME",
+                  "TXT",
+                  "MX",
+                  "NS",
+                  "SRV"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "ttl": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "priority": {
+                "type": "integer"
+              },
+              "proxied": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "zone_id",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/zones/{zone_id}/dns_records",
+        "paramMap": {
+          "zone_id": "path"
+        },
+        "tags": [
+          "dns"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "dns_records_get",
+      "description": "Get DNS record",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "dns_record_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id",
+          "dns_record_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/zones/{zone_id}/dns_records/{dns_record_id}",
+        "paramMap": {
+          "zone_id": "path",
+          "dns_record_id": "path"
+        },
+        "tags": [
+          "dns"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "dns_records_update",
+      "description": "Update DNS record",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "dns_record_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "type",
+              "name",
+              "content"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "AAAA",
+                  "CNAME",
+                  "TXT",
+                  "MX",
+                  "NS",
+                  "SRV"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "ttl": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "priority": {
+                "type": "integer"
+              },
+              "proxied": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "zone_id",
+          "dns_record_id",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "put",
+        "pathTemplate": "/zones/{zone_id}/dns_records/{dns_record_id}",
+        "paramMap": {
+          "zone_id": "path",
+          "dns_record_id": "path"
+        },
+        "tags": [
+          "dns"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "dns_records_delete",
+      "description": "Delete DNS record",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "dns_record_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id",
+          "dns_record_id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/zones/{zone_id}/dns_records/{dns_record_id}",
+        "paramMap": {
+          "zone_id": "path",
+          "dns_record_id": "path"
+        },
+        "tags": [
+          "dns"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "zone_purge_cache",
+      "description": "Purge cached content",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "purge_everything": {
+                "type": "boolean"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "hosts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "zone_id"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/zones/{zone_id}/purge_cache",
+        "paramMap": {
+          "zone_id": "path"
+        },
+        "tags": [
+          "zones"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "workers_list",
+      "description": "List Workers scripts",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/accounts/{account_id}/workers/scripts",
+        "paramMap": {
+          "account_id": "path"
+        },
+        "tags": [
+          "workers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "workers_get",
+      "description": "Get a Workers script",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "script_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "script_name"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/accounts/{account_id}/workers/scripts/{script_name}",
+        "paramMap": {
+          "account_id": "path",
+          "script_name": "path"
+        },
+        "tags": [
+          "workers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "workers_delete",
+      "description": "Delete a Workers script",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "script_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "script_name"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/accounts/{account_id}/workers/scripts/{script_name}",
+        "paramMap": {
+          "account_id": "path",
+          "script_name": "path"
+        },
+        "tags": [
+          "workers"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Cloudflare API (Subset)",
+    "specVersion": "4.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 14,
+    "transformedCount": 14,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

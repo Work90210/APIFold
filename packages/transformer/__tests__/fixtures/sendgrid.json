@@ -1,0 +1,266 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "SendGrid API (Subset)", "version": "3.0" },
+  "paths": {
+    "/v3/mail/send": {
+      "post": {
+        "operationId": "POST_mail-send",
+        "summary": "Send an email",
+        "tags": ["mail-send"],
+        "parameters": [
+          { "name": "Authorization", "in": "header", "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MailSend" }
+            }
+          }
+        },
+        "responses": { "202": { "description": "Accepted" } }
+      }
+    },
+    "/v3/templates": {
+      "get": {
+        "operationId": "GET_templates",
+        "summary": "List templates",
+        "tags": ["templates"],
+        "parameters": [
+          { "name": "generations", "in": "query", "schema": { "type": "string", "enum": ["legacy", "dynamic"] } },
+          { "name": "page_size", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Templates list" } }
+      },
+      "post": {
+        "operationId": "POST_templates",
+        "summary": "Create a template",
+        "tags": ["templates"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "maxLength": 100 },
+                  "generation": { "type": "string", "enum": ["legacy", "dynamic"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Template created" } }
+      }
+    },
+    "/v3/templates/{template_id}": {
+      "get": {
+        "operationId": "GET_templates-template_id",
+        "summary": "Get a template",
+        "tags": ["templates"],
+        "parameters": [
+          { "name": "template_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Template details" } }
+      },
+      "patch": {
+        "operationId": "PATCH_templates-template_id",
+        "summary": "Update a template",
+        "tags": ["templates"],
+        "parameters": [
+          { "name": "template_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "name": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated template" } }
+      },
+      "delete": {
+        "operationId": "DELETE_templates-template_id",
+        "summary": "Delete a template",
+        "tags": ["templates"],
+        "parameters": [
+          { "name": "template_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/v3/contactdb/lists": {
+      "get": {
+        "operationId": "GET_contactdb-lists",
+        "summary": "List contact lists",
+        "tags": ["contacts"],
+        "responses": { "200": { "description": "Lists" } }
+      },
+      "post": {
+        "operationId": "POST_contactdb-lists",
+        "summary": "Create a contact list",
+        "tags": ["contacts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "201": { "description": "List created" } }
+      }
+    },
+    "/v3/contactdb/lists/{list_id}": {
+      "get": {
+        "operationId": "GET_contactdb-lists-list_id",
+        "summary": "Get a contact list",
+        "tags": ["contacts"],
+        "parameters": [
+          { "name": "list_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Contact list" } }
+      },
+      "patch": {
+        "operationId": "PATCH_contactdb-lists-list_id",
+        "summary": "Update a contact list",
+        "tags": ["contacts"],
+        "parameters": [
+          { "name": "list_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "name": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "operationId": "DELETE_contactdb-lists-list_id",
+        "summary": "Delete a contact list",
+        "tags": ["contacts"],
+        "parameters": [
+          { "name": "list_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/v3/contactdb/recipients": {
+      "get": {
+        "operationId": "GET_contactdb-recipients",
+        "summary": "List recipients",
+        "tags": ["contacts"],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "page_size", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Recipients" } }
+      },
+      "post": {
+        "operationId": "POST_contactdb-recipients",
+        "summary": "Add recipients",
+        "tags": ["contacts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["email"],
+                  "properties": {
+                    "email": { "type": "string", "format": "email" },
+                    "first_name": { "type": "string" },
+                    "last_name": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Recipients added" } }
+      }
+    },
+    "/v3/suppression/bounces": {
+      "get": {
+        "operationId": "GET_suppression-bounces",
+        "summary": "List bounces",
+        "tags": ["suppression"],
+        "parameters": [
+          { "name": "start_time", "in": "query", "schema": { "type": "integer" } },
+          { "name": "end_time", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Bounces" } }
+      },
+      "delete": {
+        "operationId": "DELETE_suppression-bounces",
+        "summary": "Delete bounces",
+        "tags": ["suppression"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "delete_all": { "type": "boolean" },
+                  "emails": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MailSend": {
+        "type": "object",
+        "required": ["personalizations", "from", "subject", "content"],
+        "properties": {
+          "personalizations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["to"],
+              "properties": {
+                "to": { "type": "array", "items": { "$ref": "#/components/schemas/EmailAddress" } },
+                "cc": { "type": "array", "items": { "$ref": "#/components/schemas/EmailAddress" } },
+                "bcc": { "type": "array", "items": { "$ref": "#/components/schemas/EmailAddress" } },
+                "subject": { "type": "string" }
+              }
+            }
+          },
+          "from": { "$ref": "#/components/schemas/EmailAddress" },
+          "reply_to": { "$ref": "#/components/schemas/EmailAddress" },
+          "subject": { "type": "string" },
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "value"],
+              "properties": {
+                "type": { "type": "string", "enum": ["text/plain", "text/html"] },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "template_id": { "type": "string" }
+        }
+      },
+      "EmailAddress": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1378 @@
+{
+  "tools": [
+    {
+      "name": "repos_get",
+      "description": "Get a repository",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "The account owner of the repository."
+          },
+          "repo": {
+            "type": "string",
+            "description": "The name of the repository without the `.git` extension."
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_delete",
+      "description": "Delete a repository",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/repos/{owner}/{repo}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_update",
+      "description": "Update a repository",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the repository."
+              },
+              "description": {
+                "type": "string",
+                "description": "A short description of the repository."
+              },
+              "homepage": {
+                "type": "string"
+              },
+              "private": {
+                "type": "boolean"
+              },
+              "has_issues": {
+                "type": "boolean"
+              },
+              "has_projects": {
+                "type": "boolean"
+              },
+              "has_wiki": {
+                "type": "boolean"
+              },
+              "default_branch": {
+                "type": "string"
+              },
+              "allow_squash_merge": {
+                "type": "boolean"
+              },
+              "allow_merge_commit": {
+                "type": "boolean"
+              },
+              "allow_rebase_merge": {
+                "type": "boolean"
+              },
+              "delete_branch_on_merge": {
+                "type": "boolean"
+              },
+              "archived": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "patch",
+        "pathTemplate": "/repos/{owner}/{repo}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_getcontent",
+      "description": "Get repository content",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string",
+            "description": "The name of the commit/branch/tag."
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "path"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/contents/{path}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "path": "path",
+          "ref": "query"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_listbranches",
+      "description": "List branches",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "protected": {
+            "type": "boolean"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/branches",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "protected": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_listcommits",
+      "description": "List commits",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "sha": {
+            "type": "string",
+            "description": "SHA or branch to start listing commits from."
+          },
+          "path": {
+            "type": "string",
+            "description": "Only commits containing this file path will be returned."
+          },
+          "author": {
+            "type": "string"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/commits",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "sha": "query",
+          "path": "query",
+          "author": "query",
+          "since": "query",
+          "until": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_listreleases",
+      "description": "List releases",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/releases",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_createrelease",
+      "description": "Create a release",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "tag_name"
+            ],
+            "properties": {
+              "tag_name": {
+                "type": "string"
+              },
+              "target_commitish": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "draft": {
+                "type": "boolean",
+                "default": false
+              },
+              "prerelease": {
+                "type": "boolean",
+                "default": false
+              },
+              "generate_release_notes": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/repos/{owner}/{repo}/releases",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "users_getauthenticated",
+      "description": "Get the authenticated user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/user",
+        "paramMap": {},
+        "tags": [
+          "users"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "users_getbyusername",
+      "description": "Get a user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users/{username}",
+        "paramMap": {
+          "username": "path"
+        },
+        "tags": [
+          "users"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_listforuser",
+      "description": "List repositories for a user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "all",
+              "owner",
+              "member"
+            ]
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "pushed",
+              "full_name"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "username"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users/{username}/repos",
+        "paramMap": {
+          "username": "path",
+          "type": "query",
+          "sort": "query",
+          "direction": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "repos"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "issues_listforrepo",
+      "description": "List repository issues",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed",
+              "all"
+            ],
+            "default": "open"
+          },
+          "labels": {
+            "type": "string",
+            "description": "A list of comma separated label names."
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "comments"
+            ],
+            "default": "created"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "creator": {
+            "type": "string"
+          },
+          "milestone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/issues",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "state": "query",
+          "labels": "query",
+          "sort": "query",
+          "direction": "query",
+          "since": "query",
+          "per_page": "query",
+          "page": "query",
+          "assignee": "query",
+          "creator": "query",
+          "milestone": "query"
+        },
+        "tags": [
+          "issues"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "issues_create",
+      "description": "Create an issue",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "assignees": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "milestone": {
+                "type": "integer"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/repos/{owner}/{repo}/issues",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path"
+        },
+        "tags": [
+          "issues"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "issues_get",
+      "description": "Get an issue",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "issue_number": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "issue_number"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/issues/{issue_number}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "issue_number": "path"
+        },
+        "tags": [
+          "issues"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "issues_update",
+      "description": "Update an issue",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "issue_number": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "state_reason": {
+                "type": "string",
+                "enum": [
+                  "completed",
+                  "not_planned",
+                  "reopened"
+                ]
+              },
+              "assignees": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "milestone": {
+                "type": "integer",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "issue_number"
+        ]
+      },
+      "_meta": {
+        "method": "patch",
+        "pathTemplate": "/repos/{owner}/{repo}/issues/{issue_number}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "issue_number": "path"
+        },
+        "tags": [
+          "issues"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "issues_listcomments",
+      "description": "List issue comments",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "issue_number": {
+            "type": "integer"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "issue_number"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/issues/{issue_number}/comments",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "issue_number": "path",
+          "since": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "issues"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "issues_createcomment",
+      "description": "Create an issue comment",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "issue_number": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "body"
+            ],
+            "properties": {
+              "body": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "issue_number",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/repos/{owner}/{repo}/issues/{issue_number}/comments",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "issue_number": "path"
+        },
+        "tags": [
+          "issues"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pulls_list",
+      "description": "List pull requests",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed",
+              "all"
+            ],
+            "default": "open"
+          },
+          "head": {
+            "type": "string"
+          },
+          "base": {
+            "type": "string"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "popularity",
+              "long-running"
+            ],
+            "default": "created"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "owner",
+          "repo"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/pulls",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "state": "query",
+          "head": "query",
+          "base": "query",
+          "sort": "query",
+          "direction": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "pulls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pulls_create",
+      "description": "Create a pull request",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "title",
+              "head",
+              "base"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "head": {
+                "type": "string"
+              },
+              "base": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "draft": {
+                "type": "boolean"
+              },
+              "maintainer_can_modify": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/repos/{owner}/{repo}/pulls",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path"
+        },
+        "tags": [
+          "pulls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pulls_get",
+      "description": "Get a pull request",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "pull_number": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "pull_number"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/pulls/{pull_number}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "pull_number": "path"
+        },
+        "tags": [
+          "pulls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pulls_update",
+      "description": "Update a pull request",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "pull_number": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "base": {
+                "type": "string"
+              },
+              "maintainer_can_modify": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "pull_number"
+        ]
+      },
+      "_meta": {
+        "method": "patch",
+        "pathTemplate": "/repos/{owner}/{repo}/pulls/{pull_number}",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "pull_number": "path"
+        },
+        "tags": [
+          "pulls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pulls_merge",
+      "description": "Merge a pull request",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "pull_number": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "commit_title": {
+                "type": "string"
+              },
+              "commit_message": {
+                "type": "string"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "merge_method": {
+                "type": "string",
+                "enum": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "pull_number"
+        ]
+      },
+      "_meta": {
+        "method": "put",
+        "pathTemplate": "/repos/{owner}/{repo}/pulls/{pull_number}/merge",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "pull_number": "path"
+        },
+        "tags": [
+          "pulls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pulls_listreviews",
+      "description": "List reviews for a pull request",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "pull_number": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "pull_number"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+        "paramMap": {
+          "owner": "path",
+          "repo": "path",
+          "pull_number": "path",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "pulls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "orgs_get",
+      "description": "Get an organization",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "org": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "org"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/orgs/{org}",
+        "paramMap": {
+          "org": "path"
+        },
+        "tags": [
+          "orgs"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "repos_listfororg",
+      "description": "List organization repositories",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "org": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "all",
+              "public",
+              "private",
+              "forks",
+              "sources",
+              "member"
+            ]
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "pushed",
+              "full_name"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "org"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/orgs/{org}/repos",
+        "paramMap": {
+          "org": "path",
+          "type": "query",
+          "sort": "query",
+          "direction": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "orgs"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "orgs_listmembers",
+      "description": "List organization members",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "org": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "string",
+            "enum": [
+              "2fa_disabled",
+              "all"
+            ],
+            "default": "all"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "all",
+              "admin",
+              "member"
+            ],
+            "default": "all"
+          },
+          "per_page": {
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "org"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/orgs/{org}/members",
+        "paramMap": {
+          "org": "path",
+          "filter": "query",
+          "role": "query",
+          "per_page": "query",
+          "page": "query"
+        },
+        "tags": [
+          "orgs"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "GitHub REST API",
+    "specVersion": "1.1.4",
+    "openApiVersion": "3.0",
+    "totalOperations": 26,
+    "transformedCount": 26,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

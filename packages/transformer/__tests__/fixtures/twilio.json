@@ -1,0 +1,240 @@
+{
+  "openapi": "3.0.1",
+  "info": { "title": "Twilio API (Subset)", "version": "1.0.0" },
+  "paths": {
+    "/2010-04-01/Accounts/{AccountSid}/Messages.json": {
+      "get": {
+        "operationId": "ListMessage",
+        "summary": "List messages",
+        "tags": ["messages"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "To", "in": "query", "schema": { "type": "string" } },
+          { "name": "From", "in": "query", "schema": { "type": "string" } },
+          { "name": "DateSent", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "PageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 1000 } }
+        ],
+        "responses": { "200": { "description": "List of messages" } }
+      },
+      "post": {
+        "operationId": "CreateMessage",
+        "summary": "Send a message",
+        "tags": ["messages"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["To"],
+                "properties": {
+                  "To": { "type": "string", "description": "The destination phone number" },
+                  "From": { "type": "string" },
+                  "MessagingServiceSid": { "type": "string" },
+                  "Body": { "type": "string", "description": "The text of the message" },
+                  "MediaUrl": { "type": "array", "items": { "type": "string", "format": "uri" } },
+                  "StatusCallback": { "type": "string", "format": "uri" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Message created" } }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json": {
+      "get": {
+        "operationId": "FetchMessage",
+        "summary": "Fetch a message",
+        "tags": ["messages"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Sid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Message details" } }
+      },
+      "post": {
+        "operationId": "UpdateMessage",
+        "summary": "Update a message",
+        "tags": ["messages"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Sid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "type": "object", "properties": { "Body": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated message" } }
+      },
+      "delete": {
+        "operationId": "DeleteMessage",
+        "summary": "Delete a message",
+        "tags": ["messages"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Sid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Calls.json": {
+      "get": {
+        "operationId": "ListCall",
+        "summary": "List calls",
+        "tags": ["calls"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "To", "in": "query", "schema": { "type": "string" } },
+          { "name": "From", "in": "query", "schema": { "type": "string" } },
+          { "name": "Status", "in": "query", "schema": { "type": "string", "enum": ["queued", "ringing", "in-progress", "completed", "busy", "failed", "no-answer", "canceled"] } },
+          { "name": "PageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "List of calls" } }
+      },
+      "post": {
+        "operationId": "CreateCall",
+        "summary": "Make a call",
+        "tags": ["calls"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["To", "From"],
+                "properties": {
+                  "To": { "type": "string" },
+                  "From": { "type": "string" },
+                  "Url": { "type": "string", "format": "uri" },
+                  "Twiml": { "type": "string" },
+                  "ApplicationSid": { "type": "string" },
+                  "Method": { "type": "string", "enum": ["GET", "POST"] },
+                  "StatusCallback": { "type": "string", "format": "uri" },
+                  "Timeout": { "type": "integer" },
+                  "Record": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Call created" } }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json": {
+      "get": {
+        "operationId": "FetchCall",
+        "summary": "Fetch a call",
+        "tags": ["calls"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Sid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Call details" } }
+      },
+      "post": {
+        "operationId": "UpdateCall",
+        "summary": "Update a call",
+        "tags": ["calls"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Sid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Url": { "type": "string", "format": "uri" },
+                  "Method": { "type": "string" },
+                  "Status": { "type": "string", "enum": ["canceled", "completed"] },
+                  "Twiml": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated call" } }
+      },
+      "delete": {
+        "operationId": "DeleteCall",
+        "summary": "Delete a call record",
+        "tags": ["calls"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "Sid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/2010-04-01/Accounts.json": {
+      "get": {
+        "operationId": "ListAccount",
+        "summary": "List accounts",
+        "tags": ["accounts"],
+        "parameters": [
+          { "name": "FriendlyName", "in": "query", "schema": { "type": "string" } },
+          { "name": "Status", "in": "query", "schema": { "type": "string", "enum": ["active", "suspended", "closed"] } },
+          { "name": "PageSize", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "List of accounts" } }
+      },
+      "post": {
+        "operationId": "CreateAccount",
+        "summary": "Create a sub-account",
+        "tags": ["accounts"],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "type": "object", "properties": { "FriendlyName": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Account created" } }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}.json": {
+      "get": {
+        "operationId": "FetchAccount",
+        "summary": "Fetch an account",
+        "tags": ["accounts"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Account details" } }
+      },
+      "post": {
+        "operationId": "UpdateAccount",
+        "summary": "Update an account",
+        "tags": ["accounts"],
+        "parameters": [
+          { "name": "AccountSid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "FriendlyName": { "type": "string" },
+                  "Status": { "type": "string", "enum": ["active", "suspended", "closed"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated account" } }
+      }
+    }
+  }
+}

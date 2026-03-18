@@ -1,0 +1,167 @@
+{
+  "openapi": "3.0.1",
+  "info": { "title": "HubSpot CRM API (Subset)", "version": "3.0" },
+  "paths": {
+    "/crm/v3/objects/contacts": {
+      "get": {
+        "operationId": "getContacts",
+        "summary": "List contacts",
+        "tags": ["contacts"],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "after", "in": "query", "schema": { "type": "string" } },
+          { "name": "properties", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } },
+          { "name": "associations", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } },
+          { "name": "archived", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": { "200": { "description": "Contacts list" } }
+      },
+      "post": {
+        "operationId": "createContact",
+        "summary": "Create a contact",
+        "tags": ["contacts"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimplePublicObjectInput" } } } },
+        "responses": { "201": { "description": "Created contact" } }
+      }
+    },
+    "/crm/v3/objects/contacts/{contactId}": {
+      "get": {
+        "operationId": "getContactById",
+        "summary": "Get a contact",
+        "tags": ["contacts"],
+        "parameters": [
+          { "name": "contactId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "properties", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } }
+        ],
+        "responses": { "200": { "description": "Contact" } }
+      },
+      "patch": {
+        "operationId": "updateContact",
+        "summary": "Update a contact",
+        "tags": ["contacts"],
+        "parameters": [ { "name": "contactId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimplePublicObjectInput" } } } },
+        "responses": { "200": { "description": "Updated contact" } }
+      },
+      "delete": {
+        "operationId": "archiveContact",
+        "summary": "Archive a contact",
+        "tags": ["contacts"],
+        "parameters": [ { "name": "contactId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "204": { "description": "Archived" } }
+      }
+    },
+    "/crm/v3/objects/deals": {
+      "get": {
+        "operationId": "getDeals",
+        "summary": "List deals",
+        "tags": ["deals"],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "after", "in": "query", "schema": { "type": "string" } },
+          { "name": "properties", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } }
+        ],
+        "responses": { "200": { "description": "Deals list" } }
+      },
+      "post": {
+        "operationId": "createDeal",
+        "summary": "Create a deal",
+        "tags": ["deals"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimplePublicObjectInput" } } } },
+        "responses": { "201": { "description": "Created deal" } }
+      }
+    },
+    "/crm/v3/objects/deals/{dealId}": {
+      "get": {
+        "operationId": "getDealById",
+        "summary": "Get a deal",
+        "tags": ["deals"],
+        "parameters": [
+          { "name": "dealId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "properties", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } }
+        ],
+        "responses": { "200": { "description": "Deal" } }
+      },
+      "patch": {
+        "operationId": "updateDeal",
+        "summary": "Update a deal",
+        "tags": ["deals"],
+        "parameters": [ { "name": "dealId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimplePublicObjectInput" } } } },
+        "responses": { "200": { "description": "Updated deal" } }
+      },
+      "delete": {
+        "operationId": "archiveDeal",
+        "summary": "Archive a deal",
+        "tags": ["deals"],
+        "parameters": [ { "name": "dealId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "204": { "description": "Archived" } }
+      }
+    },
+    "/crm/v3/objects/companies": {
+      "get": {
+        "operationId": "getCompanies",
+        "summary": "List companies",
+        "tags": ["companies"],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "after", "in": "query", "schema": { "type": "string" } },
+          { "name": "properties", "in": "query", "schema": { "type": "array", "items": { "type": "string" } } }
+        ],
+        "responses": { "200": { "description": "Companies list" } }
+      },
+      "post": {
+        "operationId": "createCompany",
+        "summary": "Create a company",
+        "tags": ["companies"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimplePublicObjectInput" } } } },
+        "responses": { "201": { "description": "Created company" } }
+      }
+    },
+    "/crm/v3/objects/companies/{companyId}": {
+      "get": {
+        "operationId": "getCompanyById",
+        "summary": "Get a company",
+        "tags": ["companies"],
+        "parameters": [ { "name": "companyId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Company" } }
+      },
+      "patch": {
+        "operationId": "updateCompany",
+        "summary": "Update a company",
+        "tags": ["companies"],
+        "parameters": [ { "name": "companyId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SimplePublicObjectInput" } } } },
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "operationId": "archiveCompany",
+        "summary": "Archive a company",
+        "tags": ["companies"],
+        "parameters": [ { "name": "companyId", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "204": { "description": "Archived" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SimplePublicObjectInput": {
+        "type": "object",
+        "required": ["properties"],
+        "properties": {
+          "properties": { "type": "object", "additionalProperties": { "type": "string" } },
+          "associations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "to": { "type": "object", "properties": { "id": { "type": "string" } } },
+                "types": { "type": "array", "items": { "type": "object", "properties": { "associationCategory": { "type": "string" }, "associationTypeId": { "type": "integer" } } } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

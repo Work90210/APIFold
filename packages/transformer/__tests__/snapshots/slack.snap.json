@@ -1,0 +1,582 @@
+{
+  "tools": [
+    {
+      "name": "chat_postmessage",
+      "description": "Sends a message to a channel",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "blocks": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "thread_ts": {
+                "type": "string"
+              },
+              "reply_broadcast": {
+                "type": "boolean"
+              },
+              "unfurl_links": {
+                "type": "boolean"
+              },
+              "unfurl_media": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/chat.postMessage",
+        "paramMap": {},
+        "tags": [
+          "chat"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "chat_update",
+      "description": "Updates a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel",
+              "ts"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "blocks": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/chat.update",
+        "paramMap": {},
+        "tags": [
+          "chat"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "chat_delete",
+      "description": "Deletes a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel",
+              "ts"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/chat.delete",
+        "paramMap": {},
+        "tags": [
+          "chat"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "conversations_list",
+      "description": "List conversations",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "types": {
+            "type": "string"
+          },
+          "exclude_archived": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 1000
+          },
+          "cursor": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/conversations.list",
+        "paramMap": {
+          "types": "query",
+          "exclude_archived": "query",
+          "limit": "query",
+          "cursor": "query"
+        },
+        "tags": [
+          "conversations"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "conversations_info",
+      "description": "Get conversation info",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "include_locale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/conversations.info",
+        "paramMap": {
+          "channel": "query",
+          "include_locale": "query"
+        },
+        "tags": [
+          "conversations"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "conversations_history",
+      "description": "Fetch conversation history",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "oldest": {
+            "type": "string"
+          },
+          "latest": {
+            "type": "string"
+          },
+          "inclusive": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "cursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/conversations.history",
+        "paramMap": {
+          "channel": "query",
+          "oldest": "query",
+          "latest": "query",
+          "inclusive": "query",
+          "limit": "query",
+          "cursor": "query"
+        },
+        "tags": [
+          "conversations"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "conversations_create",
+      "description": "Create a conversation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "is_private": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/conversations.create",
+        "paramMap": {},
+        "tags": [
+          "conversations"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "conversations_join",
+      "description": "Join a conversation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/conversations.join",
+        "paramMap": {},
+        "tags": [
+          "conversations"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "users_list",
+      "description": "List users",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "cursor": {
+            "type": "string"
+          },
+          "include_locale": {
+            "type": "boolean"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users.list",
+        "paramMap": {
+          "limit": "query",
+          "cursor": "query",
+          "include_locale": "query"
+        },
+        "tags": [
+          "users"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "users_info",
+      "description": "Get user info",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string"
+          },
+          "include_locale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users.info",
+        "paramMap": {
+          "user": "query",
+          "include_locale": "query"
+        },
+        "tags": [
+          "users"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "users_lookupbyemail",
+      "description": "Find a user by email",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users.lookupByEmail",
+        "paramMap": {
+          "email": "query"
+        },
+        "tags": [
+          "users"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "reactions_add",
+      "description": "Add a reaction",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel",
+              "name",
+              "timestamp"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/reactions.add",
+        "paramMap": {},
+        "tags": [
+          "reactions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "reactions_remove",
+      "description": "Remove a reaction",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel",
+              "name",
+              "timestamp"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/reactions.remove",
+        "paramMap": {},
+        "tags": [
+          "reactions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "search_messages",
+      "description": "Search messages",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "score",
+              "timestamp"
+            ]
+          },
+          "sort_dir": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "count": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/search.messages",
+        "paramMap": {
+          "query": "query",
+          "sort": "query",
+          "sort_dir": "query",
+          "count": "query",
+          "page": "query"
+        },
+        "tags": [
+          "search"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "pins_add",
+      "description": "Pin a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "channel",
+              "timestamp"
+            ],
+            "properties": {
+              "channel": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/pins.add",
+        "paramMap": {},
+        "tags": [
+          "pins"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Slack Web API (Subset)",
+    "specVersion": "1.7.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 15,
+    "transformedCount": 15,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

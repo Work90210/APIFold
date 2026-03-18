@@ -1,0 +1,29 @@
+{
+  "tools": [
+    {
+      "name": "healthcheck",
+      "description": "Health check endpoint",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/health",
+        "paramMap": {},
+        "tags": [],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Minimal API",
+    "specVersion": "0.1.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 1,
+    "transformedCount": 1,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

@@ -1,0 +1,596 @@
+{
+  "tools": [
+    {
+      "name": "post_mail_send",
+      "description": "Send an email",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "personalizations",
+              "from",
+              "subject",
+              "content"
+            ],
+            "properties": {
+              "personalizations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "to"
+                  ],
+                  "properties": {
+                    "to": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "email"
+                        ],
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "cc": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "email"
+                        ],
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "bcc": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "email"
+                        ],
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "subject": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "from": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "reply_to": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "subject": {
+                "type": "string"
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "value"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text/plain",
+                        "text/html"
+                      ]
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "template_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v3/mail/send",
+        "paramMap": {},
+        "tags": [
+          "mail-send"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_templates",
+      "description": "List templates",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "generations": {
+            "type": "string",
+            "enum": [
+              "legacy",
+              "dynamic"
+            ]
+          },
+          "page_size": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v3/templates",
+        "paramMap": {
+          "generations": "query",
+          "page_size": "query"
+        },
+        "tags": [
+          "templates"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "post_templates",
+      "description": "Create a template",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "generation": {
+                "type": "string",
+                "enum": [
+                  "legacy",
+                  "dynamic"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v3/templates",
+        "paramMap": {},
+        "tags": [
+          "templates"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_templates_template_id",
+      "description": "Get a template",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v3/templates/{template_id}",
+        "paramMap": {
+          "template_id": "path"
+        },
+        "tags": [
+          "templates"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "delete_templates_template_id",
+      "description": "Delete a template",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v3/templates/{template_id}",
+        "paramMap": {
+          "template_id": "path"
+        },
+        "tags": [
+          "templates"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "patch_templates_template_id",
+      "description": "Update a template",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "template_id"
+        ]
+      },
+      "_meta": {
+        "method": "patch",
+        "pathTemplate": "/v3/templates/{template_id}",
+        "paramMap": {
+          "template_id": "path"
+        },
+        "tags": [
+          "templates"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_contactdb_lists",
+      "description": "List contact lists",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v3/contactdb/lists",
+        "paramMap": {},
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "post_contactdb_lists",
+      "description": "Create a contact list",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v3/contactdb/lists",
+        "paramMap": {},
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_contactdb_lists_list_id",
+      "description": "Get a contact list",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "list_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v3/contactdb/lists/{list_id}",
+        "paramMap": {
+          "list_id": "path"
+        },
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "delete_contactdb_lists_list_id",
+      "description": "Delete a contact list",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "list_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list_id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v3/contactdb/lists/{list_id}",
+        "paramMap": {
+          "list_id": "path"
+        },
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "patch_contactdb_lists_list_id",
+      "description": "Update a contact list",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "list_id": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "list_id"
+        ]
+      },
+      "_meta": {
+        "method": "patch",
+        "pathTemplate": "/v3/contactdb/lists/{list_id}",
+        "paramMap": {
+          "list_id": "path"
+        },
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_contactdb_recipients",
+      "description": "List recipients",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v3/contactdb/recipients",
+        "paramMap": {
+          "page": "query",
+          "page_size": "query"
+        },
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "post_contactdb_recipients",
+      "description": "Add recipients",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "email"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "first_name": {
+                  "type": "string"
+                },
+                "last_name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v3/contactdb/recipients",
+        "paramMap": {},
+        "tags": [
+          "contacts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_suppression_bounces",
+      "description": "List bounces",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "start_time": {
+            "type": "integer"
+          },
+          "end_time": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v3/suppression/bounces",
+        "paramMap": {
+          "start_time": "query",
+          "end_time": "query"
+        },
+        "tags": [
+          "suppression"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "delete_suppression_bounces",
+      "description": "Delete bounces",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "delete_all": {
+                "type": "boolean"
+              },
+              "emails": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v3/suppression/bounces",
+        "paramMap": {},
+        "tags": [
+          "suppression"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "SendGrid API (Subset)",
+    "specVersion": "3.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 15,
+    "transformedCount": 15,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

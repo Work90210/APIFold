@@ -1,0 +1,1603 @@
+{
+  "tools": [
+    {
+      "name": "getcustomers",
+      "description": "List all customers",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "A limit on the number of objects to be returned. Limit can range between 1 and 100."
+          },
+          "starting_after": {
+            "type": "string",
+            "description": "A cursor for use in pagination."
+          },
+          "ending_before": {
+            "type": "string",
+            "description": "A cursor for use in pagination."
+          },
+          "email": {
+            "type": "string",
+            "description": "A case-sensitive filter on the list based on the customer's email field."
+          },
+          "created[gt]": {
+            "type": "integer",
+            "description": "Return results where the created field is greater than this value."
+          },
+          "created[gte]": {
+            "type": "integer",
+            "description": "Return results where the created field is greater than or equal to this value."
+          },
+          "created[lt]": {
+            "type": "integer",
+            "description": "Return results where the created field is less than this value."
+          },
+          "created[lte]": {
+            "type": "integer",
+            "description": "Return results where the created field is less than or equal to this value."
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/customers",
+        "paramMap": {
+          "limit": "query",
+          "starting_after": "query",
+          "ending_before": "query",
+          "email": "query",
+          "created[gt]": "query",
+          "created[gte]": "query",
+          "created[lt]": "query",
+          "created[lte]": "query"
+        },
+        "tags": [
+          "Customers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postcustomers",
+      "description": "Create a customer",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "description": "Customer's email address."
+              },
+              "name": {
+                "type": "string",
+                "description": "The customer's full name or business name."
+              },
+              "description": {
+                "type": "string",
+                "description": "An arbitrary string attached to the object."
+              },
+              "phone": {
+                "type": "string",
+                "description": "The customer's phone number."
+              },
+              "address": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  },
+                  "line1": {
+                    "type": "string"
+                  },
+                  "line2": {
+                    "type": "string"
+                  },
+                  "postal_code": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  }
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Set of key-value pairs that you can attach to an object."
+              },
+              "payment_method": {
+                "type": "string",
+                "description": "The ID of the PaymentMethod to attach to the customer."
+              },
+              "preferred_locales": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Customer's preferred languages, ordered by preference."
+              }
+            }
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/customers",
+        "paramMap": {},
+        "tags": [
+          "Customers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getcustomerscustomer",
+      "description": "Retrieve a customer",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/customers/{customer}",
+        "paramMap": {
+          "customer": "path"
+        },
+        "tags": [
+          "Customers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postcustomerscustomer",
+      "description": "Update a customer",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "customer"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/customers/{customer}",
+        "paramMap": {
+          "customer": "path"
+        },
+        "tags": [
+          "Customers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletecustomerscustomer",
+      "description": "Delete a customer",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v1/customers/{customer}",
+        "paramMap": {
+          "customer": "path"
+        },
+        "tags": [
+          "Customers"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getcharges",
+      "description": "List all charges",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "customer": {
+            "type": "string",
+            "description": "Only return charges for the customer specified by this customer ID."
+          },
+          "starting_after": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/charges",
+        "paramMap": {
+          "limit": "query",
+          "customer": "query",
+          "starting_after": "query"
+        },
+        "tags": [
+          "Charges"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postcharges",
+      "description": "Create a charge",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "properties": {
+              "amount": {
+                "type": "integer",
+                "description": "Amount intended to be collected by this payment, in cents."
+              },
+              "currency": {
+                "type": "string",
+                "description": "Three-letter ISO currency code."
+              },
+              "customer": {
+                "type": "string",
+                "description": "The ID of an existing customer."
+              },
+              "description": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "A payment source to be charged."
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/charges",
+        "paramMap": {},
+        "tags": [
+          "Charges"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getchargescharge",
+      "description": "Retrieve a charge",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "charge": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "charge"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/charges/{charge}",
+        "paramMap": {
+          "charge": "path"
+        },
+        "tags": [
+          "Charges"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postchargescharge",
+      "description": "Update a charge",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "charge": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "charge"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/charges/{charge}",
+        "paramMap": {
+          "charge": "path"
+        },
+        "tags": [
+          "Charges"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postchargeschargecapture",
+      "description": "Capture a charge",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "charge": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "integer"
+              },
+              "receipt_email": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "charge"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/charges/{charge}/capture",
+        "paramMap": {
+          "charge": "path"
+        },
+        "tags": [
+          "Charges"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getpaymentintents",
+      "description": "List all PaymentIntents",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "customer": {
+            "type": "string"
+          },
+          "starting_after": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/payment_intents",
+        "paramMap": {
+          "limit": "query",
+          "customer": "query",
+          "starting_after": "query"
+        },
+        "tags": [
+          "PaymentIntents"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postpaymentintents",
+      "description": "Create a PaymentIntent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "properties": {
+              "amount": {
+                "type": "integer",
+                "description": "Amount intended to be collected, in cents."
+              },
+              "currency": {
+                "type": "string"
+              },
+              "customer": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "payment_method": {
+                "type": "string"
+              },
+              "confirm": {
+                "type": "boolean"
+              },
+              "capture_method": {
+                "type": "string",
+                "enum": [
+                  "automatic",
+                  "automatic_async",
+                  "manual"
+                ]
+              },
+              "payment_method_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "automatic_payment_methods": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "allow_redirects": {
+                    "type": "string",
+                    "enum": [
+                      "always",
+                      "never"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/payment_intents",
+        "paramMap": {},
+        "tags": [
+          "PaymentIntents"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getpaymentintentsintent",
+      "description": "Retrieve a PaymentIntent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/payment_intents/{intent}",
+        "paramMap": {
+          "intent": "path"
+        },
+        "tags": [
+          "PaymentIntents"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postpaymentintentsintent",
+      "description": "Update a PaymentIntent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "integer"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/payment_intents/{intent}",
+        "paramMap": {
+          "intent": "path"
+        },
+        "tags": [
+          "PaymentIntents"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postpaymentintentsintentconfirm",
+      "description": "Confirm a PaymentIntent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "payment_method": {
+                "type": "string"
+              },
+              "return_url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/payment_intents/{intent}/confirm",
+        "paramMap": {
+          "intent": "path"
+        },
+        "tags": [
+          "PaymentIntents"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postpaymentintentsintentcancel",
+      "description": "Cancel a PaymentIntent",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "cancellation_reason": {
+                "type": "string",
+                "enum": [
+                  "abandoned",
+                  "duplicate",
+                  "fraudulent",
+                  "requested_by_customer"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/payment_intents/{intent}/cancel",
+        "paramMap": {
+          "intent": "path"
+        },
+        "tags": [
+          "PaymentIntents"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getsubscriptions",
+      "description": "List subscriptions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "customer": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "canceled",
+              "incomplete",
+              "incomplete_expired",
+              "past_due",
+              "paused",
+              "trialing",
+              "unpaid",
+              "all",
+              "ended"
+            ]
+          },
+          "price": {
+            "type": "string"
+          },
+          "starting_after": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/subscriptions",
+        "paramMap": {
+          "limit": "query",
+          "customer": "query",
+          "status": "query",
+          "price": "query",
+          "starting_after": "query"
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postsubscriptions",
+      "description": "Create a subscription",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "customer"
+            ],
+            "properties": {
+              "customer": {
+                "type": "string"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "price": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "cancel_at_period_end": {
+                "type": "boolean"
+              },
+              "default_payment_method": {
+                "type": "string"
+              },
+              "trial_period_days": {
+                "type": "integer"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/subscriptions",
+        "paramMap": {},
+        "tags": [
+          "Subscriptions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getsubscriptionssubscriptionexposedid",
+      "description": "Retrieve a subscription",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription_exposed_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscription_exposed_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/subscriptions/{subscription_exposed_id}",
+        "paramMap": {
+          "subscription_exposed_id": "path"
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postsubscriptionssubscriptionexposedid",
+      "description": "Update a subscription",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription_exposed_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "cancel_at_period_end": {
+                "type": "boolean"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "proration_behavior": {
+                "type": "string",
+                "enum": [
+                  "always_invoice",
+                  "create_prorations",
+                  "none"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "subscription_exposed_id"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/subscriptions/{subscription_exposed_id}",
+        "paramMap": {
+          "subscription_exposed_id": "path"
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletesubscriptionssubscriptionexposedid",
+      "description": "Cancel a subscription",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription_exposed_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscription_exposed_id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v1/subscriptions/{subscription_exposed_id}",
+        "paramMap": {
+          "subscription_exposed_id": "path"
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getinvoices",
+      "description": "List all invoices",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "customer": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "open",
+              "paid",
+              "uncollectible",
+              "void"
+            ]
+          },
+          "subscription": {
+            "type": "string"
+          },
+          "starting_after": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/invoices",
+        "paramMap": {
+          "limit": "query",
+          "customer": "query",
+          "status": "query",
+          "subscription": "query",
+          "starting_after": "query"
+        },
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postinvoices",
+      "description": "Create an invoice",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "customer": {
+                "type": "string"
+              },
+              "subscription": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "auto_advance": {
+                "type": "boolean"
+              },
+              "collection_method": {
+                "type": "string",
+                "enum": [
+                  "charge_automatically",
+                  "send_invoice"
+                ]
+              },
+              "days_until_due": {
+                "type": "integer"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/invoices",
+        "paramMap": {},
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getinvoicesinvoice",
+      "description": "Retrieve an invoice",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "invoice"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/invoices/{invoice}",
+        "paramMap": {
+          "invoice": "path"
+        },
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postinvoicesinvoice",
+      "description": "Update an invoice",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "invoice"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/invoices/{invoice}",
+        "paramMap": {
+          "invoice": "path"
+        },
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deleteinvoicesinvoice",
+      "description": "Delete a draft invoice",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "invoice"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v1/invoices/{invoice}",
+        "paramMap": {
+          "invoice": "path"
+        },
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postinvoicesinvoicefinalize",
+      "description": "Finalize an invoice",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "auto_advance": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "invoice"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/invoices/{invoice}/finalize",
+        "paramMap": {
+          "invoice": "path"
+        },
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postinvoicesinvoicepay",
+      "description": "Pay an invoice",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "payment_method": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "invoice"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/invoices/{invoice}/pay",
+        "paramMap": {
+          "invoice": "path"
+        },
+        "tags": [
+          "Invoices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getproducts",
+      "description": "List all products",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "starting_after": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "good",
+              "service"
+            ]
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/products",
+        "paramMap": {
+          "limit": "query",
+          "active": "query",
+          "starting_after": "query",
+          "type": "query"
+        },
+        "tags": [
+          "Products"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postproducts",
+      "description": "Create a product",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "default_price_data": {
+                "type": "object",
+                "properties": {
+                  "unit_amount": {
+                    "type": "integer"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "recurring": {
+                    "type": "object",
+                    "properties": {
+                      "interval": {
+                        "type": "string",
+                        "enum": [
+                          "day",
+                          "week",
+                          "month",
+                          "year"
+                        ]
+                      },
+                      "interval_count": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/products",
+        "paramMap": {},
+        "tags": [
+          "Products"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getproductsid",
+      "description": "Retrieve a product",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/products/{id}",
+        "paramMap": {
+          "id": "path"
+        },
+        "tags": [
+          "Products"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postproductsid",
+      "description": "Update a product",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/products/{id}",
+        "paramMap": {
+          "id": "path"
+        },
+        "tags": [
+          "Products"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deleteproductsid",
+      "description": "Delete a product",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v1/products/{id}",
+        "paramMap": {
+          "id": "path"
+        },
+        "tags": [
+          "Products"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getprices",
+      "description": "List all prices",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "product": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "one_time",
+              "recurring"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "starting_after": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/prices",
+        "paramMap": {
+          "limit": "query",
+          "active": "query",
+          "product": "query",
+          "type": "query",
+          "currency": "query",
+          "starting_after": "query"
+        },
+        "tags": [
+          "Prices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postprices",
+      "description": "Create a price",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "currency"
+            ],
+            "properties": {
+              "unit_amount": {
+                "type": "integer",
+                "description": "A positive integer in cents representing how much to charge."
+              },
+              "currency": {
+                "type": "string"
+              },
+              "product": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "billing_scheme": {
+                "type": "string",
+                "enum": [
+                  "per_unit",
+                  "tiered"
+                ]
+              },
+              "recurring": {
+                "type": "object",
+                "properties": {
+                  "interval": {
+                    "type": "string",
+                    "enum": [
+                      "day",
+                      "week",
+                      "month",
+                      "year"
+                    ]
+                  },
+                  "interval_count": {
+                    "type": "integer"
+                  },
+                  "usage_type": {
+                    "type": "string",
+                    "enum": [
+                      "licensed",
+                      "metered"
+                    ]
+                  }
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/prices",
+        "paramMap": {},
+        "tags": [
+          "Prices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "getpricesprice",
+      "description": "Retrieve a price",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "price"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/prices/{price}",
+        "paramMap": {
+          "price": "path"
+        },
+        "tags": [
+          "Prices"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "postpricesprice",
+      "description": "Update a price",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "active": {
+                "type": "boolean"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "nickname": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "price"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/prices/{price}",
+        "paramMap": {
+          "price": "path"
+        },
+        "tags": [
+          "Prices"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Stripe API",
+    "specVersion": "2023-10-16",
+    "openApiVersion": "3.0",
+    "totalOperations": 37,
+    "transformedCount": 37,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

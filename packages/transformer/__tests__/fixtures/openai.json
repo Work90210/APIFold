@@ -1,0 +1,252 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "OpenAI API (Subset)", "version": "2.0.0" },
+  "paths": {
+    "/v1/chat/completions": {
+      "post": {
+        "operationId": "createChatCompletion",
+        "summary": "Create a chat completion",
+        "tags": ["chat"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChatCompletionRequest" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Chat completion" } }
+      }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "operationId": "createEmbedding",
+        "summary": "Create embeddings",
+        "tags": ["embeddings"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["model", "input"],
+                "properties": {
+                  "model": { "type": "string" },
+                  "input": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+                  "encoding_format": { "type": "string", "enum": ["float", "base64"] },
+                  "dimensions": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Embeddings" } }
+      }
+    },
+    "/v1/models": {
+      "get": {
+        "operationId": "listModels",
+        "summary": "List models",
+        "tags": ["models"],
+        "responses": { "200": { "description": "List of models" } }
+      }
+    },
+    "/v1/models/{model}": {
+      "get": {
+        "operationId": "retrieveModel",
+        "summary": "Retrieve a model",
+        "tags": ["models"],
+        "parameters": [
+          { "name": "model", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Model details" } }
+      },
+      "delete": {
+        "operationId": "deleteModel",
+        "summary": "Delete a fine-tuned model",
+        "tags": ["models"],
+        "parameters": [
+          { "name": "model", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Deletion status" } }
+      }
+    },
+    "/v1/files": {
+      "get": {
+        "operationId": "listFiles",
+        "summary": "List files",
+        "tags": ["files"],
+        "parameters": [
+          { "name": "purpose", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "List of files" } }
+      }
+    },
+    "/v1/files/{file_id}": {
+      "get": {
+        "operationId": "retrieveFile",
+        "summary": "Retrieve a file",
+        "tags": ["files"],
+        "parameters": [
+          { "name": "file_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "File details" } }
+      },
+      "delete": {
+        "operationId": "deleteFile",
+        "summary": "Delete a file",
+        "tags": ["files"],
+        "parameters": [
+          { "name": "file_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Deletion status" } }
+      }
+    },
+    "/v1/images/generations": {
+      "post": {
+        "operationId": "createImage",
+        "summary": "Generate images",
+        "tags": ["images"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": { "type": "string", "maxLength": 4000 },
+                  "model": { "type": "string", "enum": ["dall-e-2", "dall-e-3"] },
+                  "n": { "type": "integer", "minimum": 1, "maximum": 10 },
+                  "quality": { "type": "string", "enum": ["standard", "hd"] },
+                  "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"] },
+                  "style": { "type": "string", "enum": ["vivid", "natural"] },
+                  "response_format": { "type": "string", "enum": ["url", "b64_json"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Generated images" } }
+      }
+    },
+    "/v1/images/edits": {
+      "post": {
+        "operationId": "createImageEdit",
+        "summary": "Edit an image",
+        "tags": ["images"],
+        "deprecated": true,
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "type": "object", "properties": { "image": { "type": "string", "format": "binary" } } }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Edited image" } }
+      }
+    },
+    "/v1/fine_tuning/jobs": {
+      "get": {
+        "operationId": "listFineTuningJobs",
+        "summary": "List fine-tuning jobs",
+        "tags": ["fine-tuning"],
+        "parameters": [
+          { "name": "after", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": { "200": { "description": "List of jobs" } }
+      },
+      "post": {
+        "operationId": "createFineTuningJob",
+        "summary": "Create a fine-tuning job",
+        "tags": ["fine-tuning"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["training_file", "model"],
+                "properties": {
+                  "training_file": { "type": "string" },
+                  "model": { "type": "string" },
+                  "validation_file": { "type": "string" },
+                  "hyperparameters": {
+                    "type": "object",
+                    "properties": {
+                      "n_epochs": { "oneOf": [{ "type": "string", "enum": ["auto"] }, { "type": "integer" }] },
+                      "batch_size": { "oneOf": [{ "type": "string", "enum": ["auto"] }, { "type": "integer" }] },
+                      "learning_rate_multiplier": { "oneOf": [{ "type": "string", "enum": ["auto"] }, { "type": "number" }] }
+                    }
+                  },
+                  "suffix": { "type": "string", "maxLength": 18 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Fine-tuning job created" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatCompletionRequest": {
+        "type": "object",
+        "required": ["model", "messages"],
+        "properties": {
+          "model": { "type": "string" },
+          "messages": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ChatMessage" }
+          },
+          "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+          "top_p": { "type": "number" },
+          "n": { "type": "integer" },
+          "stream": { "type": "boolean" },
+          "max_tokens": { "type": "integer" },
+          "presence_penalty": { "type": "number" },
+          "frequency_penalty": { "type": "number" },
+          "tools": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ChatTool" }
+          },
+          "tool_choice": {
+            "oneOf": [
+              { "type": "string", "enum": ["none", "auto", "required"] },
+              { "type": "object", "properties": { "type": { "type": "string" }, "function": { "type": "object", "properties": { "name": { "type": "string" } } } } }
+            ]
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "required": ["role", "content"],
+        "properties": {
+          "role": { "type": "string", "enum": ["system", "user", "assistant", "tool"] },
+          "content": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "name": { "type": "string" },
+          "tool_calls": { "type": "array", "items": { "type": "object" } },
+          "tool_call_id": { "type": "string" }
+        }
+      },
+      "ChatTool": {
+        "type": "object",
+        "required": ["type", "function"],
+        "properties": {
+          "type": { "type": "string", "enum": ["function"] },
+          "function": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "parameters": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

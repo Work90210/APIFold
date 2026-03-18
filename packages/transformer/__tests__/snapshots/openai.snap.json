@@ -1,0 +1,569 @@
+{
+  "tools": [
+    {
+      "name": "createchatcompletion",
+      "description": "Create a chat completion",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "model",
+              "messages"
+            ],
+            "properties": {
+              "model": {
+                "type": "string"
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "role",
+                    "content"
+                  ],
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "system",
+                        "user",
+                        "assistant",
+                        "tool"
+                      ]
+                    },
+                    "content": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "tool_call_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "top_p": {
+                "type": "number"
+              },
+              "n": {
+                "type": "integer"
+              },
+              "stream": {
+                "type": "boolean"
+              },
+              "max_tokens": {
+                "type": "integer"
+              },
+              "presence_penalty": {
+                "type": "number"
+              },
+              "frequency_penalty": {
+                "type": "number"
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "function"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "function"
+                      ]
+                    },
+                    "function": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "parameters": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "tool_choice": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "auto",
+                      "required"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "function": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/chat/completions",
+        "paramMap": {},
+        "tags": [
+          "chat"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createembedding",
+      "description": "Create embeddings",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "model",
+              "input"
+            ],
+            "properties": {
+              "model": {
+                "type": "string"
+              },
+              "input": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "encoding_format": {
+                "type": "string",
+                "enum": [
+                  "float",
+                  "base64"
+                ]
+              },
+              "dimensions": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/embeddings",
+        "paramMap": {},
+        "tags": [
+          "embeddings"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "listmodels",
+      "description": "List models",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/models",
+        "paramMap": {},
+        "tags": [
+          "models"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "retrievemodel",
+      "description": "Retrieve a model",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "model"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/models/{model}",
+        "paramMap": {
+          "model": "path"
+        },
+        "tags": [
+          "models"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletemodel",
+      "description": "Delete a fine-tuned model",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "model"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v1/models/{model}",
+        "paramMap": {
+          "model": "path"
+        },
+        "tags": [
+          "models"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "listfiles",
+      "description": "List files",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/files",
+        "paramMap": {
+          "purpose": "query"
+        },
+        "tags": [
+          "files"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "retrievefile",
+      "description": "Retrieve a file",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/files/{file_id}",
+        "paramMap": {
+          "file_id": "path"
+        },
+        "tags": [
+          "files"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletefile",
+      "description": "Delete a file",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/v1/files/{file_id}",
+        "paramMap": {
+          "file_id": "path"
+        },
+        "tags": [
+          "files"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createimage",
+      "description": "Generate images",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "prompt"
+            ],
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "model": {
+                "type": "string",
+                "enum": [
+                  "dall-e-2",
+                  "dall-e-3"
+                ]
+              },
+              "n": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "quality": {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "hd"
+                ]
+              },
+              "size": {
+                "type": "string",
+                "enum": [
+                  "256x256",
+                  "512x512",
+                  "1024x1024",
+                  "1792x1024",
+                  "1024x1792"
+                ]
+              },
+              "style": {
+                "type": "string",
+                "enum": [
+                  "vivid",
+                  "natural"
+                ]
+              },
+              "response_format": {
+                "type": "string",
+                "enum": [
+                  "url",
+                  "b64_json"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/images/generations",
+        "paramMap": {},
+        "tags": [
+          "images"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "listfinetuningjobs",
+      "description": "List fine-tuning jobs",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 20
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/v1/fine_tuning/jobs",
+        "paramMap": {
+          "after": "query",
+          "limit": "query"
+        },
+        "tags": [
+          "fine-tuning"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createfinetuningjob",
+      "description": "Create a fine-tuning job",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "required": [
+              "training_file",
+              "model"
+            ],
+            "properties": {
+              "training_file": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "validation_file": {
+                "type": "string"
+              },
+              "hyperparameters": {
+                "type": "object",
+                "properties": {
+                  "n_epochs": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "auto"
+                        ]
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "batch_size": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "auto"
+                        ]
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "learning_rate_multiplier": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "auto"
+                        ]
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              },
+              "suffix": {
+                "type": "string",
+                "maxLength": 18
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/v1/fine_tuning/jobs",
+        "paramMap": {},
+        "tags": [
+          "fine-tuning"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "OpenAI API (Subset)",
+    "specVersion": "2.0.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 12,
+    "transformedCount": 11,
+    "skippedCount": 1
+  },
+  "warningCodes": []
+}

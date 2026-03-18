@@ -1,0 +1,29 @@
+{
+  "tools": [
+    {
+      "name": "listcategories",
+      "description": "List categories",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/categories",
+        "paramMap": {},
+        "tags": [],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Circular Refs API",
+    "specVersion": "1.0.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 1,
+    "transformedCount": 1,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

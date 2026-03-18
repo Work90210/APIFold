@@ -1,0 +1,587 @@
+{
+  "tools": [
+    {
+      "name": "listmessage",
+      "description": "List messages",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "To": {
+            "type": "string"
+          },
+          "From": {
+            "type": "string"
+          },
+          "DateSent": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "PageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "AccountSid"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Messages.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "To": "query",
+          "From": "query",
+          "DateSent": "query",
+          "PageSize": "query"
+        },
+        "tags": [
+          "messages"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createmessage",
+      "description": "Send a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "To"
+            ],
+            "properties": {
+              "To": {
+                "type": "string",
+                "description": "The destination phone number"
+              },
+              "From": {
+                "type": "string"
+              },
+              "MessagingServiceSid": {
+                "type": "string"
+              },
+              "Body": {
+                "type": "string",
+                "description": "The text of the message"
+              },
+              "MediaUrl": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "StatusCallback": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "required": [
+          "AccountSid",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Messages.json",
+        "paramMap": {
+          "AccountSid": "path"
+        },
+        "tags": [
+          "messages"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "fetchmessage",
+      "description": "Fetch a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "Sid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountSid",
+          "Sid"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "Sid": "path"
+        },
+        "tags": [
+          "messages"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "updatemessage",
+      "description": "Update a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "Sid": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "Body": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "AccountSid",
+          "Sid"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "Sid": "path"
+        },
+        "tags": [
+          "messages"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletemessage",
+      "description": "Delete a message",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "Sid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountSid",
+          "Sid"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Messages/{Sid}.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "Sid": "path"
+        },
+        "tags": [
+          "messages"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "listcall",
+      "description": "List calls",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "To": {
+            "type": "string"
+          },
+          "From": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "ringing",
+              "in-progress",
+              "completed",
+              "busy",
+              "failed",
+              "no-answer",
+              "canceled"
+            ]
+          },
+          "PageSize": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "AccountSid"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Calls.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "To": "query",
+          "From": "query",
+          "Status": "query",
+          "PageSize": "query"
+        },
+        "tags": [
+          "calls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createcall",
+      "description": "Make a call",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "required": [
+              "To",
+              "From"
+            ],
+            "properties": {
+              "To": {
+                "type": "string"
+              },
+              "From": {
+                "type": "string"
+              },
+              "Url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "Twiml": {
+                "type": "string"
+              },
+              "ApplicationSid": {
+                "type": "string"
+              },
+              "Method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST"
+                ]
+              },
+              "StatusCallback": {
+                "type": "string",
+                "format": "uri"
+              },
+              "Timeout": {
+                "type": "integer"
+              },
+              "Record": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "AccountSid",
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Calls.json",
+        "paramMap": {
+          "AccountSid": "path"
+        },
+        "tags": [
+          "calls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "fetchcall",
+      "description": "Fetch a call",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "Sid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountSid",
+          "Sid"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "Sid": "path"
+        },
+        "tags": [
+          "calls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "updatecall",
+      "description": "Update a call",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "Sid": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "Url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "Method": {
+                "type": "string"
+              },
+              "Status": {
+                "type": "string",
+                "enum": [
+                  "canceled",
+                  "completed"
+                ]
+              },
+              "Twiml": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "AccountSid",
+          "Sid"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "Sid": "path"
+        },
+        "tags": [
+          "calls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "deletecall",
+      "description": "Delete a call record",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "Sid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountSid",
+          "Sid"
+        ]
+      },
+      "_meta": {
+        "method": "delete",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}/Calls/{Sid}.json",
+        "paramMap": {
+          "AccountSid": "path",
+          "Sid": "path"
+        },
+        "tags": [
+          "calls"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "listaccount",
+      "description": "List accounts",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "FriendlyName": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "closed"
+            ]
+          },
+          "PageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/2010-04-01/Accounts.json",
+        "paramMap": {
+          "FriendlyName": "query",
+          "Status": "query",
+          "PageSize": "query"
+        },
+        "tags": [
+          "accounts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "createaccount",
+      "description": "Create a sub-account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "FriendlyName": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": []
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/2010-04-01/Accounts.json",
+        "paramMap": {},
+        "tags": [
+          "accounts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "fetchaccount",
+      "description": "Fetch an account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountSid"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}.json",
+        "paramMap": {
+          "AccountSid": "path"
+        },
+        "tags": [
+          "accounts"
+        ],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "updateaccount",
+      "description": "Update an account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "AccountSid": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "FriendlyName": {
+                "type": "string"
+              },
+              "Status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "suspended",
+                  "closed"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "AccountSid"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/2010-04-01/Accounts/{AccountSid}.json",
+        "paramMap": {
+          "AccountSid": "path"
+        },
+        "tags": [
+          "accounts"
+        ],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "Twilio API (Subset)",
+    "specVersion": "1.0.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 14,
+    "transformedCount": 14,
+    "skippedCount": 0
+  },
+  "warningCodes": []
+}

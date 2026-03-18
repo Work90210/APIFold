@@ -1,0 +1,200 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Slack Web API (Subset)", "version": "1.7.0" },
+  "paths": {
+    "/chat.postMessage": {
+      "post": {
+        "operationId": "chat_postMessage",
+        "summary": "Sends a message to a channel",
+        "tags": ["chat"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel"],
+          "properties": {
+            "channel": { "type": "string" }, "text": { "type": "string" },
+            "blocks": { "type": "array", "items": { "type": "object" } },
+            "thread_ts": { "type": "string" }, "reply_broadcast": { "type": "boolean" },
+            "unfurl_links": { "type": "boolean" }, "unfurl_media": { "type": "boolean" }
+          }
+        } } } },
+        "responses": { "200": { "description": "Message sent" } }
+      }
+    },
+    "/chat.update": {
+      "post": {
+        "operationId": "chat_update",
+        "summary": "Updates a message",
+        "tags": ["chat"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel", "ts"],
+          "properties": { "channel": { "type": "string" }, "ts": { "type": "string" }, "text": { "type": "string" }, "blocks": { "type": "array", "items": { "type": "object" } } }
+        } } } },
+        "responses": { "200": { "description": "Message updated" } }
+      }
+    },
+    "/chat.delete": {
+      "post": {
+        "operationId": "chat_delete",
+        "summary": "Deletes a message",
+        "tags": ["chat"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel", "ts"],
+          "properties": { "channel": { "type": "string" }, "ts": { "type": "string" } }
+        } } } },
+        "responses": { "200": { "description": "Message deleted" } }
+      }
+    },
+    "/conversations.list": {
+      "get": {
+        "operationId": "conversations_list",
+        "summary": "List conversations",
+        "tags": ["conversations"],
+        "parameters": [
+          { "name": "types", "in": "query", "schema": { "type": "string" } },
+          { "name": "exclude_archived", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "maximum": 1000 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Conversations list" } }
+      }
+    },
+    "/conversations.info": {
+      "get": {
+        "operationId": "conversations_info",
+        "summary": "Get conversation info",
+        "tags": ["conversations"],
+        "parameters": [
+          { "name": "channel", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "include_locale", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": { "200": { "description": "Conversation info" } }
+      }
+    },
+    "/conversations.history": {
+      "get": {
+        "operationId": "conversations_history",
+        "summary": "Fetch conversation history",
+        "tags": ["conversations"],
+        "parameters": [
+          { "name": "channel", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "oldest", "in": "query", "schema": { "type": "string" } },
+          { "name": "latest", "in": "query", "schema": { "type": "string" } },
+          { "name": "inclusive", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Conversation history" } }
+      }
+    },
+    "/conversations.create": {
+      "post": {
+        "operationId": "conversations_create",
+        "summary": "Create a conversation",
+        "tags": ["conversations"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["name"],
+          "properties": { "name": { "type": "string" }, "is_private": { "type": "boolean" } }
+        } } } },
+        "responses": { "200": { "description": "Conversation created" } }
+      }
+    },
+    "/conversations.join": {
+      "post": {
+        "operationId": "conversations_join",
+        "summary": "Join a conversation",
+        "tags": ["conversations"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel"],
+          "properties": { "channel": { "type": "string" } }
+        } } } },
+        "responses": { "200": { "description": "Joined" } }
+      }
+    },
+    "/users.list": {
+      "get": {
+        "operationId": "users_list",
+        "summary": "List users",
+        "tags": ["users"],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
+          { "name": "include_locale", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": { "200": { "description": "Users list" } }
+      }
+    },
+    "/users.info": {
+      "get": {
+        "operationId": "users_info",
+        "summary": "Get user info",
+        "tags": ["users"],
+        "parameters": [
+          { "name": "user", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "include_locale", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": { "200": { "description": "User info" } }
+      }
+    },
+    "/users.lookupByEmail": {
+      "get": {
+        "operationId": "users_lookupByEmail",
+        "summary": "Find a user by email",
+        "tags": ["users"],
+        "parameters": [
+          { "name": "email", "in": "query", "required": true, "schema": { "type": "string", "format": "email" } }
+        ],
+        "responses": { "200": { "description": "User info" } }
+      }
+    },
+    "/reactions.add": {
+      "post": {
+        "operationId": "reactions_add",
+        "summary": "Add a reaction",
+        "tags": ["reactions"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel", "name", "timestamp"],
+          "properties": { "channel": { "type": "string" }, "name": { "type": "string" }, "timestamp": { "type": "string" } }
+        } } } },
+        "responses": { "200": { "description": "Reaction added" } }
+      }
+    },
+    "/reactions.remove": {
+      "post": {
+        "operationId": "reactions_remove",
+        "summary": "Remove a reaction",
+        "tags": ["reactions"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel", "name", "timestamp"],
+          "properties": { "channel": { "type": "string" }, "name": { "type": "string" }, "timestamp": { "type": "string" } }
+        } } } },
+        "responses": { "200": { "description": "Reaction removed" } }
+      }
+    },
+    "/search.messages": {
+      "get": {
+        "operationId": "search_messages",
+        "summary": "Search messages",
+        "tags": ["search"],
+        "parameters": [
+          { "name": "query", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["score", "timestamp"] } },
+          { "name": "sort_dir", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] } },
+          { "name": "count", "in": "query", "schema": { "type": "integer" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Search results" } }
+      }
+    },
+    "/pins.add": {
+      "post": {
+        "operationId": "pins_add",
+        "summary": "Pin a message",
+        "tags": ["pins"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "required": ["channel", "timestamp"],
+          "properties": { "channel": { "type": "string" }, "timestamp": { "type": "string" } }
+        } } } },
+        "responses": { "200": { "description": "Pinned" } }
+      }
+    }
+  }
+}

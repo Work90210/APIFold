@@ -2,34 +2,50 @@
   "name": "@model-translator/transformer",
   "version": "0.1.0",
   "license": "MIT",
+  "description": "Transform OpenAPI specs into MCP tool definitions",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist"
   ],
+  "keywords": [
+    "openapi",
+    "swagger",
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "transformer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kylefuhri/model-translator",
+    "directory": "packages/transformer"
+  },
+  "homepage": "https://github.com/kylefuhri/model-translator/tree/main/packages/transformer",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@model-translator/types": "workspace:*"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "tsup"
   },
   "devDependencies": {
     "@model-translator/eslint-config": "workspace:*",
     "@model-translator/tsconfig": "workspace:*",
     "@vitest/coverage-v8": "^2.1.0",
     "eslint": "^8.57.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }

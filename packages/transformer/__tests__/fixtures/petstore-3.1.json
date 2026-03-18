@@ -1,0 +1,351 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Petstore",
+    "version": "1.0.0",
+    "summary": "A sample API that uses a petstore as an example",
+    "license": {
+      "name": "Apache 2.0",
+      "identifier": "Apache-2.0"
+    }
+  },
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "servers": [
+    {
+      "url": "https://petstore.example.com/v1"
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "operationId": "listPets",
+        "summary": "List all pets",
+        "tags": ["pets"],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many items to return at one time (max 100)",
+            "schema": { "type": "integer", "maximum": 100, "exclusiveMinimum": 0 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paged array of pets",
+            "headers": {
+              "x-next": {
+                "description": "A link to the next page of responses",
+                "schema": { "type": "string" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Pet" }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPet",
+        "summary": "Create a pet",
+        "tags": ["pets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewPet" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pet created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pets/{petId}": {
+      "get": {
+        "operationId": "showPetById",
+        "summary": "Info for a specific pet",
+        "tags": ["pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "description": "The id of the pet to retrieve",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePet",
+        "summary": "Update a pet",
+        "tags": ["pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewPet" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pet updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePet",
+        "summary": "Delete a pet",
+        "tags": ["pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Pet deleted" }
+        }
+      }
+    },
+    "/pets/{petId}/vaccinations": {
+      "get": {
+        "operationId": "listPetVaccinations",
+        "summary": "List vaccinations for a pet",
+        "tags": ["vaccinations"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of vaccinations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Vaccination" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addPetVaccination",
+        "summary": "Record a vaccination for a pet",
+        "tags": ["vaccinations"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewVaccination" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vaccination recorded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Vaccination" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "petAdopted": {
+      "post": {
+        "operationId": "petAdoptedWebhook",
+        "summary": "Notification when a pet is adopted",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": { "const": "pet.adopted" },
+                  "pet": { "$ref": "#/components/schemas/Pet" },
+                  "adoptedAt": { "type": "string", "format": "date-time" }
+                },
+                "required": ["event", "pet", "adoptedAt"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Webhook processed" }
+        }
+      }
+    },
+    "petCreated": {
+      "post": {
+        "operationId": "petCreatedWebhook",
+        "summary": "Notification when a new pet is added",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": { "const": "pet.created" },
+                  "pet": { "$ref": "#/components/schemas/Pet" },
+                  "createdAt": { "type": "string", "format": "date-time" }
+                },
+                "required": ["event", "pet", "createdAt"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Webhook processed" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "tag": { "type": ["string", "null"] },
+          "species": {
+            "type": "string",
+            "enum": ["dog", "cat", "bird", "fish", "reptile"]
+          },
+          "dateOfBirth": { "type": "string", "format": "date" }
+        }
+      },
+      "NewPet": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "tag": { "type": ["string", "null"] },
+          "species": {
+            "type": "string",
+            "enum": ["dog", "cat", "bird", "fish", "reptile"]
+          },
+          "dateOfBirth": { "type": "string", "format": "date" }
+        }
+      },
+      "Vaccination": {
+        "type": "object",
+        "required": ["id", "name", "administeredAt"],
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "administeredAt": { "type": "string", "format": "date-time" },
+          "notes": { "type": ["string", "null"] }
+        }
+      },
+      "NewVaccination": {
+        "type": "object",
+        "required": ["name", "administeredAt"],
+        "properties": {
+          "name": { "type": "string" },
+          "administeredAt": { "type": "string", "format": "date-time" },
+          "notes": { "type": ["string", "null"] }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "integer", "format": "int32" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

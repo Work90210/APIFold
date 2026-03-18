@@ -1,0 +1,84 @@
+{
+  "tools": [
+    {
+      "name": "get_users",
+      "description": "List users",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users",
+        "paramMap": {},
+        "tags": [],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "post_users",
+      "description": "Create user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "_meta": {
+        "method": "post",
+        "pathTemplate": "/users",
+        "paramMap": {},
+        "tags": [],
+        "deprecated": false
+      }
+    },
+    {
+      "name": "get_users_userid",
+      "description": "Get user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "_meta": {
+        "method": "get",
+        "pathTemplate": "/users/{userId}",
+        "paramMap": {
+          "userId": "path"
+        },
+        "tags": [],
+        "deprecated": false
+      }
+    }
+  ],
+  "metadata": {
+    "specTitle": "No OperationId API",
+    "specVersion": "1.0.0",
+    "openApiVersion": "3.0",
+    "totalOperations": 3,
+    "transformedCount": 3,
+    "skippedCount": 0
+  },
+  "warningCodes": [
+    "MISSING_OPERATION_ID",
+    "MISSING_OPERATION_ID",
+    "MISSING_OPERATION_ID"
+  ]
+}

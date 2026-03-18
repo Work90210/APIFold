@@ -16,9 +16,14 @@
     "db:studio": "pnpm --filter @model-translator/web db:studio",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
     "husky": "^9.1.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.3.0",
