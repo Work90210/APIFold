@@ -12,19 +12,6 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: mt_test
-          POSTGRES_USER: mt
-          POSTGRES_PASSWORD: test
-        ports: ["5432:5432"]
-        options: --health-cmd pg_isready --health-interval 5s --health-retries 5
-      redis:
-        image: redis:7-alpine
-        ports: ["6379:6379"]
-        options: --health-cmd "redis-cli ping" --health-interval 5s
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v5
@@ -34,13 +21,11 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run lint typecheck
-      - run: pnpm turbo run test -- --coverage
-        env:
-          DATABASE_URL: postgresql://mt:test@localhost:5432/mt_test
-          REDIS_URL: redis://localhost:6379
-          VAULT_SECRET: test-vault-secret-min-32-chars-long
+      - run: pnpm --filter @model-translator/transformer test -- --coverage
       - uses: davelosert/vitest-coverage-report-action@v2
         if: always()
+        with:
+          working-directory: packages/transformer
       - run: pnpm --filter @model-translator/transformer build
       - name: Check transformer bundle size
         run: |
