@@ -16,14 +16,14 @@
   "dependencies": {
     "@model-translator/transformer": "workspace:*",
     "@model-translator/types": "workspace:*",
-    "express": "^4.21.0",
+    "express": "^5.2.1",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0"
   },
   "devDependencies": {
     "@model-translator/eslint-config": "workspace:*",
     "@model-translator/tsconfig": "workspace:*",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.6",
     "@vitest/coverage-v8": "^2.1.0",
     "eslint": "^8.57.0",
     "tsx": "^4.19.0",
