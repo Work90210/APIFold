@@ -5,6 +5,7 @@ const CLERK_WEBHOOK_SECRET = process.env['CLERK_WEBHOOK_SECRET'];
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!CLERK_WEBHOOK_SECRET) {
+    // eslint-disable-next-line no-console
     console.error('[webhook] CLERK_WEBHOOK_SECRET not configured');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const body = await request.text();
-  if (body.length > 1_048_576) {
+  if (Buffer.byteLength(body, 'utf8') > 1_048_576) {
     return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
   }
 
