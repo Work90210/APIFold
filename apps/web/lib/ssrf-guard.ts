@@ -14,6 +14,7 @@ const PRIVATE_RANGES = [
 
 const MAX_SPEC_SIZE = 10 * 1024 * 1024; // 10MB
 const FETCH_TIMEOUT_MS = 15_000;
+const ALLOWED_PORTS = new Set(['', '80', '443', '8080', '8443']);
 
 function isPrivateIP(addr: string): boolean {
   // Also check IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1)
@@ -67,6 +68,10 @@ export async function fetchSpecFromUrl(url: string): Promise<unknown> {
     throw new Error('Only HTTP/HTTPS URLs are allowed');
   }
 
+  if (!ALLOWED_PORTS.has(parsed.port)) {
+    throw new Error(`Port ${parsed.port || 'default'} is not allowed`);
+  }
+
   // Resolve all DNS records (IPv4 + IPv6) and validate
   const addresses = await resolveAllAddresses(parsed.hostname);
   validateAddresses(addresses);
@@ -79,7 +84,7 @@ export async function fetchSpecFromUrl(url: string): Promise<unknown> {
   const response = await fetch(resolvedUrl.toString(), {
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     headers: {
-      Accept: 'application/json, application/yaml, text/yaml, text/plain',
+      Accept: 'application/json',
       Host: originalHost,
     },
     redirect: 'error', // Block redirects — they could redirect to internal IPs
@@ -109,6 +114,10 @@ export async function safeFetch(
 
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new Error('Only HTTP/HTTPS URLs are allowed');
+  }
+
+  if (!ALLOWED_PORTS.has(parsed.port)) {
+    throw new Error(`Port ${parsed.port || 'default'} is not allowed`);
   }
 
   const addresses = await resolveAllAddresses(parsed.hostname);

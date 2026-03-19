@@ -25,6 +25,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const body = await request.text();
+  if (body.length > 1_048_576) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+  }
 
   const wh = new Webhook(CLERK_WEBHOOK_SECRET);
 

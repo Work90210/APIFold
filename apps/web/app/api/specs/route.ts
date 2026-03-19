@@ -6,6 +6,7 @@ import { ServerRepository } from '../../../lib/db/repositories/server.repository
 import { ToolRepository } from '../../../lib/db/repositories/tool.repository.js';
 import { getUserId, withErrorHandler, withRateLimit, errorResponse, ApiError } from '../../../lib/api-helpers.js';
 import { createSpecSchema } from '../../../lib/validation/spec.schema.js';
+import { randomBytes } from 'node:crypto';
 import { fetchSpecFromUrl } from '../../../lib/ssrf-guard.js';
 import { publishServerEvent } from '../../../lib/redis.js';
 import { ErrorCodes } from '@apifold/types';
@@ -50,12 +51,13 @@ export function POST(request: NextRequest): Promise<NextResponse> {
 
     const db = getDb();
 
-    // Generate slug from spec name
-    const slug = input.name
+    // Generate unique slug from spec name + random suffix
+    const baseSlug = input.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
-      .slice(0, 50) || 'api';
+      .slice(0, 42) || 'api';
+    const slug = `${baseSlug}-${randomBytes(3).toString('hex')}`;
 
     // Persist in a single transaction: spec → server → tools (all or nothing)
     const result = await db.transaction(async (tx) => {

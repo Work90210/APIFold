@@ -40,9 +40,17 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       throw new ApiError(ErrorCodes.VALIDATION_ERROR, 'Server has no base URL configured', 400);
     }
 
-    // Build upstream URL
+    // Validate tool exists in DB (prevents path traversal via crafted toolName)
+    const toolRepo = new ToolRepository(db);
+    const tools = await toolRepo.findAll(userId, { serverId });
+    const matchedTool = tools.find((t) => t.name === input.toolName);
+    if (!matchedTool) {
+      return errorResponse(ErrorCodes.NOT_FOUND, 'Tool not found', 404);
+    }
+
+    // Build upstream URL using the DB-stored tool name (safe)
     const base = server.baseUrl.endsWith('/') ? server.baseUrl.slice(0, -1) : server.baseUrl;
-    const url = `${base}/tools/${encodeURIComponent(input.toolName)}`;
+    const url = `${base}/tools/${encodeURIComponent(matchedTool.name)}`;
 
     // Build auth headers
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };

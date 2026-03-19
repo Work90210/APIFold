@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { getRedis } from './redis.js';
 
 const WINDOW_MS = 60_000; // 1 minute
@@ -39,7 +40,7 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
   const key = `ratelimit:api:${userId}`;
   const now = Date.now();
   const windowStart = now - WINDOW_MS;
-  const member = `${now}:${Math.random().toString(36).slice(2, 8)}`;
+  const member = `${now}:${randomBytes(4).toString('hex')}`;
 
   try {
     const result = await redis.eval(
@@ -67,7 +68,7 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
       resetAt: Math.ceil((now + WINDOW_MS) / 1000),
     };
   } catch (err) {
-    console.error('[rate-limit] Redis error, failing open:', err instanceof Error ? err.message : err);
-    return { allowed: true, remaining: MAX_REQUESTS, resetAt: 0 };
+    console.error('[rate-limit] Redis error, failing closed:', err instanceof Error ? err.message : err);
+    return { allowed: false, remaining: 0, resetAt: Math.ceil((Date.now() + WINDOW_MS) / 1000) };
   }
 }

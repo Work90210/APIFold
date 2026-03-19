@@ -32,11 +32,12 @@ describe('checkRateLimit', () => {
     expect(result.remaining).toBe(0);
   });
 
-  it('fails open on Redis error', async () => {
+  it('fails closed on Redis error', async () => {
     const { _mockRedis } = await import('../../lib/redis.js') as unknown as { _mockRedis: { eval: ReturnType<typeof vi.fn> } };
     _mockRedis.eval.mockRejectedValue(new Error('Redis down'));
 
     const result = await checkRateLimit('user-1');
-    expect(result.allowed).toBe(true);
+    expect(result.allowed).toBe(false);
+    expect(result.remaining).toBe(0);
   });
 });

@@ -23,6 +23,20 @@ export class ApiError extends Error {
   }
 }
 
+export class NotFoundError extends ApiError {
+  constructor(message = 'Resource not found') {
+    super(ErrorCodes.NOT_FOUND, message, 404);
+    this.name = 'NotFoundError';
+  }
+}
+
+export class ConflictError extends ApiError {
+  constructor(message = 'Resource already exists') {
+    super(ErrorCodes.CONFLICT, message, 409);
+    this.name = 'ConflictError';
+  }
+}
+
 export function errorResponse(code: string, message: string, status?: number): NextResponse {
   const httpStatus = status ?? HttpStatusByErrorCode[code as keyof typeof HttpStatusByErrorCode] ?? 500;
   return NextResponse.json(createErrorResponse(code, message), { status: httpStatus });
@@ -50,15 +64,8 @@ export function withErrorHandler(
       return errorResponse(err.code, err.message, err.status);
     }
 
-    const message = err instanceof Error ? err.message : 'Internal server error';
-
-    if (message.includes('not found') || message.includes('access denied')) {
-      return errorResponse(ErrorCodes.NOT_FOUND, 'Resource not found', 404);
-    }
-
-    // Don't leak internal errors
+    // Don't leak internal error details
     console.error('Unhandled API error:', err);
     return errorResponse(ErrorCodes.INTERNAL_ERROR, 'Internal server error', 500);
   });
 }
-
