@@ -16,9 +16,8 @@ export function getRedis(): Redis {
       maxRetriesPerRequest: 3,
       lazyConnect: false,
     });
-    redisInstance.on('error', (err) => {
-      console.error('[redis] connection error:', err.message);
-    });
+    // eslint-disable-next-line no-console
+    redisInstance.on('error', (err) => console.error('[redis] connection error:', err.message));
   }
   return redisInstance;
 }
@@ -26,6 +25,10 @@ export function getRedis(): Redis {
 export async function publishServerEvent(
   event: { readonly type: string; readonly serverId: string; readonly slug?: string },
 ): Promise<void> {
-  const redis = getRedis();
-  await redis.publish('mcp:server-events', JSON.stringify(event));
+  try {
+    const redis = getRedis();
+    await redis.publish('mcp:server-events', JSON.stringify(event));
+  } catch {
+    // Best-effort: don't crash the request if Redis is down
+  }
 }
