@@ -28,13 +28,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Build transformer
-        run: pnpm --filter @model-translator/transformer build
+        run: pnpm --filter @apifold/transformer build
 
       - name: Lint and typecheck
         run: pnpm turbo run lint typecheck
 
       - name: Run tests
-        run: pnpm --filter @model-translator/transformer test
+        run: pnpm --filter @apifold/transformer test
 
       - name: Create Release PR or Publish
         id: changesets

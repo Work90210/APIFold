@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/${GITHUB_OWNER:-model-translator}/model-translator-web:latest
+    image: ghcr.io/${GITHUB_OWNER:-apifold}/apifold-web:latest
     # Do not expose web port directly — all traffic routes through nginx
     expose:
       - "3000"
@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   runtime:
-    image: ghcr.io/${GITHUB_OWNER:-model-translator}/model-translator-runtime:latest
+    image: ghcr.io/${GITHUB_OWNER:-apifold}/apifold-runtime:latest
     # Do not expose runtime port directly — all traffic routes through nginx
     expose:
       - "3001"
@@ -39,14 +39,14 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: model_translator
+      POSTGRES_DB: apifold
       POSTGRES_USER: mt
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mt -d model_translator"]
+      test: ["CMD-SHELL", "pg_isready -U mt -d apifold"]
       interval: 5s
       timeout: 5s
       retries: 5

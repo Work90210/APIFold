@@ -1,10 +1,10 @@
-# @model-translator/transformer
+# @apifold/transformer
 
 ## 0.2.0
 
 ### Minor Changes
 
-- [#27](https://github.com/Work90210/model-translator/pull/27) [`3d7b09d`](https://github.com/Work90210/model-translator/commit/3d7b09db316dfd62ccee90ff022e271340cb7cd3) Thanks [@Work90210](https://github.com/Work90210)! - feat: implement OpenAPI to MCP transformer engine
+- [#27](https://github.com/Work90210/apifold/pull/27) [`3d7b09d`](https://github.com/Work90210/apifold/commit/3d7b09db316dfd62ccee90ff022e271340cb7cd3) Thanks [@Work90210](https://github.com/Work90210)! - feat: implement OpenAPI to MCP transformer engine
   - Parse and validate OpenAPI 3.0.x and 3.1.x specs
   - Transform operations into MCP tool definitions with full parameter mapping
   - Deep $ref resolution with circular reference detection

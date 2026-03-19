@@ -1,5 +1,5 @@
 {
-  "name": "@model-translator/ui",
+  "name": "@apifold/ui",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@model-translator/eslint-config": "workspace:*",
-    "@model-translator/tsconfig": "workspace:*",
+    "@apifold/eslint-config": "workspace:*",
+    "@apifold/tsconfig": "workspace:*",
     "eslint": "^8.57.0",
     "typescript": "^5.6.0"
   },

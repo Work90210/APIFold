@@ -1,5 +1,5 @@
 {
-  "name": "@model-translator/transformer",
+  "name": "@apifold/transformer",
   "version": "0.2.0",
   "license": "MIT",
   "description": "Transform OpenAPI specs into MCP tool definitions",
@@ -27,10 +27,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/kylefuhri/model-translator",
+    "url": "https://github.com/kylefuhri/apifold",
     "directory": "packages/transformer"
   },
-  "homepage": "https://github.com/kylefuhri/model-translator/tree/main/packages/transformer",
+  "homepage": "https://github.com/kylefuhri/apifold/tree/main/packages/transformer",
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
@@ -41,8 +41,8 @@
     "prepublishOnly": "tsup"
   },
   "devDependencies": {
-    "@model-translator/eslint-config": "workspace:*",
-    "@model-translator/tsconfig": "workspace:*",
+    "@apifold/eslint-config": "workspace:*",
+    "@apifold/tsconfig": "workspace:*",
     "@vitest/coverage-v8": "^2.1.0",
     "eslint": "^8.57.0",
     "tsup": "^8.5.1",

@@ -17,7 +17,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/runtime/node_modules ./apps/runtime/node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
-RUN pnpm turbo run build --filter=@model-translator/runtime
+RUN pnpm turbo run build --filter=@apifold/runtime
 
 FROM base AS runner
 WORKDIR /app

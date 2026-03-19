@@ -4,7 +4,7 @@
 
 **Status**: Accepted
 
-**Context**: Model Translator consists of multiple packages (transformer library, web app, runtime server, shared types, UI components). We need a strategy for managing these interconnected packages.
+**Context**: APIFold consists of multiple packages (transformer library, web app, runtime server, shared types, UI components). We need a strategy for managing these interconnected packages.
 
 **Decision**: Use a pnpm workspace monorepo with Turborepo for build orchestration.
 
@@ -20,7 +20,7 @@
 
 **Context**: The transformer library should be freely usable by anyone, while the hosted platform should remain open-source with copyleft protection.
 
-**Decision**: License `@model-translator/transformer` under MIT, everything else under AGPL-3.0-or-later.
+**Decision**: License `@apifold/transformer` under MIT, everything else under AGPL-3.0-or-later.
 
 **Consequences**:
 - Transformer library can be used in any project

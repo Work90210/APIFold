@@ -1,0 +1,28 @@
+{
+  "name": "@apifold/vault",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@apifold/eslint-config": "workspace:*",
+    "@apifold/tsconfig": "workspace:*",
+    "eslint": "^8.57.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

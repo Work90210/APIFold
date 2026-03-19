@@ -1,6 +1,6 @@
-# Contributing to Model Translator
+# Contributing to APIFold
 
-Thank you for your interest in contributing to Model Translator!
+Thank you for your interest in contributing to APIFold!
 
 ## Development Setup
 
@@ -14,8 +14,8 @@ Thank you for your interest in contributing to Model Translator!
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/model-translator.git
-cd model-translator
+git clone https://github.com/your-org/apifold.git
+cd apifold
 
 # Install dependencies
 pnpm install
@@ -75,7 +75,7 @@ pnpm dev
 
 ## Licensing
 
-- The `@model-translator/transformer` package is licensed under MIT
+- The `@apifold/transformer` package is licensed under MIT
 - All other code is licensed under AGPL-3.0-or-later
 
 By contributing, you agree that your contributions will be licensed under the respective licenses.

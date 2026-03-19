@@ -4,7 +4,7 @@ import type {
   CreateServerInput,
   UpdateServerInput,
   ServerFilters,
-} from '@model-translator/types';
+} from '@apifold/types';
 import { mcpServers } from '../schema/servers.js';
 import { specs } from '../schema/specs.js';
 import { BaseRepository } from './base.repository.js';

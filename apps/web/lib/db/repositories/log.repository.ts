@@ -1,5 +1,5 @@
 import { eq, and, desc } from 'drizzle-orm';
-import type { RequestLog, CreateRequestLogInput } from '@model-translator/types';
+import type { RequestLog, CreateRequestLogInput } from '@apifold/types';
 import { requestLogs } from '../schema/request-logs.js';
 import { mcpServers } from '../schema/servers.js';
 import { mcpTools } from '../schema/tools.js';

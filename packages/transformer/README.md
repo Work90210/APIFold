@@ -1,4 +1,4 @@
-# @model-translator/transformer
+# @apifold/transformer
 
 Transform OpenAPI 3.0/3.1 specifications into [MCP (Model Context Protocol)](https://modelcontextprotocol.io) tool definitions.
 
@@ -18,15 +18,15 @@ Transform OpenAPI 3.0/3.1 specifications into [MCP (Model Context Protocol)](htt
 ## Install
 
 ```bash
-npm install @model-translator/transformer
+npm install @apifold/transformer
 # or
-pnpm add @model-translator/transformer
+pnpm add @apifold/transformer
 ```
 
 ## Quick Start
 
 ```typescript
-import { parseSpec, transformSpec } from '@model-translator/transformer';
+import { parseSpec, transformSpec } from '@apifold/transformer';
 
 // 1. Parse an OpenAPI spec (raw JSON/YAML object)
 const parsed = parseSpec({ spec: myOpenApiSpec });
@@ -149,7 +149,7 @@ OpenAPI 2.0 (Swagger) is **not supported**. Convert to 3.x first using tools lik
 The package exports typed error classes for precise error handling:
 
 ```typescript
-import { ParseError, ValidationError, TransformError } from '@model-translator/transformer';
+import { ParseError, ValidationError, TransformError } from '@apifold/transformer';
 
 try {
   const parsed = parseSpec({ spec: untrustedInput });

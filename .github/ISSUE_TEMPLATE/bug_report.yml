@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for taking the time to report a bug. Please fill out the sections below so we can reproduce and fix the issue.
 
-        **Before submitting**, please search [existing issues](https://github.com/Work90210/model-translator/issues) to avoid duplicates.
+        **Before submitting**, please search [existing issues](https://github.com/Work90210/apifold/issues) to avoid duplicates.
 
   - type: textarea
     id: description
@@ -52,7 +52,7 @@ body:
     id: component
     attributes:
       label: Component
-      description: Which part of Model Translator is affected?
+      description: Which part of APIFold is affected?
       options:
         - Transformer (npm library)
         - Web App (Dashboard / API)
@@ -86,7 +86,7 @@ body:
         OS: macOS 14.3 / Ubuntu 22.04
         Browser: Chrome 122
         Docker: 25.0.3
-        Model Translator version: v0.1.0
+        APIFold version: v0.1.0
       render: shell
 
   - type: textarea
