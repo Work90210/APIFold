@@ -1,4 +1,5 @@
 import { pbkdf2Sync, createHash, timingSafeEqual } from 'node:crypto';
+
 import { PBKDF2_ITERATIONS, KEY_LENGTH, PBKDF2_DIGEST } from './constants.js';
 
 let cachedKey: Buffer | null = null;

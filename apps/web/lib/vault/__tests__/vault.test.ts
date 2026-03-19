@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { encrypt } from '../encrypt.js';
+import { describe, it, expect, afterEach } from 'vitest';
+
 import { decrypt } from '../decrypt.js';
 import { deriveKey, clearKeyCache } from '../derive-key.js';
+import { encrypt } from '../encrypt.js';
 import { validateVaultSecret, validateVaultSalt } from '../validate.js';
 
 const TEST_SECRET = 'a'.repeat(32) + 'b'.repeat(16); // 48 chars

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -17,12 +18,12 @@ import type {
   UsageEvent,
   RequestLog,
   BaseEvent,
-  PlaintextKey,
   CredentialAuthType,
   AuthMode,
   TransportType,
   HttpMethod,
 } from '../index.js';
+import type { CreateSpecInput } from '../spec.js';
 
 describe('ApiResponse', () => {
   describe('createSuccessResponse', () => {
@@ -193,9 +194,7 @@ describe('Type safety', () => {
   });
 
   it('Spec should not include toolCount in CreateSpecInput', () => {
-    // toolCount is derived, not caller-supplied
-    type CreateKeys = keyof import('../spec.js').CreateSpecInput;
-    const keys: CreateKeys[] = ['name', 'version', 'rawSpec'];
+    const keys: (keyof CreateSpecInput)[] = ['name', 'version', 'rawSpec'];
     expect(keys).not.toContain('toolCount');
   });
 

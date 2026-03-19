@@ -1,6 +1,7 @@
 import { randomBytes, createCipheriv } from 'node:crypto';
-import { deriveKey } from './derive-key.js';
+
 import { IV_LENGTH, AUTH_TAG_LENGTH, ALGORITHM, CIPHERTEXT_VERSION } from './constants.js';
+import { deriveKey } from './derive-key.js';
 
 export function encrypt(plaintext: string, secret: string, salt: string): string {
   const key = deriveKey(secret, salt);
