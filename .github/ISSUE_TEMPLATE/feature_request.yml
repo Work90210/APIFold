@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for suggesting a feature! Please fill out the sections below so we can evaluate and prioritize it.
 
-        **Before submitting**, please search [existing issues](https://github.com/Work90210/model-translator/issues?q=label%3Aenhancement) and [discussions](https://github.com/Work90210/model-translator/discussions) to avoid duplicates.
+        **Before submitting**, please search [existing issues](https://github.com/Work90210/apifold/issues?q=label%3Aenhancement) and [discussions](https://github.com/Work90210/apifold/discussions) to avoid duplicates.
 
   - type: textarea
     id: problem
@@ -37,7 +37,7 @@ body:
     id: component
     attributes:
       label: Component
-      description: Which part of Model Translator does this affect?
+      description: Which part of APIFold does this affect?
       options:
         - Transformer (npm library)
         - Web App (Dashboard / API)

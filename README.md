@@ -1,6 +1,6 @@
 <br />
 <p align="center">
-    <a href="https://github.com/kylefuhri/model-translator" target="_blank"><img width="260" src="https://via.placeholder.com/520x120/1a1a2e/ffffff?text=Model+Translator" alt="Model Translator"></a>
+    <a href="https://apifold.dev" target="_blank"><img width="260" src="public/logo.svg" alt="APIFold"></a>
     <br />
     <br />
     <b>Turn any REST API into an MCP server. No code required.</b>
@@ -8,15 +8,15 @@
     <br />
 </p>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/kylefuhri/model-translator/ci.yml?label=tests&style=flat-square)](https://github.com/kylefuhri/model-translator/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/Work90210/APIFold/ci.yml?label=tests&style=flat-square)](https://github.com/Work90210/APIFold/actions)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
 [![Transformer](https://img.shields.io/badge/transformer-MIT-green?style=flat-square)](./packages/transformer/LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9-orange?style=flat-square)](https://pnpm.io)
 
-Model Translator reads an OpenAPI 3.x or Swagger 2.x specification and generates a live, production-ready [MCP](https://modelcontextprotocol.io) server endpoint. AI agents — Claude, Cursor, Copilot, or any MCP-compatible client — can connect immediately. Tool calls execute real HTTP requests to real upstream APIs with securely stored credentials. No stubs, no mocks, no glue code.
+APIFold reads an OpenAPI 3.x or Swagger 2.x specification and generates a live, production-ready [MCP](https://modelcontextprotocol.io) server endpoint. AI agents — Claude, Cursor, Copilot, or any MCP-compatible client — can connect immediately. Tool calls execute real HTTP requests to real upstream APIs with securely stored credentials. No stubs, no mocks, no glue code.
 
-<!-- ![Model Translator Dashboard](public/images/dashboard.png) -->
+<!-- ![APIFold Dashboard](public/images/dashboard.png) -->
 
 Table of Contents:
 
@@ -35,14 +35,14 @@ Table of Contents:
 Before running the installation command, make sure you have [Node.js 20+](https://nodejs.org), [pnpm 9+](https://pnpm.io), and [Docker](https://www.docker.com/products/docker-desktop) installed on your machine:
 
 ```bash
-git clone https://github.com/kylefuhri/model-translator.git
-cd model-translator
+git clone https://github.com/Work90210/APIFold.git
+cd APIFold
 pnpm install
 ```
 
 ## Self-Hosting
 
-Model Translator is designed to run in a containerized environment. Running your own instance is as easy as running one command from your terminal:
+APIFold is designed to run in a containerized environment. Running your own instance is as easy as running one command from your terminal:
 
 ### Development
 
@@ -71,11 +71,11 @@ The production stack includes Nginx reverse proxy, Next.js web app, Express MCP 
 The core conversion logic is published as a standalone MIT-licensed npm package. You can use it in your own tools without any AGPL obligations:
 
 ```bash
-npm install @model-translator/transformer
+npm install @apifold/transformer
 ```
 
 ```typescript
-import { transform } from "@model-translator/transformer";
+import { transform } from "@apifold/transformer";
 
 const tools = transform(myOpenAPISpec);
 // Returns MCP-compatible tool definitions
@@ -118,7 +118,7 @@ Once you've imported a spec and created an MCP server through the dashboard:
 graph LR
     Spec["OpenAPI / Swagger\nSpec"] --> Transformer
 
-    subgraph MT["Model Translator"]
+    subgraph MT["APIFold"]
         Transformer["Transformer\n(MIT lib)"]
         Transformer --> Runtime["Runtime\nExpress + SSE"]
         Web["Web App\nNext.js"] --> DB["Postgres 16\nRedis 7"]
@@ -129,7 +129,7 @@ graph LR
     Agent["AI Agent\nClaude, Cursor,\nCopilot, etc."] -- "MCP / SSE" --> Runtime
 ```
 
-Model Translator uses a monorepo architecture built with [Turborepo](https://turbo.build) and [pnpm workspaces](https://pnpm.io/workspaces):
+APIFold uses a monorepo architecture built with [Turborepo](https://turbo.build) and [pnpm workspaces](https://pnpm.io/workspaces):
 
 | Component | Path | Description |
 |-----------|------|-------------|
@@ -155,7 +155,7 @@ For security issues, please refer to our [security policy](docs/SECURITY.md) for
 
 This repository uses a dual-license model:
 
-- **[`@model-translator/transformer`](packages/transformer)** is available under the [MIT License](packages/transformer/LICENSE). Use it anywhere, no strings attached.
+- **[`@apifold/transformer`](packages/transformer)** is available under the [MIT License](packages/transformer/LICENSE). Use it anywhere, no strings attached.
 - **Everything else** is available under the [GNU Affero General Public License v3.0](LICENSE).
 
 This is the same model used by [Grafana](https://grafana.com), [Plausible](https://plausible.io), and [PostHog](https://posthog.com).

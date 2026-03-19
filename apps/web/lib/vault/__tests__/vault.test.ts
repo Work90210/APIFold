@@ -228,7 +228,7 @@ describe('validateVaultSecret', () => {
   });
 
   it('should reject empty string', () => {
-    expect(() => validateVaultSecret('')).toThrow('VAULT_SECRET environment variable is required');
+    expect(() => validateVaultSecret('')).toThrow('VAULT_SECRET must be at least 32 characters');
   });
 
   it('should reject string shorter than 32 chars', () => {
@@ -255,7 +255,7 @@ describe('validateVaultSalt', () => {
   });
 
   it('should reject empty string', () => {
-    expect(() => validateVaultSalt('')).toThrow('VAULT_SALT environment variable is required');
+    expect(() => validateVaultSalt('')).toThrow('VAULT_SALT must be at least 32 characters');
   });
 
   it('should reject string shorter than 32 chars', () => {

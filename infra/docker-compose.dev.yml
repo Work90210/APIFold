@@ -4,14 +4,14 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: model_translator
+      POSTGRES_DB: apifold
       POSTGRES_USER: mt
       POSTGRES_PASSWORD: mt_dev_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mt -d model_translator"]
+      test: ["CMD-SHELL", "pg_isready -U mt -d apifold"]
       interval: 5s
       timeout: 5s
       retries: 5

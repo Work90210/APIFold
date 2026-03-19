@@ -1,4 +1,4 @@
 module.exports = {
   root: true,
-  extends: ["@model-translator/eslint-config/react"],
+  extends: ["@apifold/eslint-config/react"],
 };

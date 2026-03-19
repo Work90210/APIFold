@@ -1,5 +1,5 @@
 {
-  "name": "@model-translator/types",
+  "name": "@apifold/types",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -19,8 +19,8 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@model-translator/eslint-config": "workspace:*",
-    "@model-translator/tsconfig": "workspace:*",
+    "@apifold/eslint-config": "workspace:*",
+    "@apifold/tsconfig": "workspace:*",
     "eslint": "^8.57.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"

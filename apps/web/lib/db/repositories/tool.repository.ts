@@ -1,5 +1,5 @@
 import { eq, and, ilike } from 'drizzle-orm';
-import type { McpTool, CreateToolInput, UpdateToolInput, ToolFilters } from '@model-translator/types';
+import type { McpTool, CreateToolInput, UpdateToolInput, ToolFilters } from '@apifold/types';
 import { mcpTools } from '../schema/tools.js';
 import { mcpServers } from '../schema/servers.js';
 import { BaseRepository } from './base.repository.js';

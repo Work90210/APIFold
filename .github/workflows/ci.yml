@@ -21,12 +21,12 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run lint typecheck
-      - run: pnpm --filter @model-translator/transformer test:coverage
+      - run: pnpm --filter @apifold/transformer test:coverage
       - uses: davelosert/vitest-coverage-report-action@v2
         if: always()
         with:
           working-directory: packages/transformer
-      - run: pnpm --filter @model-translator/transformer build
+      - run: pnpm --filter @apifold/transformer build
       - name: Check transformer bundle size
         run: |
           SIZE=$(wc -c < packages/transformer/dist/index.js | tr -d ' ')

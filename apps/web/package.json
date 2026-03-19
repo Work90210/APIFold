@@ -1,5 +1,5 @@
 {
-  "name": "@model-translator/web",
+  "name": "@apifold/web",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -13,8 +13,9 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@model-translator/types": "workspace:*",
-    "@model-translator/ui": "workspace:*",
+    "@apifold/types": "workspace:*",
+    "@apifold/ui": "workspace:*",
+    "@apifold/vault": "workspace:*",
     "drizzle-orm": "^0.45.1",
     "next": "^14.2.0",
     "postgres": "^3.4.8",
@@ -23,8 +24,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@model-translator/eslint-config": "workspace:*",
-    "@model-translator/tsconfig": "workspace:*",
+    "@apifold/eslint-config": "workspace:*",
+    "@apifold/tsconfig": "workspace:*",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitest/coverage-v8": "^2.1.0",

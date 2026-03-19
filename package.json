@@ -1,5 +1,5 @@
 {
-  "name": "model-translator",
+  "name": "apifold",
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "engines": {
@@ -11,9 +11,9 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "db:migrate": "pnpm --filter @model-translator/web db:migrate",
-    "db:seed": "pnpm --filter @model-translator/web db:seed",
-    "db:studio": "pnpm --filter @model-translator/web db:studio",
+    "db:migrate": "pnpm --filter @apifold/web db:migrate",
+    "db:seed": "pnpm --filter @apifold/web db:seed",
+    "db:studio": "pnpm --filter @apifold/web db:studio",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "changeset": "changeset",

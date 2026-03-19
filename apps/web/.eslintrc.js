@@ -1,4 +1,4 @@
 module.exports = {
   root: true,
-  extends: ["@model-translator/eslint-config/base", "next/core-web-vitals"],
+  extends: ["@apifold/eslint-config/base", "next/core-web-vitals"],
 };

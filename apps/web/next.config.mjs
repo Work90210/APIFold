@@ -39,8 +39,8 @@ const securityHeaders = [
 const nextConfig = {
   output: "standalone",
   transpilePackages: [
-    "@model-translator/ui",
-    "@model-translator/types",
+    "@apifold/ui",
+    "@apifold/types",
   ],
   // Disable potentially sensitive information in response headers
   poweredByHeader: false,

@@ -4,7 +4,7 @@ import type {
   CreateCredentialInput,
   UpdateCredentialInput,
   CredentialFilters,
-} from '@model-translator/types';
+} from '@apifold/types';
 import { credentials } from '../schema/credentials.js';
 import { mcpServers } from '../schema/servers.js';
 import { encryptCredential, decryptCredential } from '../../vault/index.js';
