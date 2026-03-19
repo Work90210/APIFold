@@ -52,6 +52,13 @@ export function DELETE(request: NextRequest, context: RouteParams): Promise<Next
 
     const db = getDb();
     const credentialRepo = new CredentialRepository(db);
+
+    // Verify credential belongs to this server before deleting
+    const credential = await credentialRepo.findById(userId, credentialId);
+    if (!credential || credential.serverId !== serverId) {
+      return errorResponse(ErrorCodes.NOT_FOUND, 'Credential not found', 404);
+    }
+
     await credentialRepo.delete(userId, credentialId);
 
     return NextResponse.json(createSuccessResponse({ deleted: true }));

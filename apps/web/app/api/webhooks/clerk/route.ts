@@ -5,7 +5,8 @@ const CLERK_WEBHOOK_SECRET = process.env['CLERK_WEBHOOK_SECRET'];
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!CLERK_WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    console.error('[webhook] CLERK_WEBHOOK_SECRET not configured');
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 
   const headerPayload = request.headers;

@@ -16,7 +16,43 @@ const MAX_SPEC_SIZE = 10 * 1024 * 1024; // 10MB
 const FETCH_TIMEOUT_MS = 15_000;
 
 function isPrivateIP(addr: string): boolean {
-  return PRIVATE_RANGES.some((pattern) => pattern.test(addr));
+  // Also check IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1)
+  const mapped = addr.match(/^::ffff:(.+)$/i);
+  const normalized = mapped ? mapped[1]! : addr;
+  return PRIVATE_RANGES.some((pattern) => pattern.test(normalized));
+}
+
+async function resolveAllAddresses(hostname: string): Promise<string[]> {
+  const allAddresses: string[] = [];
+
+  // Resolve both A and AAAA records
+  try {
+    const ipv4 = await dns.resolve4(hostname);
+    allAddresses.push(...ipv4);
+  } catch {
+    // No A records
+  }
+
+  try {
+    const ipv6 = await dns.resolve6(hostname);
+    allAddresses.push(...ipv6);
+  } catch {
+    // No AAAA records
+  }
+
+  if (allAddresses.length === 0) {
+    throw new Error('Could not resolve hostname');
+  }
+
+  return allAddresses;
+}
+
+function validateAddresses(addresses: readonly string[]): void {
+  for (const addr of addresses) {
+    if (isPrivateIP(addr)) {
+      throw new Error('URL resolves to a private IP address');
+    }
+  }
 }
 
 /**
@@ -31,26 +67,11 @@ export async function fetchSpecFromUrl(url: string): Promise<unknown> {
     throw new Error('Only HTTP/HTTPS URLs are allowed');
   }
 
-  // Resolve DNS and check for private IPs
-  let addresses: string[];
-  try {
-    addresses = await dns.resolve4(parsed.hostname);
-  } catch {
-    try {
-      addresses = await dns.resolve6(parsed.hostname);
-    } catch {
-      throw new Error('Could not resolve hostname');
-    }
-  }
-
-  for (const addr of addresses) {
-    if (isPrivateIP(addr)) {
-      throw new Error('URL resolves to a private IP address');
-    }
-  }
+  // Resolve all DNS records (IPv4 + IPv6) and validate
+  const addresses = await resolveAllAddresses(parsed.hostname);
+  validateAddresses(addresses);
 
   // Fetch using the resolved IP to prevent DNS rebinding.
-  // Replace hostname with the first validated IP, keep original Host header.
   const resolvedUrl = new URL(url);
   const originalHost = resolvedUrl.host;
   resolvedUrl.hostname = addresses[0]!;
@@ -90,22 +111,8 @@ export async function safeFetch(
     throw new Error('Only HTTP/HTTPS URLs are allowed');
   }
 
-  let addresses: string[];
-  try {
-    addresses = await dns.resolve4(parsed.hostname);
-  } catch {
-    try {
-      addresses = await dns.resolve6(parsed.hostname);
-    } catch {
-      throw new Error('Could not resolve hostname');
-    }
-  }
-
-  for (const addr of addresses) {
-    if (isPrivateIP(addr)) {
-      throw new Error('URL resolves to a private IP address');
-    }
-  }
+  const addresses = await resolveAllAddresses(parsed.hostname);
+  validateAddresses(addresses);
 
   const resolvedUrl = new URL(url);
   const originalHost = resolvedUrl.host;

@@ -69,11 +69,14 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
     });
 
     const responseText = await response.text();
+    const MAX_RESPONSE_SIZE = 1024 * 1024; // 1MB
+    const isTruncated = responseText.length > MAX_RESPONSE_SIZE;
+    const responseBody = isTruncated ? responseText.slice(0, MAX_RESPONSE_SIZE) : responseText;
 
     return NextResponse.json(createSuccessResponse({
       status: response.status,
-      headers: Object.fromEntries(response.headers.entries()),
-      body: responseText,
+      body: responseBody,
+      truncated: isTruncated,
     }));
   });
 }
