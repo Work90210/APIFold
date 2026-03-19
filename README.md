@@ -8,7 +8,7 @@
     <br />
 </p>
 
-[![CI](https://img.shields.io/github/actions/workflow/status/Work90210/model-translator/ci.yml?label=tests&style=flat-square)](https://github.com/Work90210/model-translator/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/Work90210/APIFold/ci.yml?label=tests&style=flat-square)](https://github.com/Work90210/APIFold/actions)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
 [![Transformer](https://img.shields.io/badge/transformer-MIT-green?style=flat-square)](./packages/transformer/LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square)](https://nodejs.org)
@@ -35,8 +35,8 @@ Table of Contents:
 Before running the installation command, make sure you have [Node.js 20+](https://nodejs.org), [pnpm 9+](https://pnpm.io), and [Docker](https://www.docker.com/products/docker-desktop) installed on your machine:
 
 ```bash
-git clone https://github.com/Work90210/model-translator.git
-cd model-translator
+git clone https://github.com/Work90210/APIFold.git
+cd APIFold
 pnpm install
 ```
 
