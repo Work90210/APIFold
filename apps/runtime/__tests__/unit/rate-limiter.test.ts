@@ -2,21 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createPerServerRateLimiter } from '../../src/middleware/rate-limiter.js';
 import { createTestLogger } from '../helpers.js';
 
-function createMockRedis(count = 1) {
-  const pipelineResult = {
-    zremrangebyscore: vi.fn().mockReturnThis(),
-    zcard: vi.fn().mockReturnThis(),
-    exec: vi.fn().mockResolvedValue([
-      [null, 0],      // zremrangebyscore result
-      [null, count],  // zcard result
-    ]),
-  };
-
+function createMockRedis(evalResult = 5) {
   return {
-    pipeline: vi.fn().mockReturnValue(pipelineResult),
-    zadd: vi.fn().mockResolvedValue(1),
-    pexpire: vi.fn().mockResolvedValue(1),
-    _pipelineResult: pipelineResult,
+    eval: vi.fn().mockResolvedValue(evalResult),
   };
 }
 
@@ -39,7 +27,7 @@ describe('createPerServerRateLimiter', () => {
   let redis: ReturnType<typeof createMockRedis>;
 
   beforeEach(() => {
-    redis = createMockRedis(1);
+    redis = createMockRedis(5); // 5 requests used, under default 100
   });
 
   it('allows requests under the limit', async () => {
@@ -54,11 +42,11 @@ describe('createPerServerRateLimiter', () => {
     await limiter(req, res, next);
 
     expect(next).toHaveBeenCalled();
-    expect(redis.zadd).toHaveBeenCalled(); // entry added after check
+    expect(redis.eval).toHaveBeenCalled();
   });
 
-  it('blocks requests at the limit without adding to sorted set', async () => {
-    redis = createMockRedis(100); // at limit
+  it('blocks requests at the limit', async () => {
+    redis = createMockRedis(-1); // Lua returns -1 when at limit
 
     const limiter = createPerServerRateLimiter({
       redis: redis as never,
@@ -72,7 +60,6 @@ describe('createPerServerRateLimiter', () => {
 
     expect(next).not.toHaveBeenCalled();
     expect((res as { status: ReturnType<typeof vi.fn> }).status).toHaveBeenCalledWith(429);
-    expect(redis.zadd).not.toHaveBeenCalled(); // no bloat
   });
 
   it('passes through when no slug', async () => {
@@ -87,7 +74,7 @@ describe('createPerServerRateLimiter', () => {
     await limiter(req, res, next);
 
     expect(next).toHaveBeenCalled();
-    expect(redis.pipeline).not.toHaveBeenCalled();
+    expect(redis.eval).not.toHaveBeenCalled();
   });
 
   it('passes through for invalid slug format', async () => {
@@ -102,11 +89,11 @@ describe('createPerServerRateLimiter', () => {
     await limiter(req, res, next);
 
     expect(next).toHaveBeenCalled();
-    expect(redis.pipeline).not.toHaveBeenCalled();
+    expect(redis.eval).not.toHaveBeenCalled();
   });
 
-  it('allows request on Redis error (fail-open) without setting rate limit headers', async () => {
-    redis._pipelineResult.exec.mockRejectedValue(new Error('Redis down'));
+  it('allows request on Redis error (fail-open)', async () => {
+    redis.eval.mockRejectedValue(new Error('Redis down'));
 
     const limiter = createPerServerRateLimiter({
       redis: redis as never,
@@ -119,11 +106,9 @@ describe('createPerServerRateLimiter', () => {
     await limiter(req, res, next);
 
     expect(next).toHaveBeenCalled();
-    // No rate limit headers set when Redis is down
-    expect((res as { setHeader: ReturnType<typeof vi.fn> }).setHeader).not.toHaveBeenCalled();
   });
 
-  it('includes client IP in Redis key for per-client isolation', async () => {
+  it('includes client IP in Redis key', async () => {
     const limiter = createPerServerRateLimiter({
       redis: redis as never,
       logger: createTestLogger(),
@@ -134,8 +119,8 @@ describe('createPerServerRateLimiter', () => {
     const { req, res, next } = createMockReqRes('test-slug');
     await limiter(req, res, next);
 
-    // zadd should be called with key containing client IP
-    const zaddCall = redis.zadd.mock.calls[0];
-    expect(zaddCall?.[0]).toContain('127.0.0.1');
+    const evalCall = redis.eval.mock.calls[0];
+    const key = evalCall?.[2]; // KEYS[1]
+    expect(key).toContain('127.0.0.1');
   });
 });

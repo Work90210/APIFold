@@ -1,8 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
 
 import { decrypt } from '../decrypt.js';
-import { deriveKey, clearKeyCache } from '../derive-key.js';
+import { clearKeyCache } from '../derive-key.js';
 import { encrypt } from '../encrypt.js';
+import { _deriveKeyInternal as deriveKey } from '@apifold/vault';
 import { validateVaultSecret, validateVaultSalt } from '../validate.js';
 
 const TEST_SECRET = 'a'.repeat(32) + 'b'.repeat(16); // 48 chars

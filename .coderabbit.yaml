@@ -1,0 +1,20 @@
+language: en-US
+reviews:
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - master
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  path_instructions: []
+  tools:
+    github-checks:
+      enabled: true
+  auto_assign:
+    enabled: true
+    auto_assign_author: true
+chat:
+  auto_reply: true

@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import type { RequestHandler } from 'express';
 import type { Redis } from 'ioredis';
 
@@ -13,15 +14,30 @@ export interface RateLimiterOptions {
 const SLUG_MAX_LENGTH = 64;
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
 
-/**
- * Per-server, per-client sliding window rate limiter backed by Redis.
- * Keys include client IP for isolation. Check-before-add to avoid bloating
- * the sorted set with rejected entries. Fail-open with debounced warnings.
- */
+// Atomic Lua script: clean, check, conditionally add
+const RATE_LIMIT_SCRIPT = `
+  local key = KEYS[1]
+  local window_start = tonumber(ARGV[1])
+  local now = tonumber(ARGV[2])
+  local max_requests = tonumber(ARGV[3])
+  local window_ms = tonumber(ARGV[4])
+  local member = ARGV[5]
+
+  redis.call('ZREMRANGEBYSCORE', key, '-inf', window_start)
+  local count = redis.call('ZCARD', key)
+
+  if count < max_requests then
+    redis.call('ZADD', key, now, member)
+    redis.call('PEXPIRE', key, window_ms)
+    return count + 1
+  end
+
+  return -1
+`;
+
 export function createPerServerRateLimiter(options: RateLimiterOptions): RequestHandler {
   const { redis, logger, windowMs, defaultMax } = options;
 
-  // Debounce Redis error warnings — at most once per 10 seconds
   let lastRedisWarningAt = 0;
   const REDIS_WARN_INTERVAL_MS = 10_000;
 
@@ -37,29 +53,24 @@ export function createPerServerRateLimiter(options: RateLimiterOptions): Request
     const key = `ratelimit:${slug}:${clientId}`;
     const now = Date.now();
     const windowStart = now - windowMs;
+    const member = `${now}:${randomBytes(4).toString('hex')}`;
 
     try {
-      // Step 1: Clean expired entries and count BEFORE adding
-      const pipeline = redis.pipeline();
-      pipeline.zremrangebyscore(key, '-inf', windowStart);
-      pipeline.zcard(key);
-
-      const results = await pipeline.exec();
-      const count = (results?.[1]?.[1] as number) ?? 0;
+      const result = await redis.eval(
+        RATE_LIMIT_SCRIPT, 1, key,
+        windowStart, now, maxRequests, windowMs, member,
+      ) as number;
 
       res.setHeader('X-RateLimit-Limit', maxRequests);
-      res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - count));
       res.setHeader('X-RateLimit-Reset', Math.ceil((now + windowMs) / 1000));
 
-      if (count >= maxRequests) {
+      if (result === -1) {
+        res.setHeader('X-RateLimit-Remaining', '0');
         res.status(429).json({ error: 'Rate limit exceeded' });
         return;
       }
 
-      // Step 2: Only add if under limit — prevents rejected-request bloat
-      await redis.zadd(key, now, `${now}:${Math.random().toString(36).slice(2, 8)}`);
-      await redis.pexpire(key, windowMs);
-
+      res.setHeader('X-RateLimit-Remaining', Math.max(0, maxRequests - result));
       next();
     } catch (err) {
       const now2 = Date.now();
