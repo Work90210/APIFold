@@ -18,6 +18,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Missing svix headers' }, { status: 400 });
   }
 
+  // Reject oversized payloads before reading body (public endpoint, no auth)
+  const contentLength = request.headers.get('content-length');
+  if (contentLength && parseInt(contentLength, 10) > 1_048_576) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+  }
+
   const body = await request.text();
 
   const wh = new Webhook(CLERK_WEBHOOK_SECRET);

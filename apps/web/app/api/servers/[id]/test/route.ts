@@ -10,7 +10,7 @@ import { safeFetch } from '../../../../../lib/ssrf-guard.js';
 import { z } from 'zod';
 
 const testCallSchema = z.object({
-  toolName: z.string().min(1),
+  toolName: z.string().min(1).max(200),
   arguments: z.record(z.string(), z.unknown()).default({}),
 });
 

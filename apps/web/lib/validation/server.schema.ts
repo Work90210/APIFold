@@ -12,7 +12,7 @@ export const createServerSchema = z.object({
 export const updateServerSchema = z.object({
   name: z.string().min(1).max(200).trim().optional(),
   authMode: z.enum(['none', 'api_key', 'bearer']).optional(),
-  baseUrl: z.string().max(2000).optional(),
+  baseUrl: z.string().max(2000).regex(/^https?:\/\//, 'baseUrl must start with http:// or https://').optional(),
   rateLimitPerMinute: z.number().int().min(1).max(10000).optional(),
   isActive: z.boolean().optional(),
 });
