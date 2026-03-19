@@ -38,9 +38,10 @@ function validateBaseUrl(raw: string): string {
       hostname.startsWith('10.') ||
       hostname.startsWith('192.168.') ||
       hostname.startsWith('169.254.') ||
-      hostname.startsWith('172.16.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
       hostname.startsWith('fc00:') ||
-      hostname.startsWith('fe80:')
+      hostname.startsWith('fe80:') ||
+      /^::ffff:/.test(hostname)
     ) {
       throw new Error('base_url targets a private or internal host');
     }
@@ -171,12 +172,15 @@ export async function fetchCredentialHeaders(
     throw new Error('Credential decryption failed');
   }
 
+  // Sanitize decrypted credential — prevent CRLF injection into HTTP headers
+  const sanitized = plaintext.replace(/[\r\n]/g, '');
+
   if (row.auth_type === 'bearer') {
-    return Object.freeze({ Authorization: `Bearer ${plaintext}` });
+    return Object.freeze({ Authorization: `Bearer ${sanitized}` });
   }
 
   if (row.auth_type === 'api_key') {
-    return Object.freeze({ 'X-API-Key': plaintext });
+    return Object.freeze({ 'X-API-Key': sanitized });
   }
 
   throw new Error(`Unsupported auth type: ${row.auth_type}`);
