@@ -1,10 +1,10 @@
 import { eq, and, desc } from 'drizzle-orm';
 import type { RequestLog, CreateRequestLogInput } from '@apifold/types';
-import { requestLogs } from '../schema/request-logs.js';
-import { mcpServers } from '../schema/servers.js';
-import { mcpTools } from '../schema/tools.js';
-import { BaseRepository } from './base.repository.js';
-import { DEFAULT_QUERY_LIMIT, MAX_QUERY_LIMIT } from './constants.js';
+import { requestLogs } from '../schema/request-logs';
+import { mcpServers } from '../schema/servers';
+import { mcpTools } from '../schema/tools';
+import { BaseRepository } from './base.repository';
+import { DEFAULT_QUERY_LIMIT, MAX_QUERY_LIMIT } from './constants';
 
 export interface LogFilters {
   readonly serverId?: string;

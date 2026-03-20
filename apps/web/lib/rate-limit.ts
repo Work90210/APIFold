@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 
-import { getRedis } from './redis.js';
+import { getRedis } from './redis';
 
 const WINDOW_MS = 60_000; // 1 minute
 const MAX_REQUESTS = 100;

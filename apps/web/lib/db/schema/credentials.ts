@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
-import { mcpServers } from './servers.js';
+import { mcpServers } from './servers';
 
 export const credentials = pgTable(
   'credentials',

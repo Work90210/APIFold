@@ -1,6 +1,6 @@
-export { specs } from './specs.js';
-export { mcpServers } from './servers.js';
-export { mcpTools } from './tools.js';
-export { credentials } from './credentials.js';
-export { usageEvents } from './usage-events.js';
-export { requestLogs } from './request-logs.js';
+export { specs } from './specs';
+export { mcpServers } from './servers';
+export { mcpTools } from './tools';
+export { credentials } from './credentials';
+export { usageEvents } from './usage-events';
+export { requestLogs } from './request-logs';

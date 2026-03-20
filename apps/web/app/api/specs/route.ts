@@ -1,14 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
-import { getDb } from '../../../lib/db/index.js';
-import { SpecRepository } from '../../../lib/db/repositories/spec.repository.js';
-import { ServerRepository } from '../../../lib/db/repositories/server.repository.js';
-import { ToolRepository } from '../../../lib/db/repositories/tool.repository.js';
-import { getUserId, withErrorHandler, withRateLimit, ApiError } from '../../../lib/api-helpers.js';
-import { createSpecSchema } from '../../../lib/validation/spec.schema.js';
+import { getDb } from '../../../lib/db/index';
+import { SpecRepository } from '../../../lib/db/repositories/spec.repository';
+import { ServerRepository } from '../../../lib/db/repositories/server.repository';
+import { ToolRepository } from '../../../lib/db/repositories/tool.repository';
+import { getUserId, withErrorHandler, withRateLimit, ApiError } from '../../../lib/api-helpers';
+import { createSpecSchema } from '../../../lib/validation/spec.schema';
 import { randomBytes } from 'node:crypto';
-import { fetchSpecFromUrl } from '../../../lib/ssrf-guard.js';
-import { publishServerEvent } from '../../../lib/redis.js';
+import { fetchSpecFromUrl } from '../../../lib/ssrf-guard';
+import { publishServerEvent } from '../../../lib/redis';
 import { ErrorCodes } from '@apifold/types';
 
 export function GET(_request: NextRequest): Promise<NextResponse> {

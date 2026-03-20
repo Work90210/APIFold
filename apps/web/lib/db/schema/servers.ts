@@ -8,7 +8,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { specs } from './specs.js';
+import { specs } from './specs';
 
 export const mcpServers = pgTable(
   'mcp_servers',

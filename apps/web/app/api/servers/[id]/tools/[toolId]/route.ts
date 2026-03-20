@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
-import { getDb } from '../../../../../../lib/db/index.js';
-import { ToolRepository } from '../../../../../../lib/db/repositories/tool.repository.js';
-import { getUserId, withErrorHandler, withRateLimit } from '../../../../../../lib/api-helpers.js';
-import { updateToolSchema } from '../../../../../../lib/validation/tool.schema.js';
-import { uuidParam } from '../../../../../../lib/validation/common.schema.js';
-import { publishServerEvent } from '../../../../../../lib/redis.js';
+import { getDb } from '../../../../../../lib/db/index';
+import { ToolRepository } from '../../../../../../lib/db/repositories/tool.repository';
+import { getUserId, withErrorHandler, withRateLimit } from '../../../../../../lib/api-helpers';
+import { updateToolSchema } from '../../../../../../lib/validation/tool.schema';
+import { uuidParam } from '../../../../../../lib/validation/common.schema';
+import { publishServerEvent } from '../../../../../../lib/redis';
 
 type RouteParams = { params: Promise<{ id: string; toolId: string }> };
 

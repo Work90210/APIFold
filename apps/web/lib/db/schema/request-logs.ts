@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, integer, timestamp, index } from 'drizzle-orm/pg-core';
-import { mcpServers } from './servers.js';
-import { mcpTools } from './tools.js';
+import { mcpServers } from './servers';
+import { mcpTools } from './tools';
 
 export const requestLogs = pgTable(
   'request_logs',

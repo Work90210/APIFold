@@ -1,20 +1,27 @@
 :root {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-heading: "Plus Jakarta Sans", "Plus Jakarta Sans Fallback", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", "Inter Fallback", "Geist Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
+  /* Modular scale ratio 1.25 (major third) - base 1rem */
+  --text-fluid-xs: clamp(0.64rem, 0.6rem + 0.2vw, 0.8rem);
+  --text-fluid-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.889rem);
+  --text-fluid-base: clamp(1rem, 0.93rem + 0.35vw, 1.125rem);
+  --text-fluid-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.406rem);
+  --text-fluid-xl: clamp(1.563rem, 1.4rem + 0.8vw, 1.758rem);
+  --text-fluid-2xl: clamp(1.953rem, 1.7rem + 1.25vw, 2.197rem);
+  --text-fluid-3xl: clamp(2.441rem, 2rem + 2.2vw, 3.052rem);
 
   --leading-tight: 1.25;
+  --leading-snug: 1.375;
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
 
+  --tracking-tighter: -0.04em;
   --tracking-tight: -0.025em;
   --tracking-normal: 0;
   --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+
+  --prose-max-width: 65ch;
 }

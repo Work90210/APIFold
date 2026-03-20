@@ -1,0 +1,85 @@
+---
+title: Connect to Claude Desktop
+description: Integrate your APIFold MCP server with Claude Desktop.
+---
+
+Claude Desktop supports MCP servers via a configuration file. Follow these steps to connect your APIFold server.
+
+## Configuration
+
+### 1. Open Claude Desktop Settings
+
+- Launch Claude Desktop
+- Go to **Settings** (gear icon)
+- Navigate to **Developer**
+- Click **Edit Config**
+
+This opens your `claude_desktop_config.json` file.
+
+### 2. Add Your Server
+
+Add the following to the `mcpServers` object:
+
+```json
+{
+  "mcpServers": {
+    "your-server-slug": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sse-client",
+        "https://your-domain.com/mcp/your-server-slug/sse"
+      ]
+    }
+  }
+}
+```
+
+Replace `your-server-slug` with your actual server slug (found on the server config page) and `your-domain.com` with your APIFold domain.
+
+You can also copy this snippet directly from the **Connection Snippets** section on your server's config page.
+
+### 3. Restart Claude Desktop
+
+Close and reopen Claude Desktop for the configuration to take effect.
+
+## Verification
+
+After restarting:
+
+1. Open a new conversation in Claude
+2. Look for the tool icon (hammer/wrench) in the input area
+3. Click it — you should see your API tools listed
+4. Try asking Claude to use one of your tools
+
+## Multiple Servers
+
+You can connect multiple MCP servers by adding more entries to the `mcpServers` object:
+
+```json
+{
+  "mcpServers": {
+    "github-api": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sse-client", "https://your-domain.com/mcp/github-api/sse"]
+    },
+    "stripe-api": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sse-client", "https://your-domain.com/mcp/stripe-api/sse"]
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### Tools not appearing
+- Verify the server is **Active** in the dashboard
+- Check that at least one tool is **Enabled**
+- Ensure the URL in your config is correct
+- Restart Claude Desktop
+
+### Connection errors
+- Check that your APIFold instance is running and accessible
+- Verify network connectivity to the MCP endpoint
+- Check the server logs in the dashboard for errors

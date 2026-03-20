@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, boolean, timestamp, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
-import { mcpServers } from './servers.js';
+import { mcpServers } from './servers';
 
 export const mcpTools = pgTable(
   'mcp_tools',

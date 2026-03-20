@@ -1,0 +1,73 @@
+---
+title: Getting Started
+description: Get up and running with APIFold in under 5 minutes.
+---
+
+Welcome to APIFold! This guide walks you through converting your first OpenAPI spec into a live MCP server.
+
+## Prerequisites
+
+- An APIFold account (sign up at the dashboard)
+- An OpenAPI 3.0/3.1 or Swagger 2.0 spec (URL or file)
+
+## Quick Start
+
+### 1. Sign Up
+
+Create an account at the APIFold dashboard. We use Clerk for authentication, so you can sign up with email, Google, or GitHub.
+
+### 2. Import Your Spec
+
+Navigate to **Dashboard > Import Spec** and provide your OpenAPI spec:
+
+- **URL**: Paste a publicly accessible link to your raw JSON or YAML spec
+- **File Upload**: Drag and drop your `openapi.json`, `openapi.yaml`, or `swagger.json` file
+
+APIFold parses the spec, extracts all operations, and generates MCP tool definitions automatically.
+
+### 3. Configure Your Server
+
+After import, you'll see a preview of the detected operations. Click **Import** to create the spec, then create an MCP server from it:
+
+- Choose an auth mode (`none`, `api_key`, or `bearer`)
+- Set the upstream base URL
+- Optionally configure rate limits
+
+### 4. Connect an AI Client
+
+Copy the generated configuration snippet for your preferred client:
+
+**Claude Desktop** — Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sse-client", "https://your-domain.com/mcp/your-server/sse"]
+    }
+  }
+}
+```
+
+**Cursor** — Add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "url": "https://your-domain.com/mcp/your-server/sse"
+    }
+  }
+}
+```
+
+### 5. Start Using Tools
+
+Restart your AI client. Your API tools will appear in the tool picker, ready for the AI to call on your behalf.
+
+## Next Steps
+
+- [Import a Spec](/docs/import-spec) — Detailed guide on supported formats
+- [Configure Your Server](/docs/configure-server) — Auth, rate limits, and tool management
+- [Dashboard Guide](/docs/dashboard-guide) — Tour of every screen

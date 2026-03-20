@@ -1,0 +1,232 @@
+---
+title: API Reference
+description: Programmatic access to APIFold platform resources.
+---
+
+All API endpoints are available at `/api` and require authentication.
+
+## Authentication
+
+Include your Clerk session token in the `Authorization` header:
+
+```
+Authorization: Bearer <session-token>
+```
+
+All authenticated routes are protected by Clerk middleware. Unauthenticated requests receive a `401` response.
+
+## Response Format
+
+All responses follow a consistent envelope:
+
+```typescript
+// Success
+{
+  "success": true,
+  "data": T,
+  "error": null,
+  "meta": { "total": 100, "page": 1, "limit": 20, "hasMore": true }
+}
+
+// Error
+{
+  "success": false,
+  "data": null,
+  "error": { "code": "NOT_FOUND", "message": "Resource not found" }
+}
+```
+
+## Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | 400 | Invalid request body or parameters |
+| `AUTH_ERROR` | 401 | Missing or invalid authentication |
+| `FORBIDDEN` | 403 | Insufficient permissions |
+| `NOT_FOUND` | 404 | Resource does not exist |
+| `CONFLICT` | 409 | Resource already exists |
+| `RATE_LIMIT` | 429 | Too many requests |
+| `INTERNAL_ERROR` | 500 | Unexpected server error |
+| `UPSTREAM_ERROR` | 502 | Upstream API failure |
+
+## Specs
+
+### List Specs
+
+```
+GET /api/specs
+```
+
+Returns all specs belonging to the authenticated user.
+
+### Create Spec
+
+```
+POST /api/specs
+Content-Type: application/json
+
+{
+  "name": "My API",
+  "version": "1.0.0",
+  "sourceUrl": "https://example.com/openapi.json",
+  "rawSpec": { ... }
+}
+```
+
+### Get Spec
+
+```
+GET /api/specs/:id
+```
+
+### Update Spec
+
+```
+PUT /api/specs/:id
+Content-Type: application/json
+
+{
+  "name": "Updated Name"
+}
+```
+
+### Delete Spec
+
+```
+DELETE /api/specs/:id
+```
+
+## Servers
+
+### List Servers
+
+```
+GET /api/servers
+```
+
+### Create Server (from Spec)
+
+```
+POST /api/specs/:specId/servers
+Content-Type: application/json
+
+{
+  "slug": "my-api",
+  "name": "My API Server",
+  "authMode": "api_key",
+  "baseUrl": "https://api.example.com/v1"
+}
+```
+
+### Get Server
+
+```
+GET /api/servers/:id
+```
+
+### Update Server
+
+```
+PUT /api/servers/:id
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "rateLimitPerMinute": 120
+}
+```
+
+### Delete Server
+
+```
+DELETE /api/servers/:id
+```
+
+## Tools
+
+### List Tools
+
+```
+GET /api/servers/:serverId/tools
+```
+
+### Update Tool
+
+```
+PUT /api/servers/:serverId/tools/:toolId
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+```
+
+### Test Tool
+
+```
+POST /api/servers/:serverId/test
+Content-Type: application/json
+
+{
+  "toolName": "listUsers",
+  "input": { "limit": 10 }
+}
+```
+
+Returns the tool execution result with timing information.
+
+## Credentials
+
+### Create Credential
+
+```
+POST /api/servers/:serverId/credentials
+Content-Type: application/json
+
+{
+  "label": "Production API Key",
+  "plaintextKey": "sk-...",
+  "authType": "api_key"
+}
+```
+
+The key is encrypted at rest and never returned in API responses.
+
+### Delete Credential
+
+```
+DELETE /api/servers/:serverId/credentials/:credentialId
+```
+
+## Logs
+
+### List Logs
+
+```
+GET /api/servers/:serverId/logs?cursor=abc&limit=50
+```
+
+Returns cursor-paginated request logs. Supports optional query parameters: `method`, `statusCode`, `from`, `to`.
+
+## Usage
+
+### Get Usage Stats
+
+```
+GET /api/usage
+```
+
+Returns aggregate usage statistics for the authenticated user.
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalSpecs": 5,
+    "totalServers": 3,
+    "totalTools": 42,
+    "totalRequests": 12500,
+    "requestsThisMonth": 1200
+  }
+}
+```

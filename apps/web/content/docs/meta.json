@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "getting-started",
+    "import-spec",
+    "configure-server",
+    "connect-claude",
+    "connect-cursor",
+    "dashboard-guide",
+    "api-reference"
+  ]
+}

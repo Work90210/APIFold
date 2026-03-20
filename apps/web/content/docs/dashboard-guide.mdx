@@ -1,0 +1,83 @@
+---
+title: Dashboard Guide
+description: A comprehensive tour of every screen in the APIFold dashboard.
+---
+
+The dashboard is your command center for managing MCP servers. Here's what each screen does.
+
+## Home
+
+The landing page after login. Shows:
+
+- **Stats Row** — Total specs, active servers, tools exposed, and requests this month
+- **Spec Cards** — Grid of all imported API specs with quick navigation
+- **Import CTA** — Quick link to import a new spec
+
+## Import Spec
+
+The entry point for creating new servers.
+
+- **URL Input** — Paste a link to your OpenAPI spec
+- **File Upload** — Drag and drop a JSON/YAML file
+- **Step Indicator** — Tracks your progress: Source → Preview → Confirm
+- **Operation Preview** — Review all detected endpoints before importing
+
+## Spec Detail
+
+Deep dive into an imported API.
+
+- **Spec Header** — Name, version, source URL, import date
+- **Server List** — All MCP servers created from this spec
+- **Create Server** — Button to spin up a new server
+
+## Server Config
+
+The main management page for each server.
+
+- **Configuration Form** — Edit name, base URL, auth mode, rate limits
+- **Connection Panel** — Server status, transport type, auth mode, slug
+- **Connection Snippets** — Ready-to-copy JSON configs for Claude Desktop and Cursor
+- **Quick Links** — Navigate to Tools, Console, Logs, or Export
+
+## Tools
+
+Master-detail view of all tools in a server.
+
+- **Tool Sidebar** — Scrollable list with enable/disable badges
+- **Tool Detail** — Name, description, input schema, toggle button
+- Click any tool to view its JSON Schema and enable/disable it
+
+## Console
+
+Interactive playground for testing tools.
+
+- **Tool Picker** — Select which tool to test
+- **Schema Form** — Dynamically rendered from the tool's `inputSchema`
+  - Supports string, number, boolean, enum, and object fields
+  - Toggle between form mode and raw JSON editor
+- **Response Viewer** — Shows the result with timing information
+- **Session History** — Accordion of the last 10 calls in this session
+
+## Logs
+
+Monitor request traffic for each server.
+
+- **Filter Bar** — Filter by HTTP method, status code, and date range
+- **Log Table** — Sortable, paginated table of all requests
+- **Log Detail Modal** — Click any row for full request details
+- **Retention Notice** — Shows how long logs are retained on your plan
+
+## Export
+
+Download your server configuration.
+
+- **Format Selector** — Choose JSON or YAML
+- **Code Preview** — Syntax-highlighted preview with copy button
+- **Download Button** — Save the file locally
+
+## Settings
+
+Account and billing management.
+
+- **Account Info** — Name, email, member since (from Clerk)
+- **Plan Card** — Current plan tier and usage statistics

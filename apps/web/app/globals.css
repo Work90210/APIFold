@@ -1,0 +1,365 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    font-kerning: normal;
+    line-height: var(--leading-normal);
+  }
+
+  /* Dark mode: reduce font weight for better readability on dark backgrounds */
+  .dark body {
+    font-weight: 350;
+  }
+
+  /* OpenType: disable ligatures on monospace/code for readability */
+  code,
+  pre,
+  kbd,
+  samp,
+  .font-mono {
+    font-variant-ligatures: none;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    font-weight: 600;
+  }
+
+  /* Optical alignment: headings get slight negative left margin for visual alignment */
+  h1, h2, h3 {
+    margin-left: -0.05em;
+  }
+
+  /* Tabular numbers for data */
+  [data-numeric],
+  .tabular-nums,
+  table td,
+  .stat-value {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* OpenType: proper fractions for recipe/fraction display */
+  .fractions {
+    font-variant-numeric: diagonal-fractions;
+  }
+
+  /* OpenType: small caps for abbreviations */
+  abbr,
+  .small-caps {
+    font-variant-caps: all-small-caps;
+    text-decoration: none;
+  }
+
+  /* Prose content max-width */
+  .prose-content {
+    max-width: var(--prose-max-width);
+  }
+
+  /* Font display swap for web fonts */
+  @font-face {
+    font-display: swap;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background-color: hsl(var(--selection-bg));
+    color: hsl(var(--selection-fg));
+  }
+
+  /* Focus-visible defaults */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Remove focus outline on mouse click */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Dark mode: use lighter surfaces instead of shadows for depth */
+  .dark .shadow-sm,
+  .dark .shadow,
+  .dark .shadow-md {
+    box-shadow: none;
+    border-color: hsl(var(--border));
+  }
+
+  .dark .shadow-lg,
+  .dark .shadow-xl {
+    box-shadow: none;
+  }
+
+  /* Dark mode: elevate with surface color instead */
+  .dark .hover\:shadow-lg:hover,
+  .dark .hover\:shadow-xl:hover {
+    box-shadow: none;
+    background-color: hsl(var(--surface-2));
+  }
+}
+
+@layer components {
+  /* Skip link — visible only on focus for keyboard users */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: var(--z-tooltip, 100);
+    padding: 0.75rem 1.5rem;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: top 200ms ease-out;
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+
+  /* Touch target sizing */
+  @media (pointer: coarse) {
+    .touch-target {
+      min-height: 2.75rem; /* 44px */
+      min-width: 2.75rem;
+      padding: 0.75rem 1.25rem; /* 12px 20px */
+    }
+  }
+
+  @media (pointer: fine) {
+    .touch-target {
+      padding: 0.5rem 1rem; /* 8px 16px */
+    }
+  }
+
+  /* Touch target pseudo-element for icon buttons — expands tap area */
+  .icon-btn-touch {
+    position: relative;
+  }
+
+  .icon-btn-touch::before {
+    content: "";
+    position: absolute;
+    inset: -10px;
+  }
+}
+
+@layer utilities {
+  /* Prefers reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Hover media query guard — prevent stuck hover on touch devices */
+  @media (hover: none) {
+    .hover\:-translate-y-0\.5:hover,
+    .hover\:-translate-y-1:hover {
+      transform: none !important;
+    }
+
+    .hover\:shadow-lg:hover,
+    .hover\:shadow-xl:hover {
+      box-shadow: inherit !important;
+    }
+
+  }
+
+  /* Safe-area insets for notched devices */
+  .safe-area-padding {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: var(--radius-full);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Page entry animation — slide up + fade */
+  .animate-in {
+    animation: slide-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .animate-in-slow {
+    animation: slide-up 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Glass card utility */
+  .glass-card {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Pulse animation for live indicators */
+  .pulse-live {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+    }
+  }
+
+  /* Progress bar mount animation */
+  .animate-progress {
+    animation: progress-fill 800ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both;
+  }
+
+  @keyframes progress-fill {
+    from {
+      width: 0%;
+    }
+  }
+
+  /* Count-up fade for stat values */
+  .animate-value {
+    animation: value-in 600ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 50ms + 200ms) both;
+  }
+
+  @keyframes value-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Gradient divider */
+  .gradient-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--border)),
+      transparent
+    );
+  }
+
+
+  /* Sidebar brand animation */
+  .animate-brand {
+    animation: brand-in 800ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+  }
+
+  @keyframes brand-in {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Auto-fit responsive grid — replaces fixed-column grids */
+  .grid-auto-fill {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  /* Responsive table-to-cards for mobile */
+  @media (max-width: 640px) {
+    .responsive-table table,
+    .responsive-table thead,
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table th,
+    .responsive-table td {
+      display: block;
+    }
+
+    .responsive-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .responsive-table tr {
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius-xl);
+      background: hsl(var(--card));
+    }
+
+    .responsive-table td {
+      padding: 0.25rem 0;
+      border: none;
+      text-align: left;
+    }
+
+    .responsive-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 0.125rem;
+    }
+  }
+}

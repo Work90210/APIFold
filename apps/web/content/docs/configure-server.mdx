@@ -1,0 +1,56 @@
+---
+title: Configure Your MCP Server
+description: Manage authentication, rate limits, and tool visibility for your MCP server.
+---
+
+After importing a spec and creating a server, you can fine-tune its behavior from the **Server Config** page.
+
+## Authentication Modes
+
+Control how your MCP server authenticates with the upstream API.
+
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| **None** | No authentication | Public APIs, development |
+| **API Key** | Sends an `x-api-key` header | Most API providers |
+| **Bearer Token** | Sends an `Authorization: Bearer <token>` header | OAuth-based APIs |
+
+To set up authentication:
+
+1. Navigate to your server's config page
+2. Select the auth mode
+3. Add a credential with your API key or token
+
+Credentials are encrypted at rest using AES-256-GCM and never logged or exposed in API responses.
+
+## Base URL
+
+The upstream API endpoint that your MCP server proxies requests to. This should be the root URL of your API (e.g., `https://api.example.com/v1`).
+
+## Rate Limiting
+
+Protect your upstream API by setting a requests-per-minute (RPM) limit on your MCP server. When the limit is exceeded, tool calls return a rate limit error with a `Retry-After` hint.
+
+**Default:** 60 requests per minute.
+
+## Tool Management
+
+From the **Tools** page, you can:
+
+- **Enable/Disable** individual tools — disabled tools are hidden from AI clients
+- **View Input Schema** — see the JSON Schema that defines each tool's parameters
+- **Test Tools** — use the Console to send test requests
+
+This is useful for:
+- Hiding administrative or destructive endpoints
+- Focusing the AI on a subset of your API
+- Testing new operations before exposing them
+
+## Connection Snippets
+
+The server config page provides ready-to-copy configuration snippets for:
+
+- **Claude Desktop** — `claude_desktop_config.json` format with `npx @modelcontextprotocol/server-sse-client`
+- **Cursor** — `.cursor/mcp.json` format with direct URL
+
+Each snippet is pre-filled with your server's slug and domain.

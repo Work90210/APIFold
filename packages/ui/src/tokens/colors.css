@@ -1,17 +1,146 @@
 :root {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222 47% 11%);
-  --color-primary: hsl(221 83% 53%);
-  --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(210 40% 96%);
-  --color-secondary-foreground: hsl(222 47% 11%);
-  --color-muted: hsl(210 40% 96%);
-  --color-muted-foreground: hsl(215 16% 47%);
-  --color-accent: hsl(210 40% 96%);
-  --color-accent-foreground: hsl(222 47% 11%);
-  --color-destructive: hsl(0 84% 60%);
-  --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(214 32% 91%);
-  --color-input: hsl(214 32% 91%);
-  --color-ring: hsl(221 83% 53%);
+  --background: 220 20% 99%;
+  --foreground: 222 47% 11%;
+
+  /* Tinted neutrals — subtle brand hue (222deg) tint with chroma 0.01 */
+  --surface-1: 220 20% 99%;
+  --surface-2: 220 20% 98.5%;
+  --surface-3: 222 22% 94%;
+
+  --card: 220 10% 100%;
+  --card-foreground: 222 47% 11%;
+
+  --popover: 220 10% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  --primary: 222 80% 52%;
+  --primary-foreground: 220 20% 99%;
+
+  --secondary: 222 18% 94%;
+  --secondary-foreground: 222 47% 14%;
+
+  --muted: 222 18% 94%;
+  --muted-foreground: 222 14% 46%;
+
+  --accent: 222 80% 96%;
+  --accent-foreground: 222 80% 42%;
+
+  --destructive: 4 76% 56%;
+  --destructive-foreground: 0 0% 100%;
+
+  --brand-400: 222 80% 62%;
+  --brand-500: 222 80% 52%;
+  --brand-600: 222 80% 44%;
+  --brand-700: 222 80% 35%;
+
+  --status-success: 152 60% 38%;
+  --status-success-muted: 152 50% 94%;
+  --status-warning: 38 92% 50%;
+  --status-warning-muted: 38 70% 94%;
+  --status-error: 4 76% 56%;
+  --status-error-muted: 4 60% 95%;
+  --status-info: 222 80% 52%;
+  --status-info-muted: 222 60% 95%;
+
+  --border: 220 17% 93%;
+  --input: 222 17% 88%;
+  --ring: 222 80% 52%;
+
+  --radius: 0.5rem;
+
+  --selection-bg: 222 80% 92%;
+  --selection-fg: 222 80% 20%;
+}
+
+.dark {
+  --background: 224 50% 6%;
+  --foreground: 220 20% 95%;
+
+  /* Tinted neutrals — subtle brand hue in dark mode */
+  --surface-1: 224 50% 6%;
+  --surface-2: 222 38% 10%;
+  --surface-3: 222 30% 14%;
+
+  --card: 222 38% 9%;
+  --card-foreground: 220 20% 95%;
+
+  --popover: 222 38% 9%;
+  --popover-foreground: 220 20% 95%;
+
+  --primary: 222 76% 62%;
+  --primary-foreground: 224 50% 6%;
+
+  --secondary: 222 25% 16%;
+  --secondary-foreground: 220 20% 90%;
+
+  --muted: 222 25% 16%;
+  --muted-foreground: 222 16% 58%;
+
+  --accent: 222 40% 16%;
+  --accent-foreground: 222 76% 72%;
+
+  --destructive: 4 65% 45%;
+  --destructive-foreground: 220 20% 95%;
+
+  --brand-400: 222 76% 72%;
+  --brand-500: 222 76% 62%;
+  --brand-600: 222 76% 52%;
+  --brand-700: 222 76% 42%;
+
+  --status-success: 152 55% 48%;
+  --status-success-muted: 152 30% 14%;
+  --status-warning: 38 80% 55%;
+  --status-warning-muted: 38 30% 14%;
+  --status-error: 4 65% 52%;
+  --status-error-muted: 4 30% 14%;
+  --status-info: 222 76% 62%;
+  --status-info-muted: 222 30% 14%;
+
+  --border: 222 25% 18%;
+  --input: 222 25% 18%;
+  --ring: 222 76% 52%;
+
+  --radius: 0.5rem;
+
+  --selection-bg: 222 60% 22%;
+  --selection-fg: 222 60% 90%;
+}
+
+/* OKLCH: Progressive enhancement for modern browsers with perceptually uniform colors */
+@supports (color: oklch(0 0 0)) {
+  :root {
+    --oklch-primary: oklch(0.52 0.18 255);
+    --oklch-primary-fg: oklch(0.98 0.005 255);
+    --oklch-brand-400: oklch(0.62 0.16 255);
+    --oklch-brand-500: oklch(0.52 0.18 255);
+    --oklch-brand-600: oklch(0.44 0.16 255);
+    --oklch-brand-700: oklch(0.35 0.12 255);
+    --oklch-success: oklch(0.55 0.14 160);
+    --oklch-warning: oklch(0.75 0.16 70);
+    --oklch-error: oklch(0.55 0.18 25);
+    --oklch-info: oklch(0.52 0.18 255);
+    --oklch-surface-1: oklch(0.99 0.005 255);
+    --oklch-surface-2: oklch(0.97 0.005 255);
+    --oklch-surface-3: oklch(0.94 0.008 255);
+    --oklch-border: oklch(0.90 0.01 255);
+    --oklch-muted-fg: oklch(0.55 0.02 255);
+  }
+
+  .dark {
+    --oklch-primary: oklch(0.62 0.16 255);
+    --oklch-primary-fg: oklch(0.15 0.03 255);
+    --oklch-brand-400: oklch(0.72 0.14 255);
+    --oklch-brand-500: oklch(0.62 0.16 255);
+    --oklch-brand-600: oklch(0.52 0.14 255);
+    --oklch-brand-700: oklch(0.42 0.12 255);
+    --oklch-success: oklch(0.62 0.12 160);
+    --oklch-warning: oklch(0.72 0.14 70);
+    --oklch-error: oklch(0.55 0.15 25);
+    --oklch-info: oklch(0.62 0.16 255);
+    --oklch-surface-1: oklch(0.17 0.02 255);
+    --oklch-surface-2: oklch(0.21 0.02 255);
+    --oklch-surface-3: oklch(0.25 0.02 255);
+    --oklch-border: oklch(0.28 0.02 255);
+    --oklch-muted-fg: oklch(0.55 0.02 255);
+  }
 }

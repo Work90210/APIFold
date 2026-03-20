@@ -5,10 +5,10 @@ import type {
   UpdateServerInput,
   ServerFilters,
 } from '@apifold/types';
-import { mcpServers } from '../schema/servers.js';
-import { specs } from '../schema/specs.js';
-import { BaseRepository } from './base.repository.js';
-import { DEFAULT_QUERY_LIMIT } from './constants.js';
+import { mcpServers } from '../schema/servers';
+import { specs } from '../schema/specs';
+import { BaseRepository } from './base.repository';
+import { DEFAULT_QUERY_LIMIT } from './constants';
 
 export class ServerRepository extends BaseRepository<
   McpServer,

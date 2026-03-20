@@ -3,10 +3,12 @@
   "compilerOptions": {
     "paths": {
       "@/*": [
-        "./src/*"
+        "./*"
       ]
     },
-    "allowJs": true
+    "allowJs": true,
+    "declaration": false,
+    "declarationMap": false
   },
   "include": [
     "next-env.d.ts",

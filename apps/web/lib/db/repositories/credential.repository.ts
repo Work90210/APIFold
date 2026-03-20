@@ -5,11 +5,11 @@ import type {
   UpdateCredentialInput,
   CredentialFilters,
 } from '@apifold/types';
-import { credentials } from '../schema/credentials.js';
-import { mcpServers } from '../schema/servers.js';
-import { encryptCredential, decryptCredential } from '../../vault/index.js';
-import { BaseRepository } from './base.repository.js';
-import { DEFAULT_QUERY_LIMIT } from './constants.js';
+import { credentials } from '../schema/credentials';
+import { mcpServers } from '../schema/servers';
+import { encryptCredential, decryptCredential } from '../../vault/index';
+import { BaseRepository } from './base.repository';
+import { DEFAULT_QUERY_LIMIT } from './constants';
 
 const safeColumns = {
   id: credentials.id,

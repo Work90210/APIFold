@@ -1,19 +1,41 @@
 :root {
+  /* 4px base grid */
   --space-0: 0;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
+  --space-px: 1px;
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-24: 6rem;      /* 96px */
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  --space-fluid-1: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+  --space-fluid-2: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+  --space-fluid-4: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --space-fluid-8: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+  --space-fluid-16: clamp(4rem, 3rem + 5vw, 6rem);
+
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.375rem;  /* 6px */
+  --radius-lg: 0.5rem;    /* 8px */
+  --radius-xl: 0.75rem;   /* 12px */
+  --radius-2xl: 1rem;     /* 16px */
   --radius-full: 9999px;
+
+  --container-max-width: 87.5rem; /* 1400px */
+  --touch-target-min: 2.75rem;    /* 44px */
+
+  /* Semantic z-index scale */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 100;
 }

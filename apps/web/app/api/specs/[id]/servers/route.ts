@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
-import { getDb } from '../../../../../lib/db/index.js';
-import { ServerRepository } from '../../../../../lib/db/repositories/server.repository.js';
-import { getUserId, withErrorHandler, withRateLimit } from '../../../../../lib/api-helpers.js';
-import { uuidParam } from '../../../../../lib/validation/common.schema.js';
+import { getDb } from '../../../../../lib/db/index';
+import { ServerRepository } from '../../../../../lib/db/repositories/server.repository';
+import { getUserId, withErrorHandler, withRateLimit } from '../../../../../lib/api-helpers';
+import { uuidParam } from '../../../../../lib/validation/common.schema';
 
 type RouteParams = { params: Promise<{ id: string }> };
 

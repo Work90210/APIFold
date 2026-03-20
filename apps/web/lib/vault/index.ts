@@ -1,8 +1,8 @@
-import { encrypt as rawEncrypt } from './encrypt.js';
-import { decrypt as rawDecrypt } from './decrypt.js';
+import { encrypt as rawEncrypt } from './encrypt';
+import { decrypt as rawDecrypt } from './decrypt';
 
-export { clearKeyCache } from './derive-key.js';
-export { validateVaultSecret, validateVaultSalt } from './validate.js';
+export { clearKeyCache } from './derive-key';
+export { validateVaultSecret, validateVaultSalt } from './validate';
 
 function getSecret(): string {
   const secret = process.env['VAULT_SECRET'];

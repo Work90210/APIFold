@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse, ErrorCodes } from '@apifold/types';
-import { getDb } from '../../../../../lib/db/index.js';
-import { ServerRepository } from '../../../../../lib/db/repositories/server.repository.js';
-import { ToolRepository } from '../../../../../lib/db/repositories/tool.repository.js';
-import { CredentialRepository } from '../../../../../lib/db/repositories/credential.repository.js';
-import { getUserId, withErrorHandler, withRateLimit, errorResponse, ApiError } from '../../../../../lib/api-helpers.js';
-import { uuidParam } from '../../../../../lib/validation/common.schema.js';
-import { safeFetch } from '../../../../../lib/ssrf-guard.js';
+import { getDb } from '../../../../../lib/db/index';
+import { ServerRepository } from '../../../../../lib/db/repositories/server.repository';
+import { ToolRepository } from '../../../../../lib/db/repositories/tool.repository';
+import { CredentialRepository } from '../../../../../lib/db/repositories/credential.repository';
+import { getUserId, withErrorHandler, withRateLimit, errorResponse, ApiError } from '../../../../../lib/api-helpers';
+import { uuidParam } from '../../../../../lib/validation/common.schema';
+import { safeFetch } from '../../../../../lib/ssrf-guard';
 import { z } from 'zod';
 
 const testCallSchema = z.object({

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createErrorResponse } from '@apifold/types';
 import { ErrorCodes, HttpStatusByErrorCode } from '@apifold/types';
-import { checkRateLimit } from './rate-limit.js';
+import { checkRateLimit } from './rate-limit';
 
 export async function getUserId(): Promise<string> {
   const { userId } = await auth();

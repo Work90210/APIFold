@@ -1,9 +1,9 @@
 import { eq, and, ilike } from 'drizzle-orm';
 import type { McpTool, CreateToolInput, UpdateToolInput, ToolFilters } from '@apifold/types';
-import { mcpTools } from '../schema/tools.js';
-import { mcpServers } from '../schema/servers.js';
-import { BaseRepository } from './base.repository.js';
-import { DEFAULT_QUERY_LIMIT, MAX_FILTER_LENGTH, escapeLikePattern } from './constants.js';
+import { mcpTools } from '../schema/tools';
+import { mcpServers } from '../schema/servers';
+import { BaseRepository } from './base.repository';
+import { DEFAULT_QUERY_LIMIT, MAX_FILTER_LENGTH, escapeLikePattern } from './constants';
 
 export class ToolRepository extends BaseRepository<
   McpTool,

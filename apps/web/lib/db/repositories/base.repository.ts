@@ -1,4 +1,4 @@
-import type { DrizzleClient } from '../index.js';
+import type { DrizzleClient } from '../index';
 
 export abstract class BaseRepository<
   TEntity,

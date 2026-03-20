@@ -1,8 +1,8 @@
 import { eq, and, ilike } from 'drizzle-orm';
 import type { Spec, CreateSpecInput, UpdateSpecInput, SpecFilters } from '@apifold/types';
-import { specs } from '../schema/specs.js';
-import { BaseRepository } from './base.repository.js';
-import { DEFAULT_QUERY_LIMIT, MAX_FILTER_LENGTH, escapeLikePattern } from './constants.js';
+import { specs } from '../schema/specs';
+import { BaseRepository } from './base.repository';
+import { DEFAULT_QUERY_LIMIT, MAX_FILTER_LENGTH, escapeLikePattern } from './constants';
 
 export class SpecRepository extends BaseRepository<
   Spec,

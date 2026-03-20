@@ -1,0 +1,72 @@
+---
+title: Connect to Cursor
+description: Use your APIFold tools directly within the Cursor editor.
+---
+
+Cursor supports MCP servers natively via a project-level configuration file.
+
+## Setup
+
+### 1. Create Configuration File
+
+Create a `.cursor/mcp.json` file in your project root:
+
+```json
+{
+  "mcpServers": {
+    "your-server-slug": {
+      "url": "https://your-domain.com/mcp/your-server-slug/sse"
+    }
+  }
+}
+```
+
+Replace `your-server-slug` with your actual server slug and `your-domain.com` with your APIFold domain.
+
+You can copy this snippet directly from the **Connection Snippets** section on your server's config page.
+
+### 2. Restart Cursor
+
+Restart Cursor or reload the window for the configuration to take effect.
+
+## Verification
+
+After restarting:
+
+1. Open the Cursor chat or command palette
+2. The AI should be able to discover and use your tools
+3. Try asking a question that would require your API tools
+
+## Project vs Global Configuration
+
+The `.cursor/mcp.json` file is project-specific. If you want the same MCP servers available across all projects, you can add the file to a parent directory.
+
+## Multiple Servers
+
+Add multiple servers to the same configuration:
+
+```json
+{
+  "mcpServers": {
+    "github-api": {
+      "url": "https://your-domain.com/mcp/github-api/sse"
+    },
+    "internal-api": {
+      "url": "https://your-domain.com/mcp/internal-api/sse"
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### Tools not available
+- Verify the server is **Active** in the APIFold dashboard
+- Check that at least one tool is **Enabled**
+- Ensure the URL in your config matches exactly
+- Restart Cursor
+
+### Connection refused
+- Verify your APIFold instance is running
+- Check firewall or proxy settings
+- Review server logs in the dashboard

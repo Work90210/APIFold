@@ -1,0 +1,66 @@
+---
+title: Import an API Spec
+description: Learn how to import OpenAPI and Swagger specifications into APIFold.
+---
+
+APIFold converts OpenAPI specifications into MCP tool definitions. This page covers the import process in detail.
+
+## Supported Formats
+
+| Format | Versions | File Types |
+|--------|----------|------------|
+| OpenAPI | 3.0.x, 3.1.x | `.json`, `.yaml`, `.yml` |
+| Swagger | 2.0 | `.json`, `.yaml`, `.yml` |
+
+## Import Methods
+
+### Import via URL
+
+Provide a publicly accessible URL pointing to your raw spec file. APIFold will:
+
+1. Fetch the spec over HTTPS
+2. Validate the format and version
+3. Parse all operations (paths + methods)
+4. Generate MCP tool definitions
+
+URLs must use `http://` or `https://` protocols. Private network URLs are blocked for security.
+
+### Upload File
+
+Upload your spec file directly from your computer. Drag and drop into the upload zone, or click to browse.
+
+**Limits:**
+- Maximum file size: 10MB
+- Accepted extensions: `.json`, `.yaml`, `.yml`
+
+## What Happens During Import
+
+1. **Parsing** — The spec is validated against the OpenAPI/Swagger schema
+2. **Operation Extraction** — Each path + method combination becomes a tool
+3. **Tool Naming** — Tools are named using `operationId` if available, otherwise generated from the path
+4. **Schema Mapping** — Request parameters and body schemas become the tool's `inputSchema`
+5. **Storage** — The raw spec and generated tools are saved to your account
+
+## Reviewing Generated Tools
+
+After import, you'll see a preview table with:
+
+- HTTP method and path
+- Generated tool name
+- Operation summary (if provided in the spec)
+
+Review the tools before confirming the import. You can enable or disable individual tools later from the server's Tools page.
+
+## Troubleshooting
+
+### Import fails with "Invalid spec"
+- Ensure your file is valid JSON or YAML
+- Check that the spec declares a supported version (`openapi: "3.0.0"` or `swagger: "2.0"`)
+
+### Missing operations
+- Verify your spec has paths defined under the `paths` key
+- Only `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` methods are extracted
+
+### Circular references
+- APIFold resolves `$ref` references automatically
+- Deeply nested circular schemas may be truncated to prevent infinite recursion
