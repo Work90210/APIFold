@@ -4,15 +4,16 @@ import { notFound } from "next/navigation";
 
 const DEFAULT_SLUG = ["getting-started"] as const;
 
-export default function Page({
+export default async function Page({
   params,
 }: {
-  readonly params: { readonly slug?: string[] };
+  readonly params: Promise<{ readonly slug?: string[] }>;
 }) {
+  const { slug: slugParam } = await params;
   const slug =
-    !params.slug || params.slug.length === 0
+    !slugParam || slugParam.length === 0
       ? [...DEFAULT_SLUG]
-      : params.slug;
+      : slugParam;
 
   const page = getPage(slug);
   if (!page) notFound();
@@ -35,15 +36,16 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  readonly params: { readonly slug?: string[] };
+  readonly params: Promise<{ readonly slug?: string[] }>;
 }) {
+  const { slug: slugParam } = await params;
   const slug =
-    !params.slug || params.slug.length === 0
+    !slugParam || slugParam.length === 0
       ? [...DEFAULT_SLUG]
-      : params.slug;
+      : slugParam;
 
   const page = getPage(slug);
   if (!page) notFound();

@@ -1,0 +1,64 @@
+---
+title: Changelog
+description: Release history and notable changes for APIFold.
+---
+
+## v0.1.0-beta — March 2026
+
+Initial public beta release.
+
+### Dashboard & UI
+
+- Full dashboard with server management, spec import, tool testing, and log viewing
+- Dark mode support with Impeccable Design System
+- Command palette for keyboard-driven navigation
+- Responsive design with mobile sidebar
+
+### MCP Runtime
+
+- SSE and Streamable HTTP transport support
+- Circuit breaker pattern for upstream resilience
+- Connection pooling and session management
+- Request logging and usage event tracking
+
+### API Layer
+
+- RESTful API with Clerk authentication
+- Spec import from URL or file upload (OpenAPI 3.x, Swagger 2.x)
+- Automatic MCP tool generation from OpenAPI operations
+- Server CRUD with slug-based routing
+- Credential vault with AES-256-GCM encryption
+- Rate limiting with Redis-backed sliding window
+- SSRF protection on outbound requests
+
+### Billing
+
+- Four-tier pricing: Free, Starter, Pro, Enterprise
+- Stripe Checkout integration for subscription management
+- Usage metering with Redis atomic counters
+- Webhook handling for plan changes and payment events
+- Billing Portal for self-service subscription management
+
+### Transformer (MIT)
+
+- OpenAPI 3.0, 3.1, and Swagger 2.0 parsing
+- Automatic tool name and description generation
+- JSON Schema extraction for tool input parameters
+- Warning system for unsupported features
+
+### Documentation
+
+- Fumadocs-powered documentation site
+- Getting Started guide
+- Server configuration guide
+- Client connection guides (Claude Desktop, Cursor)
+- API reference
+- Billing and authentication docs
+- FAQ and changelog
+
+### Infrastructure
+
+- Monorepo with Turborepo and pnpm workspaces
+- Docker Compose deployment (Nginx, Next.js, Express, PostgreSQL, Redis)
+- Drizzle ORM with PostgreSQL
+- Vitest test suite with 80%+ coverage target

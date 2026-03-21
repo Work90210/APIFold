@@ -7,9 +7,31 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Providers } from "./providers";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://apifold.com";
+
 export const metadata: Metadata = {
-  title: "APIFold",
-  description: "Turn any REST API into an MCP server. No code required.",
+  title: {
+    default: "APIFold — Your API. Any AI agent. In 30 seconds.",
+    template: "%s | APIFold",
+  },
+  description: "Turn any REST API into an MCP server. No code required. Open source.",
+  metadataBase: new URL(APP_URL),
+  openGraph: {
+    type: "website",
+    siteName: "APIFold",
+    title: "APIFold — Your API. Any AI agent. In 30 seconds.",
+    description: "Turn any REST API into a live MCP server. No code. No SDK wrappers. Open source.",
+    url: APP_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "APIFold — Your API. Any AI agent. In 30 seconds.",
+    description: "Turn any REST API into a live MCP server. No code. No SDK wrappers. Open source.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport: Viewport = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import Link from "next/link";
 import { Plus, Server } from "lucide-react";
 import { BackLink } from "@/components/shared/back-link";
@@ -20,9 +21,9 @@ import { cn } from "@apifold/ui";
 export default function SpecDetailPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const { data: spec, isLoading: specLoading } = useSpec(id);
   const { data: servers, isLoading: serversLoading } = useServers(id);
 

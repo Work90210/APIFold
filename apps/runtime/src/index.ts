@@ -107,6 +107,7 @@ export async function startWorker(): Promise<void> {
     toolLoader,
     sessionManager,
     toolExecutorDeps,
+    redis,
   });
 
   // Ready state

@@ -1,0 +1,74 @@
+---
+title: Authentication
+description: How APIFold handles dashboard authentication and credential encryption.
+---
+
+APIFold uses a layered authentication approach: **Clerk** for user identity and **AES-256-GCM** for credential encryption.
+
+## Dashboard Authentication (Clerk)
+
+The dashboard and all API endpoints (except health checks and webhooks) require authentication via [Clerk](https://clerk.com).
+
+### Supported Sign-In Methods
+
+- Email + password
+- Google OAuth
+- GitHub OAuth
+
+### Protected Routes
+
+The Next.js middleware protects these route patterns:
+
+- `/api/*` (except `/api/health` and `/api/webhooks/*`)
+- `/dashboard/*`
+
+Marketing pages (`/`, `/pricing`, `/docs`) are publicly accessible.
+
+### Session Management
+
+Clerk handles session tokens automatically. Sessions are short-lived JWTs validated on every request. No session data is stored server-side.
+
+## Credential Vault
+
+API keys and bearer tokens for upstream APIs are encrypted at rest using the credential vault.
+
+### Encryption Details
+
+| Property | Value |
+|----------|-------|
+| Algorithm | AES-256-GCM |
+| Key Derivation | PBKDF2 (100,000 iterations) |
+| IV | Random 12-byte per encryption |
+| Auth Tag | 128-bit GCM authentication tag |
+
+### How Credentials Flow
+
+1. **Storage**: When you add a credential, the plaintext key is encrypted with `VAULT_SECRET` + `VAULT_SALT` and stored as ciphertext
+2. **Retrieval**: When the MCP runtime needs to call your upstream API, it decrypts the credential in memory
+3. **Rotation**: Credentials can be deleted and re-added at any time. Old ciphertext is permanently removed from the database
+
+### Environment Variables
+
+| Variable | Description | Generation |
+|----------|-------------|------------|
+| `VAULT_SECRET` | Master encryption key (min 32 chars) | `openssl rand -base64 48` |
+| `VAULT_SALT` | Key derivation salt (32-char hex) | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+
+### Zero-Knowledge Design
+
+- Plaintext credentials never touch disk or logs
+- The vault key (`VAULT_SECRET`) is never stored alongside encrypted data
+- Decrypted credentials exist only in process memory during upstream API calls
+- Self-hosters control both the vault key and the database
+
+## MCP Transport Authentication
+
+MCP servers support three auth modes for client connections:
+
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| `none` | No authentication required | Local development, trusted networks |
+| `api_key` | Clients must send an API key header | Shared team access |
+| `bearer` | Clients must send a Bearer token | Production deployments |
+
+Configure the auth mode when creating or editing a server in the dashboard.

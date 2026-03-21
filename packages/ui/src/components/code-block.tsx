@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { cn } from "../lib/utils";
-
 import { CopyButton } from "./copy-button";
 
 interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {

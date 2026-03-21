@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Download } from "lucide-react";
-import { BackLink } from "@/components/shared/back-link";
-import { PageHeader } from "@/components/shared/page-header";
+import { useState, use } from "react";
+import Link from "next/link";
+import { ArrowLeft, Download } from "lucide-react";
 import { Button, CodeBlock, Skeleton } from "@apifold/ui";
 import { useExport } from "@/lib/hooks";
 import { FormatSelector } from "@/components/export/format-selector";
@@ -13,9 +12,9 @@ type ExportFormat = "json" | "yaml";
 export default function ExportPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const [format, setFormat] = useState<ExportFormat>("json");
   const { data, isLoading, refetch } = useExport(id, format);
 
@@ -36,9 +35,24 @@ export default function ExportPage({
 
   return (
     <div className="animate-in space-y-8">
-      <BackLink href={`/dashboard/servers/${id}`} label="Back to Server" />
+      {/* Back link */}
+      <Link
+        href={`/dashboard/servers/${id}`}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Back to Server
+      </Link>
 
-      <PageHeader title="Export" description="Export your server configuration as JSON or YAML." />
+      {/* Header */}
+      <div>
+        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
+          Export
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground leading-normal max-w-prose">
+          Export your server configuration as JSON or YAML.
+        </p>
+      </div>
 
       <div className="border-t border-border/40" />
 

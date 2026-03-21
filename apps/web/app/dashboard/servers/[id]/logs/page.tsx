@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { ScrollText } from "lucide-react";
-import { BackLink } from "@/components/shared/back-link";
-import { PageHeader } from "@/components/shared/page-header";
+import { useState, useMemo, use } from "react";
+import Link from "next/link";
+import { ArrowLeft, ScrollText } from "lucide-react";
 import type { RequestLog } from "@apifold/types";
 import { Button, Skeleton, EmptyState } from "@apifold/ui";
 import { useLogs } from "@/lib/hooks";
@@ -15,9 +14,9 @@ import { LogRetentionNotice } from "@/components/logs/log-retention-notice";
 export default function LogsPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const [filters, setFilters] = useState({
     method: "",
     statusCode: "",
@@ -43,9 +42,24 @@ export default function LogsPage({
 
   return (
     <div className="animate-in space-y-8">
-      <BackLink href={`/dashboard/servers/${id}`} label="Back to Server" />
+      {/* Back link */}
+      <Link
+        href={`/dashboard/servers/${id}`}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-all duration-300 ease-out-expo hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Back to Server
+      </Link>
 
-      <PageHeader title="Logs" description="Inspect incoming requests and responses." />
+      {/* Header */}
+      <div>
+        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
+          Logs
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground leading-normal max-w-prose">
+          Inspect incoming requests and responses.
+        </p>
+      </div>
 
       <div className="border-t border-border/40" />
 

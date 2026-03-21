@@ -1,0 +1,61 @@
+---
+title: Billing & Plans
+description: Understand APIFold's pricing tiers, usage metering, and billing management.
+---
+
+APIFold offers four plans to match your needs — from free hobby projects to enterprise deployments.
+
+## Plan Tiers
+
+| Feature | Free | Starter (€9/mo) | Pro (€29/mo) | Enterprise |
+|---------|------|------------------|--------------|------------|
+| MCP Servers | 2 | 10 | Unlimited | Custom |
+| Requests/month | 1,000 | 50,000 | 500,000 | Custom |
+| Log Retention | 7 days | 30 days | 90 days | Custom |
+| Support | Community | Email | Priority | Dedicated |
+| Overage | Hard cap | €0.50/10K | €0.50/10K | N/A |
+
+## Usage Metering
+
+Every tool execution call to your MCP server counts as one request. The following are **not** counted:
+
+- Health check pings (`/api/health`)
+- Dashboard page loads and API calls
+- Webhook events (Clerk, Stripe)
+- Server-to-server internal calls
+
+### How Metering Works
+
+1. Each tool execution atomically increments a Redis counter (`usage:{userId}:{YYYY-MM}`)
+2. Every 100 requests, the count is flushed to the database for historical analytics
+3. At the end of each billing cycle, usage is reported to Stripe for overage calculation
+
+### Free Tier Limits
+
+The Free tier enforces a **hard cap**. When you reach 1,000 requests in a calendar month, subsequent requests return HTTP 429 (Too Many Requests). Your servers remain accessible — only tool executions are blocked.
+
+## Overage Billing
+
+Starter and Pro plans support overage billing:
+
+- **Rate**: €0.50 per 10,000 requests (€0.00005 per request)
+- **Alerts**: You receive notifications at 80% and 100% of your included quota
+- **Billing**: Overage charges appear on your next invoice
+
+## Upgrading & Downgrading
+
+- **Upgrades** take effect immediately. You're charged the prorated difference for the remaining billing period.
+- **Downgrades** take effect at the end of the current billing period. Any unused credit applies to future invoices.
+- **Cancellation** reverts your account to the Free plan at the end of the current period.
+
+## Billing Portal
+
+Manage your subscription, update payment methods, and download invoices from the **Stripe Billing Portal**:
+
+1. Navigate to **Dashboard → Settings**
+2. Click **Manage Billing**
+3. The Stripe portal opens in a new tab
+
+## Self-Hosted Billing
+
+Self-hosted deployments have **no billing or usage limits**. All plan enforcement is disabled when running your own infrastructure. The billing system only applies to the managed cloud platform.

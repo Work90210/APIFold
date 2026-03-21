@@ -1,0 +1,53 @@
+name: Lighthouse CI
+on:
+  pull_request:
+    paths:
+      - "apps/web/app/(marketing)/**"
+      - "apps/web/app/globals.css"
+      - "packages/ui/**"
+  push:
+    branches: [master]
+    paths:
+      - "apps/web/app/(marketing)/**"
+      - "apps/web/app/globals.css"
+      - "packages/ui/**"
+permissions:
+  contents: read
+  pull-requests: write
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Build for Lighthouse
+        run: pnpm turbo run build --filter=@apifold/web
+        env:
+          # CI-only dummy values for build (not real keys)
+          # gitleaks:allow
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktbGlnaHRob3VzZS0wMC5jbGVyay5hY2NvdW50cy5kZXYk
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_CI || 'ci_placeholder_not_a_real_key' }}
+          DATABASE_URL: postgresql://ci@localhost:5432/ci
+          REDIS_URL: redis://localhost:6379
+          VAULT_SECRET: ci_placeholder_vault_secret_minimum_32_characters_long
+          VAULT_SALT: ci_placeholder_vault_salt_00000000000000000000000000000000
+      - name: Run Lighthouse CI
+        # Requires CLERK_SECRET_KEY_CI secret to serve pages at runtime.
+        # Non-blocking until the secret is configured in GitHub repo settings.
+        continue-on-error: ${{ secrets.CLERK_SECRET_KEY_CI == '' }}
+        uses: treosh/lighthouse-ci-action@v12
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktbGlnaHRob3VzZS0wMC5jbGVyay5hY2NvdW50cy5kZXYk
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_CI }}
+        with:
+          configPath: .github/lighthouse/config.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

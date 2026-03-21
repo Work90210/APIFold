@@ -7,6 +7,7 @@ import { useSpecs, useRuntimeHealth } from "@/lib/hooks";
 import { StatsRow } from "@/components/dashboard/stats-row";
 import { SpecCard } from "@/components/dashboard/spec-card";
 import { SpecCardSkeleton } from "@/components/dashboard/spec-card-skeleton";
+import { UsageWarning } from "@/components/dashboard/usage-warning";
 
 export default function DashboardPage() {
   const { data: specs, status, fetchStatus } = useSpecs();
@@ -16,6 +17,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in">
+      <UsageWarning />
       {/* Welcome hero */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

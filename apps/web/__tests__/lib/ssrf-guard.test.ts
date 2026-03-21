@@ -2,12 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchSpecFromUrl } from '../../lib/ssrf-guard.js';
 import * as dns from 'node:dns';
 
-vi.mock('node:dns', () => ({
-  promises: {
+vi.mock('node:dns', () => {
+  const promises = {
     resolve4: vi.fn(),
     resolve6: vi.fn(),
-  },
-}));
+  };
+  return {
+    default: { promises },
+    promises,
+  };
+});
 
 describe('fetchSpecFromUrl', () => {
   beforeEach(() => {

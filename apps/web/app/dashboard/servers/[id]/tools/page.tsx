@@ -1,16 +1,17 @@
 "use client";
 
-import { Wrench } from "lucide-react";
-import { BackLink } from "@/components/shared/back-link";
+import { use } from "react";
+import Link from "next/link";
+import { ArrowLeft, Wrench } from "lucide-react";
 import { cn, Button, Badge, EmptyState, Skeleton } from "@apifold/ui";
 import { useTools, useUpdateTool } from "@/lib/hooks";
 
 export default function ToolsPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const { data: tools, isLoading } = useTools(id);
   const updateTool = useUpdateTool();
 
@@ -27,7 +28,14 @@ export default function ToolsPage({
 
   return (
     <div className="space-y-8 animate-in">
-      <BackLink href={`/dashboard/servers/${id}`} label="Back to Server" />
+      {/* Back link */}
+      <Link
+        href={`/dashboard/servers/${id}`}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Back to Server
+      </Link>
 
       {/* Header */}
       <div className="flex items-center justify-between">
