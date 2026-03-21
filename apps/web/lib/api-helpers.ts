@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { ZodError } from 'zod';
 import { createErrorResponse } from '@apifold/types';
 import { ErrorCodes, HttpStatusByErrorCode } from '@apifold/types';
 import { checkRateLimit } from './rate-limit';
@@ -62,6 +63,14 @@ export function withErrorHandler(
   return handler().catch((err: unknown) => {
     if (err instanceof ApiError) {
       return errorResponse(err.code, err.message, err.status);
+    }
+
+    if (err instanceof ZodError) {
+      const issues = err.issues.map((i) => ({ path: i.path, message: i.message }));
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.VALIDATION_ERROR, 'Validation failed', issues),
+        { status: 400 },
+      );
     }
 
     // Don't leak internal error details

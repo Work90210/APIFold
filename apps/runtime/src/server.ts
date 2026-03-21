@@ -8,6 +8,7 @@ import type { SessionManager } from './mcp/session-manager.js';
 import type { ToolExecutorDeps } from './mcp/tool-executor.js';
 import { createCorsMiddleware } from './middleware/cors.js';
 import { createErrorHandler } from './middleware/error-handler.js';
+import { createMcpAuth } from './middleware/mcp-auth.js';
 import { createPerServerRateLimiter } from './middleware/rate-limiter.js';
 import { createRequestLogger } from './middleware/request-logger.js';
 import { createServiceAuth } from './middleware/service-auth.js';
@@ -42,9 +43,17 @@ export function createApp(deps: AppDeps): Express {
   app.use(express.json({ limit: '100kb' }));
   app.use(createRequestLogger(logger));
 
-  // Health + metrics (no auth required)
+  // Health (no auth required)
   app.use(createHealthRouter({ isReady: deps.isReady, logger }));
-  registerMetricsEndpoint(app);
+
+  // Metrics — behind service auth to prevent information disclosure
+  const metricsRouter = express.Router();
+  metricsRouter.use(createServiceAuth(config.runtimeSecret));
+  registerMetricsEndpoint(metricsRouter);
+  app.use(metricsRouter);
+
+  // Optional API key auth for MCP endpoints (no-op when MCP_API_KEY is not set)
+  app.use('/mcp/:slug', createMcpAuth(config.mcpApiKey));
 
   // Per-server rate limiter (Redis-backed, fail-open)
   if (deps.redis) {

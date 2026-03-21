@@ -54,6 +54,9 @@ const configSchema = z.object({
 
   // Connection capacity
   maxConnectionsPerWorker: z.coerce.number().int().min(1).default(100),
+
+  // Optional MCP API key — when set, all /mcp/:slug requests require Bearer <key>
+  mcpApiKey: z.string().min(32).optional(),
 });
 
 export type RuntimeConfig = z.infer<typeof configSchema>;
@@ -85,6 +88,7 @@ export function loadConfig(): RuntimeConfig {
     runtimeShutdownGraceMs: process.env['RUNTIME_SHUTDOWN_GRACE_MS'],
     runtimeHealthPort: process.env['RUNTIME_HEALTH_PORT'],
     maxConnectionsPerWorker: process.env['RUNTIME_MAX_CONNECTIONS_PER_WORKER'],
+    mcpApiKey: process.env['MCP_API_KEY'] || undefined,
   });
 
   if (!result.success) {

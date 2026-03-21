@@ -47,6 +47,7 @@ export async function startWorker(): Promise<void> {
     async query<T>(queryStr: string, params?: readonly unknown[]): Promise<{ readonly rows: readonly T[] }> {
       // All queries MUST use $1/$2 parameterization. The queryStr is always a
       // compile-time constant from postgres-loader.ts — never user input.
+      // eslint-disable-next-line no-restricted-syntax -- sole entry point; queryStr is always a compile-time constant
       const result = await sql.unsafe(queryStr, (params ?? []) as never[]);
       return { rows: result as unknown as readonly T[] };
     },
