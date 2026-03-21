@@ -28,6 +28,7 @@ services:
       - REDIS_URL
       - VAULT_SECRET
       - VAULT_SALT
+      - MCP_RUNTIME_SECRET
       - NODE_ENV=production
       - RUNTIME_PORT=3001
       - RUNTIME_MAX_WORKERS=${RUNTIME_MAX_WORKERS:-4}

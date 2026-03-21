@@ -24,21 +24,9 @@ interface StreamableSession {
   readonly createdAt: number;
 }
 
-// In-memory session tracking for Streamable HTTP
-const sessions = new Map<string, StreamableSession>();
 const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const MAX_SESSIONS = 10_000;
-
-// Periodic cleanup of expired sessions
 const SESSION_CLEANUP_INTERVAL_MS = 60_000;
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, session] of sessions) {
-    if (now - session.createdAt > SESSION_TTL_MS) {
-      sessions.delete(id);
-    }
-  }
-}, SESSION_CLEANUP_INTERVAL_MS).unref();
 
 function jsonRpcSuccess(id: string | number, result: unknown) {
   return Object.freeze({ jsonrpc: '2.0' as const, id, result });
@@ -59,6 +47,25 @@ function toMcpToolDef(tool: ToolDefinition): Record<string, unknown> {
 export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
   const { logger, registry, toolLoader, toolExecutorDeps } = deps;
   const router = express.Router();
+
+  // Session tracking scoped to this router instance (not module-level)
+  const sessions = new Map<string, StreamableSession>();
+
+  // Periodic cleanup of expired sessions — tied to router lifecycle
+  const cleanupTimer = setInterval(() => {
+    const now = Date.now();
+    let cleaned = 0;
+    for (const [id, session] of sessions) {
+      if (now - session.createdAt > SESSION_TTL_MS) {
+        sessions.delete(id);
+        cleaned++;
+      }
+    }
+    if (cleaned > 0) {
+      logger.debug({ cleaned }, 'Streamable HTTP stale sessions removed');
+    }
+  }, SESSION_CLEANUP_INTERVAL_MS);
+  cleanupTimer.unref();
 
   // Streamable HTTP endpoint — stateless per-request
   router.post('/mcp/:slug', async (req: Request, res: Response) => {

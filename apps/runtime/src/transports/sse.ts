@@ -51,7 +51,12 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
-    const session = sessionManager.create(slug, res)!;
+    const session = sessionManager.create(slug, res);
+    if (!session) {
+      // Race: capacity filled between check and create
+      res.status(503).json({ error: 'Too many active sessions' });
+      return;
+    }
 
     sessionManager.sendEvent(
       session,
