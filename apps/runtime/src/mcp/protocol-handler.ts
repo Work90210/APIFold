@@ -115,22 +115,6 @@ export class ProtocolHandler {
       return jsonRpcError(req.id, -32001, 'Server not found');
     }
 
-    // Usage gate: check plan limits before executing
-    const planLimits = await getPlanLimitsForUser(this.redis, server.userId);
-    const usageCheck = await checkAndIncrementUsage(
-      { redis: this.redis, logger: this.logger },
-      server.userId,
-      planLimits,
-    );
-
-    if (!usageCheck.allowed) {
-      return jsonRpcError(
-        req.id,
-        -32003,
-        `Usage limit reached (${usageCheck.currentUsage}/${usageCheck.limit}). Upgrade your plan.`,
-      );
-    }
-
     const params = req.params ?? {};
     const toolName = params['name'];
     if (typeof toolName !== 'string') {
@@ -148,6 +132,22 @@ export class ProtocolHandler {
     const tool = toolMap.get(toolName);
     if (!tool) {
       return jsonRpcError(req.id, -32002, 'Tool not found');
+    }
+
+    // Usage gate: check plan limits after tool validation, before executing
+    const planLimits = await getPlanLimitsForUser(this.redis, server.userId);
+    const usageCheck = await checkAndIncrementUsage(
+      { redis: this.redis, logger: this.logger },
+      server.userId,
+      planLimits,
+    );
+
+    if (!usageCheck.allowed) {
+      return jsonRpcError(
+        req.id,
+        -32003,
+        `Usage limit reached (${usageCheck.currentUsage}/${usageCheck.limit}). Upgrade your plan.`,
+      );
     }
 
     const toolInput = (params['arguments'] ?? {}) as Readonly<Record<string, unknown>>;

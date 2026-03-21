@@ -48,8 +48,9 @@ export async function checkAndIncrementUsage(
       local key = KEYS[1]
       local limit = tonumber(ARGV[1])
       local hardCap = tonumber(ARGV[2])
-      local budgetCap = tonumber(ARGV[3])
-      local overageRate = tonumber(ARGV[4])
+      local hasBudgetCap = tonumber(ARGV[3])
+      local budgetCap = tonumber(ARGV[4])
+      local overageRate = tonumber(ARGV[5])
 
       local current = tonumber(redis.call('GET', key) or '0')
 
@@ -59,7 +60,7 @@ export async function checkAndIncrementUsage(
       end
 
       -- Budget cap check for paid tiers (>= to catch the first overage request)
-      if budgetCap > 0 and current >= limit then
+      if hasBudgetCap == 1 and current >= limit then
         local overageRequests = current - limit
         local overageCostCents = overageRequests * overageRate * 100
         if overageCostCents >= budgetCap then
@@ -76,6 +77,7 @@ export async function checkAndIncrementUsage(
       key,
       maxReq,
       planLimits.overageRate === 0 ? 1 : 0,
+      planLimits.budgetCapCents !== null ? 1 : 0,
       planLimits.budgetCapCents ?? 0,
       planLimits.overageRate,
     ) as [number, number, number];
@@ -100,7 +102,7 @@ export async function checkAndIncrementUsage(
 
     // Fail closed for users with a budget cap (protect their spending limit)
     // Fail open for everyone else (availability over accuracy)
-    if (planLimits.budgetCapCents !== null && planLimits.budgetCapCents > 0) {
+    if (planLimits.budgetCapCents !== null) {
       return Object.freeze({
         allowed: false,
         reason: 'Usage gate unavailable — requests paused to protect spending limit',

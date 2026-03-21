@@ -49,13 +49,6 @@ export function POST(request: Request) {
     const planKey = `plan:${userId}`;
     const capCents = capEur !== null ? Math.round(capEur * 100) : null;
 
-    // Store budget cap in its own key (source of truth for webhooks to read)
-    if (capCents === null) {
-      await redis.del(budgetKey);
-    } else {
-      await redis.set(budgetKey, capCents.toString());
-    }
-
     // Update or create the plan limits cache so the runtime picks it up
     const plan = await getUserPlan(userId);
     const maxReq = Number.isFinite(plan.maxRequestsPerMonth)
@@ -67,7 +60,16 @@ export function POST(request: Request) {
       overageRate: plan.overageRate,
       budgetCapCents: capCents,
     });
-    await redis.set(planKey, limits, "EX", PLAN_CACHE_TTL);
+
+    // Atomically update budget cap key and plan cache in a single pipeline
+    const pipeline = redis.pipeline();
+    if (capCents === null) {
+      pipeline.del(budgetKey);
+    } else {
+      pipeline.set(budgetKey, capCents.toString());
+    }
+    pipeline.set(planKey, limits, "EX", PLAN_CACHE_TTL);
+    await pipeline.exec();
 
     return NextResponse.json(createSuccessResponse({ capEur }));
   });

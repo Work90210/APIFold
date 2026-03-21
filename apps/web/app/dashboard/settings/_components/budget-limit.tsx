@@ -14,8 +14,9 @@ export function BudgetLimit() {
   const [saved, setSaved] = useState(false);
 
   const planId = ((user?.publicMetadata?.plan as string) || "free") as PlanId;
-  const plan = PLANS[planId] ?? PLANS.free;
-  const isPaid = planId !== "free" && planId !== "enterprise";
+  const normalizedPlanId = (planId in PLANS ? planId : "free") as PlanId;
+  const plan = PLANS[normalizedPlanId] ?? PLANS.free;
+  const isPaid = normalizedPlanId !== "free" && normalizedPlanId !== "enterprise";
 
   useEffect(() => {
     if (!isPaid) return;

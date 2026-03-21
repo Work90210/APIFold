@@ -10,9 +10,11 @@ vi.mock("@/lib/billing/stripe-client", () => ({
 
 vi.mock("@/lib/redis", () => {
   const mockSet = vi.fn().mockResolvedValue("OK");
+  const mockGet = vi.fn().mockResolvedValue(null);
   return {
-    getRedis: vi.fn(() => ({ set: mockSet })),
+    getRedis: vi.fn(() => ({ set: mockSet, get: mockGet })),
     __mockSet: mockSet,
+    __mockGet: mockGet,
   };
 });
 
@@ -53,19 +55,21 @@ import { stripe } from "@/lib/billing/stripe-client";
 // @ts-expect-error — mock exports from vi.mock factory
 import { __mockUpdateUserMetadata, __mockGetUserList } from "@clerk/nextjs/server";
 // @ts-expect-error — mock export from vi.mock factory
-import { __mockSet } from "@/lib/redis";
+import { __mockSet, __mockGet } from "@/lib/redis";
 import type Stripe from "stripe";
 
 const mockConstructEvent = vi.mocked(stripe.webhooks.constructEvent);
 const mockUpdateUserMetadata = __mockUpdateUserMetadata as ReturnType<typeof vi.fn>;
 const mockGetUserList = __mockGetUserList as ReturnType<typeof vi.fn>;
 const mockRedisSet = __mockSet as ReturnType<typeof vi.fn>;
+const mockRedisGet = __mockGet as ReturnType<typeof vi.fn>;
 
 describe("Webhook Handler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_test_secret");
     mockRedisSet.mockResolvedValue("OK");
+    mockRedisGet.mockResolvedValue(null);
     mockGetUserList.mockResolvedValue({
       data: [
         {
@@ -211,8 +215,8 @@ describe("Webhook Handler", () => {
     });
 
     it("skips duplicate events (idempotency)", async () => {
-      // Simulate key already existing (NX returns null = already processed)
-      mockRedisSet.mockResolvedValueOnce(null);
+      // Simulate key already existing (get returns non-null = already processed)
+      mockRedisGet.mockResolvedValueOnce("1");
 
       const event = {
         id: "evt_duplicate_1",

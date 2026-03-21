@@ -98,6 +98,10 @@ export function PlanComparison() {
         body: JSON.stringify({ planId }),
       });
       const json = await res.json();
+      if (!json.success) {
+        toast({ title: "Upgrade failed", description: json.error?.message ?? "Please try again.", variant: "destructive" });
+        return;
+      }
       if (json.success && json.data?.url) {
         window.location.href = json.data.url;
       }

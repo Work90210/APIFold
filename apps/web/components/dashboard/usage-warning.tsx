@@ -13,6 +13,7 @@ export function UsageWarning() {
   if (!usage || !user) return null;
 
   const planId = ((user.publicMetadata?.plan as string) || "free") as PlanId;
+  if (!(planId in PLANS)) return null;
   const plan = PLANS[planId] ?? PLANS.free;
 
   const serverPercent = Number.isFinite(plan.maxServers)
@@ -40,7 +41,7 @@ export function UsageWarning() {
       <AlertTriangle className="h-4 w-4 shrink-0" />
       <span className="flex-1">
         {isAtLimit
-          ? `You've reached your ${resource} limit. ${planId === "free" ? "Requests are being rejected (429)." : "Overage charges apply."}`
+          ? `You've reached your ${resource} limit. ${resource === "server" ? "Remove a server to add new ones." : planId === "free" ? "Requests are being rejected (429)." : "Overage charges apply."}`
           : `You've used ${Math.round(highestPercent)}% of your ${resource} quota this month.`}
       </span>
       <Link

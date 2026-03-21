@@ -52,19 +52,27 @@ async function syncPlanLimitsToRedis(
 async function isEventProcessed(eventId: string): Promise<boolean> {
   try {
     const redis = getRedis();
-    const result = await redis.set(
+    const value = await redis.get(`webhook:processed:${eventId}`);
+    return value !== null;
+  } catch (err) {
+    console.error("[webhook] Redis dedup check failed:", err);
+    // Fail open — process the event rather than silently dropping it
+    return false;
+  }
+}
+
+async function markEventProcessed(eventId: string): Promise<void> {
+  try {
+    const redis = getRedis();
+    await redis.set(
       `webhook:processed:${eventId}`,
       "1",
       "EX",
       DEDUP_TTL_SECONDS,
       "NX",
     );
-    // NX returns null if key already exists (event already processed)
-    return result === null;
   } catch (err) {
-    console.error("[webhook] Redis dedup check failed:", err);
-    // Fail open — process the event rather than silently dropping it
-    return false;
+    console.error("[webhook] Redis dedup mark failed:", err);
   }
 }
 
@@ -76,28 +84,38 @@ export async function handleWebhookEvent(
     return Object.freeze({ handled: false, action: "duplicate" });
   }
 
+  let result: { readonly handled: boolean; readonly action: string };
+
   switch (event.type) {
     case "checkout.session.completed":
-      return handleCheckoutCompleted(
+      result = await handleCheckoutCompleted(
         event.data.object as Stripe.Checkout.Session,
       );
+      break;
 
     case "customer.subscription.updated":
-      return handleSubscriptionUpdated(
+      result = await handleSubscriptionUpdated(
         event.data.object as Stripe.Subscription,
       );
+      break;
 
     case "customer.subscription.deleted":
-      return handleSubscriptionDeleted(
+      result = await handleSubscriptionDeleted(
         event.data.object as Stripe.Subscription,
       );
+      break;
 
     case "invoice.payment_failed":
-      return handlePaymentFailed(event.data.object as Stripe.Invoice);
+      result = await handlePaymentFailed(event.data.object as Stripe.Invoice);
+      break;
 
     default:
       return Object.freeze({ handled: false, action: "ignored" });
   }
+
+  // Mark event as processed only after successful handler execution
+  await markEventProcessed(event.id);
+  return result;
 }
 
 const CUSTOMER_MAP_TTL = 90 * 24 * 60 * 60; // 90 days
@@ -130,7 +148,10 @@ async function findUserByStripeCustomerId(
     console.error("[webhook] Redis customer lookup failed:", err);
   }
 
-  // Fallback: scan Clerk users (slow but correct)
+  // Fallback: scan Clerk users (slow but correct).
+  // NOTE: This loop is capped at 1,000 users. For production scale a dedicated
+  // database lookup table (e.g. stripe_customers) should be used instead so
+  // this O(n) scan is never needed.
   try {
     const clerk = await clerkClient();
     let offset = 0;

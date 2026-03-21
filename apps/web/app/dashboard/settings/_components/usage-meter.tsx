@@ -56,7 +56,7 @@ export function UsageMeter({ label, icon: Icon, current, max }: UsageMeterProps)
       {isCritical && percent >= 100 && (
         <p className="flex items-center gap-1.5 text-xs text-destructive">
           <AlertTriangle className="h-3 w-3" />
-          Limit reached — requests will be rejected (429)
+          Limit reached
         </p>
       )}
 
