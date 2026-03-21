@@ -3,6 +3,10 @@
     "collect": {
       "startServerCommand": "pnpm --filter @apifold/web start",
       "startServerReadyPattern": "Ready",
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/pricing"
+      ],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop"
