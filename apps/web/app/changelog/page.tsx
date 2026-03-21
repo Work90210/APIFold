@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { Zap, Github } from "lucide-react";
-import { GITHUB_REPO } from "@/lib/constants";
 import { LandingNav } from "@/components/marketing/landing-nav";
 import { LandingFooter } from "@/components/marketing/landing-footer";
 

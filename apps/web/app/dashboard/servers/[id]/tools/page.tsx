@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Wrench } from "lucide-react";
 import { BackLink } from "@/components/shared/back-link";
 import { cn, Button, Badge, EmptyState, Skeleton } from "@apifold/ui";
