@@ -44,7 +44,7 @@ export function createPerServerRateLimiter(options: RateLimiterOptions): Request
   return async (req, res, next) => {
     const slug = req.params['slug'];
     if (!slug || slug.length > SLUG_MAX_LENGTH || !SLUG_PATTERN.test(slug)) {
-      next();
+      res.status(400).json({ error: 'Invalid server slug' });
       return;
     }
 

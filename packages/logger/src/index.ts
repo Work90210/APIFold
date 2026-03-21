@@ -19,6 +19,19 @@ export function createLogger(options: CreateLoggerOptions = {}): Logger {
       env === 'development'
         ? { target: 'pino-pretty', options: { colorize: true } }
         : undefined,
+    redact: {
+      paths: [
+        'req.headers.authorization',
+        'req.headers["x-api-key"]',
+        'req.headers["x-runtime-secret"]',
+        'req.headers.cookie',
+        'password',
+        'secret',
+        'token',
+        'creditCard',
+      ],
+      censor: '[REDACTED]',
+    },
     serializers: {
       err: pino.stdSerializers.err,
       req: pino.stdSerializers.req,

@@ -9,7 +9,8 @@ export function createCorsMiddleware(config: Pick<RuntimeConfig, 'corsOrigins'>)
   return cors({
     origin: origins,
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Runtime-Secret', 'X-Session-ID'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Runtime-Secret', 'X-Session-ID', 'Mcp-Session-Id'],
+    exposedHeaders: ['Mcp-Session-Id'],
     credentials: config.corsOrigins !== '*',
     maxAge: 86400,
   });
