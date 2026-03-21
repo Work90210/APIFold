@@ -186,6 +186,7 @@ export async function startWorker(): Promise<void> {
 
       await closeRedis();
 
+      credentialCache.evictAll();
       await sql.end();
       clearKeyCache();
       logger.info('Graceful shutdown complete');

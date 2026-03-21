@@ -2,6 +2,25 @@ import type { ErrorRequestHandler } from 'express';
 
 import type { Logger } from '../observability/logger.js';
 
+// Messages explicitly thrown by our middleware/handlers are safe to surface.
+// Anything else might contain file paths, DB details, or stack fragments.
+const SAFE_4XX_MESSAGES = new Set([
+  'Server not found',
+  'Session not found',
+  'Session does not belong to this server',
+  'Invalid JSON-RPC request',
+  'Missing X-Session-ID header',
+  'Invalid server slug',
+  'Worker at connection capacity',
+  'Too many active sessions',
+  'Rate limit exceeded',
+  'Missing or invalid Authorization header',
+  'Invalid API key',
+  'Missing service secret',
+  'Invalid service secret',
+  'Session does not belong to this client',
+]);
+
 export function createErrorHandler(logger: Logger): ErrorRequestHandler {
   return (err: unknown, _req, res, _next) => {
     const message = err instanceof Error ? err.message : 'Internal server error';
@@ -9,12 +28,21 @@ export function createErrorHandler(logger: Logger): ErrorRequestHandler {
 
     if (status >= 500) {
       logger.error({ err }, 'Unhandled server error');
+    } else {
+      logger.warn({ err, status }, 'Client error');
     }
 
     if (!res.headersSent) {
-      res.status(status).json({
-        error: status >= 500 ? 'Internal server error' : message,
-      });
+      let safeMessage: string;
+      if (status >= 500) {
+        safeMessage = 'Internal server error';
+      } else if (SAFE_4XX_MESSAGES.has(message)) {
+        safeMessage = message;
+      } else {
+        safeMessage = 'Bad request';
+      }
+
+      res.status(status).json({ error: safeMessage });
     }
   };
 }

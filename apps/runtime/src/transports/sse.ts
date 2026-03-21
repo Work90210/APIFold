@@ -14,6 +14,13 @@ export interface SSETransportDeps {
   readonly maxConnectionsPerWorker?: number;
 }
 
+const SLUG_MAX_LENGTH = 64;
+const SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+function isValidSlug(slug: string | undefined): slug is string {
+  return typeof slug === 'string' && slug.length > 0 && slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug);
+}
+
 export function createSSETransportRouter(deps: SSETransportDeps): Router {
   const { logger, sessionManager, protocolHandler, registry } = deps;
   const maxConns = deps.maxConnectionsPerWorker ?? 100;
@@ -22,6 +29,10 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
   // SSE endpoint — persistent connection
   router.get('/mcp/:slug/sse', (req: Request, res: Response) => {
     const slug = req.params['slug']!;
+    if (!isValidSlug(slug)) {
+      res.status(400).json({ error: 'Invalid server slug' });
+      return;
+    }
     const server = registry.getBySlug(slug);
 
     if (!server || !server.isActive) {
@@ -51,7 +62,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
-    const session = sessionManager.create(slug, res);
+    const session = sessionManager.create(slug, res, req.ip ?? 'unknown');
     if (!session) {
       // Race: capacity filled between check and create
       res.status(503).json({ error: 'Too many active sessions' });
@@ -69,6 +80,12 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
 
   // Message endpoint — receives JSON-RPC from agents via SSE session
   router.post('/mcp/:slug/message', async (req: Request, res: Response) => {
+    const slug = req.params['slug']!;
+    if (!isValidSlug(slug)) {
+      res.status(400).json({ error: 'Invalid server slug' });
+      return;
+    }
+
     const sessionId = req.headers['x-session-id'] as string | undefined;
     if (!sessionId) {
       res.status(400).json({ error: 'Missing X-Session-ID header' });
@@ -80,10 +97,15 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       res.status(404).json({ error: 'Session not found' });
       return;
     }
-
-    const slug = req.params['slug']!;
     if (session.slug !== slug) {
       res.status(403).json({ error: 'Session does not belong to this server' });
+      return;
+    }
+
+    // Bind session to originating client IP to prevent hijacking
+    if (session.clientIp !== 'unknown' && session.clientIp !== (req.ip ?? 'unknown')) {
+      logger.warn({ sessionId, expectedIp: session.clientIp, actualIp: req.ip }, 'Session IP mismatch');
+      res.status(403).json({ error: 'Session does not belong to this client' });
       return;
     }
 

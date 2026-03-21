@@ -21,6 +21,7 @@ export interface StreamableHTTPDeps {
 interface StreamableSession {
   readonly id: string;
   readonly slug: string;
+  readonly clientIp: string;
   readonly createdAt: number;
 }
 
@@ -42,6 +43,13 @@ function toMcpToolDef(tool: ToolDefinition): Record<string, unknown> {
     description: tool.description ?? '',
     inputSchema: tool.inputSchema,
   };
+}
+
+const SLUG_MAX_LENGTH = 64;
+const SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+function isValidSlug(slug: string | undefined): slug is string {
+  return typeof slug === 'string' && slug.length > 0 && slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug);
 }
 
 export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
@@ -70,6 +78,11 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
   // Streamable HTTP endpoint — stateless per-request
   router.post('/mcp/:slug', async (req: Request, res: Response) => {
     const slug = req.params['slug']!;
+    if (!isValidSlug(slug)) {
+      res.status(400).json({ error: 'Invalid server slug' });
+      return;
+    }
+
     const server = registry.getBySlug(slug);
 
     if (!server || !server.isActive) {
@@ -98,6 +111,13 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
       return;
     }
 
+    // Validate session is used from the same client IP that created it
+    if (session && session.clientIp !== 'unknown' && session.clientIp !== (req.ip ?? 'unknown')) {
+      logger.warn({ sessionId, expectedIp: session.clientIp, actualIp: req.ip }, 'Session IP mismatch');
+      res.status(403).json({ error: 'Session does not belong to this client' });
+      return;
+    }
+
     try {
       let response;
 
@@ -107,9 +127,9 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
             response = jsonRpcError(message.id, -32000, 'Too many active sessions');
             break;
           }
-          // Create a new session
+          // Create a new session bound to the originating client IP
           sessionId = randomUUID();
-          session = { id: sessionId, slug, createdAt: Date.now() };
+          session = { id: sessionId, slug, clientIp: req.ip ?? 'unknown', createdAt: Date.now() };
           sessions.set(sessionId, session);
 
           response = jsonRpcSuccess(message.id, {

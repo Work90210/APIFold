@@ -9,6 +9,7 @@ import type { ConnectionMonitor } from '../resilience/connection-monitor.js';
 export interface SSESession {
   readonly id: string;
   readonly slug: string;
+  readonly clientIp: string;
   readonly createdAt: number;
   lastActivityAt: number;
   readonly res: Response;
@@ -61,7 +62,7 @@ export class SessionManager {
     return this.sessions.size < this.maxSessions;
   }
 
-  create(slug: string, res: Response): SSESession | null {
+  create(slug: string, res: Response, clientIp: string): SSESession | null {
     if (!this.hasCapacity()) {
       this.logger.warn({ slug, maxSessions: this.maxSessions }, 'Max sessions reached');
       return null;
@@ -71,6 +72,7 @@ export class SessionManager {
     const session: SSESession = {
       id: randomUUID(),
       slug,
+      clientIp,
       createdAt: now,
       lastActivityAt: now,
       res,
