@@ -40,9 +40,13 @@ jobs:
           VAULT_SECRET: ci_placeholder_vault_secret_minimum_32_characters_long
           VAULT_SALT: ci_placeholder_vault_salt_00000000000000000000000000000000
       - name: Run Lighthouse CI
+        # Requires CLERK_SECRET_KEY_CI secret to serve pages at runtime.
+        # Non-blocking until the secret is configured in GitHub repo settings.
+        continue-on-error: ${{ secrets.CLERK_SECRET_KEY_CI == '' }}
         uses: treosh/lighthouse-ci-action@v12
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktbGlnaHRob3VzZS0wMC5jbGVyay5hY2NvdW50cy5kZXYk
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_CI }}
         with:
           configPath: .github/lighthouse/config.json
           uploadArtifacts: true
