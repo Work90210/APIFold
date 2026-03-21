@@ -66,6 +66,7 @@ export function createPerServerRateLimiter(options: RateLimiterOptions): Request
 
       if (result === -1) {
         res.setHeader('X-RateLimit-Remaining', '0');
+        res.setHeader('Retry-After', Math.ceil(windowMs / 1000));
         res.status(429).json({ error: 'Rate limit exceeded' });
         return;
       }

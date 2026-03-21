@@ -1,0 +1,46 @@
+app = "apifold-runtime"
+primary_region = "ams"
+
+[build]
+  dockerfile = "apps/runtime/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  RUNTIME_PORT = "3001"
+  RUNTIME_MAX_WORKERS = "2"
+  RUNTIME_HEALTH_PORT = "9090"
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_start_machines = true
+  auto_stop_machines = true
+  min_machines_running = 1
+
+[[services]]
+  internal_port = 3001
+  protocol = "tcp"
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[checks]
+  [checks.health]
+    type = "http"
+    port = 9090
+    path = "/health"
+    interval = "10s"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "512mb"
+
+# Multi-region deployment:
+#   fly scale count 2 --region ams   # Europe
+#   fly scale count 2 --region iad   # US East
+#   fly scale count 1 --region nrt   # Tokyo
+
+[metrics]
+  port = 9090
+  path = "/metrics"

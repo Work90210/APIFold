@@ -1,0 +1,58 @@
+# Docker Compose for use with external managed services (Postgres + Redis).
+#
+# This file does NOT include postgres or redis containers.
+# Set DATABASE_URL and REDIS_URL to point to your managed providers:
+#   - Neon, Supabase, or AWS RDS for Postgres
+#   - Upstash, ElastiCache, or Redis Cloud for Redis
+#
+# Usage:
+#   docker compose -f docker-compose.managed.yml up -d
+
+services:
+  web:
+    image: ghcr.io/${GITHUB_OWNER:-apifold}/apifold-web:latest
+    expose:
+      - "3000"
+    environment:
+      - DATABASE_URL
+      - REDIS_URL
+      - VAULT_SECRET
+      - VAULT_SALT
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  runtime:
+    image: ghcr.io/${GITHUB_OWNER:-apifold}/apifold-runtime:latest
+    expose:
+      - "3001"
+      - "9090"
+    environment:
+      - DATABASE_URL
+      - REDIS_URL
+      - VAULT_SECRET
+      - VAULT_SALT
+      - NODE_ENV=production
+      - RUNTIME_PORT=3001
+      - RUNTIME_MAX_WORKERS=${RUNTIME_MAX_WORKERS:-4}
+      - RUNTIME_SHUTDOWN_GRACE_MS=${RUNTIME_SHUTDOWN_GRACE_MS:-10000}
+      - RUNTIME_HEALTH_PORT=9090
+    restart: unless-stopped
+    stop_grace_period: 15s
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:9090/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+      - runtime
+    restart: unless-stopped

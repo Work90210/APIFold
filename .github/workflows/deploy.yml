@@ -1,0 +1,40 @@
+name: Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deploy target'
+        required: true
+        type: choice
+        options:
+          - runtime
+          - web
+          - all
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-fly:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy runtime
+        if: inputs.target == 'runtime' || inputs.target == 'all'
+        run: flyctl deploy --config infra/fly/fly.runtime.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy web
+        if: inputs.target == 'web' || inputs.target == 'all'
+        run: flyctl deploy --config infra/fly/fly.web.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

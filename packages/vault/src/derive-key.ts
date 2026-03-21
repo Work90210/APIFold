@@ -45,3 +45,37 @@ export function clearKeyCache(): void {
   cachedSecretHash = null;
   cachedSaltHash = null;
 }
+
+/**
+ * Async key derivation using Web Crypto API (crypto.subtle).
+ * For edge/browser runtimes where Node.js crypto is unavailable.
+ * Feature-flagged: only use when VAULT_USE_WEB_CRYPTO=true.
+ */
+export async function deriveKeyAsync(secret: string, salt: string): Promise<Buffer> {
+  if (typeof globalThis.crypto?.subtle === 'undefined') {
+    // Fallback to sync Node.js implementation
+    return deriveKey(secret, salt);
+  }
+
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  );
+
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode(salt),
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    KEY_LENGTH * 8,
+  );
+
+  return Buffer.from(bits);
+}

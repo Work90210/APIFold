@@ -1,4 +1,4 @@
-import type { AuthMode } from '@apifold/types';
+import type { AuthMode, TransportType } from '@apifold/types';
 
 import type { Logger } from '../observability/logger.js';
 import { metrics } from '../observability/metrics.js';
@@ -8,6 +8,7 @@ export interface L0ServerMeta {
   readonly id: string;
   readonly slug: string;
   readonly userId: string;
+  readonly transport: TransportType;
   readonly authMode: AuthMode;
   readonly baseUrl: string;
   readonly rateLimit: number;

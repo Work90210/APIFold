@@ -22,6 +22,7 @@ services:
     # Do not expose runtime port directly — all traffic routes through nginx
     expose:
       - "3001"
+      - "9090"
     environment:
       - DATABASE_URL
       - REDIS_URL
@@ -29,12 +30,22 @@ services:
       - VAULT_SALT
       - NODE_ENV=production
       - RUNTIME_PORT=3001
+      - RUNTIME_MAX_WORKERS=${RUNTIME_MAX_WORKERS:-4}
+      - RUNTIME_SHUTDOWN_GRACE_MS=${RUNTIME_SHUTDOWN_GRACE_MS:-10000}
+      - RUNTIME_HEALTH_PORT=9090
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: 15s
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:9090/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   postgres:
     image: postgres:16-alpine
@@ -77,6 +88,15 @@ services:
     depends_on:
       - web
       - runtime
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["monitoring"]
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     restart: unless-stopped
 
 volumes:

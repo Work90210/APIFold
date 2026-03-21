@@ -1,14 +1,22 @@
-import type { AuthMode } from '@apifold/types';
+import type { AuthMode, TransportType } from '@apifold/types';
 
 import type { Logger } from '../observability/logger.js';
 import type { ServerRegistry, L0ServerMeta } from '../registry/server-registry.js';
 import type { ToolDefinition } from '../registry/tool-loader.js';
 
 const VALID_AUTH_MODES = new Set<string>(['none', 'api_key', 'bearer']);
+const VALID_TRANSPORTS = new Set<string>(['sse', 'streamable-http']);
 
 const BLOCKED_HOSTNAMES = new Set([
   'localhost', '0.0.0.0', '::1', '[::1]',
 ]);
+
+function validateTransport(value: string | null | undefined): TransportType {
+  if (!value || !VALID_TRANSPORTS.has(value)) {
+    return 'sse'; // Default to SSE for backward compatibility
+  }
+  return value as TransportType;
+}
 
 function validateAuthMode(value: string): AuthMode {
   if (!VALID_AUTH_MODES.has(value)) {
@@ -64,7 +72,7 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
   const { db, logger, registry } = deps;
 
   const { rows } = await db.query<ServerRow>(
-    `SELECT id, slug, user_id, auth_mode, base_url, rate_limit, is_active
+    `SELECT id, slug, user_id, transport, auth_mode, base_url, rate_limit, is_active
      FROM mcp_servers
      WHERE is_active = true`,
   );
@@ -74,6 +82,7 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
       id: row.id,
       slug: row.slug,
       userId: row.user_id,
+      transport: validateTransport(row.transport),
       authMode: validateAuthMode(row.auth_mode),
       baseUrl: validateBaseUrl(row.base_url),
       rateLimit: row.rate_limit,
@@ -93,7 +102,7 @@ export async function reloadServer(
   const { db, registry } = deps;
 
   const { rows } = await db.query<ServerRow>(
-    `SELECT id, slug, user_id, auth_mode, base_url, rate_limit, is_active
+    `SELECT id, slug, user_id, transport, auth_mode, base_url, rate_limit, is_active
      FROM mcp_servers
      WHERE id = $1`,
     [serverId],
@@ -109,6 +118,7 @@ export async function reloadServer(
     id: row.id,
     slug: row.slug,
     userId: row.user_id,
+    transport: validateTransport(row.transport),
     authMode: validateAuthMode(row.auth_mode),
     baseUrl: validateBaseUrl(row.base_url),
     rateLimit: row.rate_limit,
@@ -190,6 +200,7 @@ interface ServerRow {
   readonly id: string;
   readonly slug: string;
   readonly user_id: string;
+  readonly transport: string | null;
   readonly auth_mode: string;
   readonly base_url: string;
   readonly rate_limit: number;

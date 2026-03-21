@@ -1,0 +1,24 @@
+# Standalone web dashboard deployment.
+# Use with external managed Postgres and Redis.
+#
+# Usage:
+#   docker compose -f docker-compose.web.yml up -d
+
+services:
+  web:
+    image: ghcr.io/${GITHUB_OWNER:-apifold}/apifold-web:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL
+      - REDIS_URL
+      - VAULT_SECRET
+      - VAULT_SALT
+      - NODE_ENV=production
+      - RUNTIME_PUBLIC_URL=${RUNTIME_PUBLIC_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

@@ -14,6 +14,7 @@
     "db:migrate": "pnpm --filter @apifold/web db:migrate",
     "db:seed": "pnpm --filter @apifold/web db:seed",
     "db:studio": "pnpm --filter @apifold/web db:studio",
+    "db:check": "tsx scripts/check-db-connection.ts",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "changeset": "changeset",

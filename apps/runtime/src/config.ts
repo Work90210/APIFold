@@ -46,6 +46,14 @@ const configSchema = z.object({
 
   // Log level
   logLevel: z.enum(['silent', 'fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+
+  // Cluster
+  runtimeMaxWorkers: z.coerce.number().int().min(1).max(8).default(4),
+  runtimeShutdownGraceMs: z.coerce.number().int().min(1000).default(10_000),
+  runtimeHealthPort: z.coerce.number().int().min(1).max(65535).default(9090),
+
+  // Connection capacity
+  maxConnectionsPerWorker: z.coerce.number().int().min(1).default(100),
 });
 
 export type RuntimeConfig = z.infer<typeof configSchema>;
@@ -73,6 +81,10 @@ export function loadConfig(): RuntimeConfig {
     globalRateLimitMax: process.env['GLOBAL_RATE_LIMIT_MAX'],
     drainTimeoutMs: process.env['DRAIN_TIMEOUT_MS'],
     logLevel: process.env['LOG_LEVEL'],
+    runtimeMaxWorkers: process.env['RUNTIME_MAX_WORKERS'],
+    runtimeShutdownGraceMs: process.env['RUNTIME_SHUTDOWN_GRACE_MS'],
+    runtimeHealthPort: process.env['RUNTIME_HEALTH_PORT'],
+    maxConnectionsPerWorker: process.env['RUNTIME_MAX_CONNECTIONS_PER_WORKER'],
   });
 
   if (!result.success) {

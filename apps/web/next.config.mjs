@@ -44,6 +44,7 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
+  assetPrefix: process.env.CDN_URL || undefined,
   transpilePackages: ["@apifold/ui", "@apifold/types"],
   poweredByHeader: false,
   images: {

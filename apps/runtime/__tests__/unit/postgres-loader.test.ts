@@ -12,6 +12,7 @@ const serverRow = {
   id: 'srv-1',
   slug: 'test',
   user_id: 'user-1',
+  transport: 'sse',
   auth_mode: 'bearer',
   base_url: 'https://api.example.com',
   rate_limit: 100,
@@ -84,7 +85,7 @@ describe('reloadServer', () => {
     const registry = new ServerRegistry({ logger: createTestLogger() });
     registry.upsert({
       id: 'srv-1', slug: 'test', userId: 'user-1',
-      authMode: 'bearer', baseUrl: 'https://api.example.com', rateLimit: 100, isActive: true,
+      transport: 'sse', authMode: 'bearer', baseUrl: 'https://api.example.com', rateLimit: 100, isActive: true,
     });
     const deps = { db, logger: createTestLogger(), registry };
 
@@ -99,7 +100,7 @@ describe('reloadServer', () => {
     const registry = new ServerRegistry({ logger: createTestLogger() });
     registry.upsert({
       id: 'srv-1', slug: 'test', userId: 'user-1',
-      authMode: 'bearer', baseUrl: 'https://api.example.com', rateLimit: 100, isActive: true,
+      transport: 'sse', authMode: 'bearer', baseUrl: 'https://api.example.com', rateLimit: 100, isActive: true,
     });
     const deps = { db, logger: createTestLogger(), registry };
 

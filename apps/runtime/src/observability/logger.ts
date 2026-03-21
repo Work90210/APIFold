@@ -1,22 +1,14 @@
-import pino from 'pino';
+import { createLogger as createSharedLogger } from '@apifold/logger';
+import type { Logger } from '@apifold/logger';
 
 import type { RuntimeConfig } from '../config.js';
 
-export type Logger = pino.Logger;
+export type { Logger };
 
 export function createLogger(config: Pick<RuntimeConfig, 'logLevel' | 'nodeEnv'>): Logger {
-  return pino({
+  return createSharedLogger({
+    name: 'apifold-runtime',
     level: config.logLevel,
-    transport:
-      config.nodeEnv === 'development'
-        ? { target: 'pino-pretty', options: { colorize: true } }
-        : undefined,
-    serializers: {
-      err: pino.stdSerializers.err,
-      req: pino.stdSerializers.req,
-      res: pino.stdSerializers.res,
-    },
-    base: { service: 'apifold-runtime' },
-    timestamp: pino.stdTimeFunctions.isoTime,
+    env: config.nodeEnv,
   });
 }

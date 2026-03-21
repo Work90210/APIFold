@@ -1,0 +1,28 @@
+# Standalone runtime deployment.
+# Use with external managed Postgres and Redis.
+#
+# Usage:
+#   docker compose -f docker-compose.runtime.yml up -d
+
+services:
+  runtime:
+    image: ghcr.io/${GITHUB_OWNER:-apifold}/apifold-runtime:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL
+      - REDIS_URL
+      - VAULT_SECRET
+      - VAULT_SALT
+      - NODE_ENV=production
+      - RUNTIME_PORT=3001
+      - RUNTIME_MAX_WORKERS=${RUNTIME_MAX_WORKERS:-4}
+      - RUNTIME_HEALTH_PORT=9090
+    restart: unless-stopped
+    stop_grace_period: 15s
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:9090/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

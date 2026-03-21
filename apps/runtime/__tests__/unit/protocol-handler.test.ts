@@ -22,6 +22,7 @@ const mockServer: L0ServerMeta = {
   id: 'srv-1',
   slug: 'test-server',
   userId: 'user-1',
+  transport: 'sse',
   authMode: 'bearer',
   baseUrl: 'https://api.example.com',
   rateLimit: 100,

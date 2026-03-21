@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Response } from 'express';
 
 import type { Logger } from '../observability/logger.js';
+import { metrics } from '../observability/metrics.js';
 import type { ConnectionMonitor } from '../resilience/connection-monitor.js';
 
 export interface SSESession {
@@ -77,11 +78,13 @@ export class SessionManager {
 
     this.sessions.set(session.id, session);
     this.monitor.onSessionCreated(slug);
+    metrics.incrementGauge('active_sse_connections');
 
     // Clean up on client disconnect
     res.on('close', () => {
       this.sessions.delete(session.id);
       this.monitor.onSessionClosed(slug);
+      metrics.decrementGauge('active_sse_connections');
       this.logger.debug({ sessionId: session.id, slug }, 'SSE session client disconnected');
     });
 
@@ -96,6 +99,7 @@ export class SessionManager {
     session.res.end();
     this.sessions.delete(sessionId);
     this.monitor.onSessionClosed(session.slug);
+    metrics.decrementGauge('active_sse_connections');
     this.logger.debug({ sessionId, slug: session.slug, reason }, 'SSE session closed');
   }
 

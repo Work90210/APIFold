@@ -18,6 +18,23 @@ const DEFAULT_BUCKETS = Object.freeze([5, 10, 25, 50, 100, 250, 500, 1000, 2500,
 class MetricsRegistry {
   private readonly counters = new Map<string, CounterEntry[]>();
   private readonly histograms = new Map<string, HistogramEntry[]>();
+  private readonly gauges = new Map<string, number>();
+
+  setGauge(name: string, value: number): void {
+    this.gauges.set(name, value);
+  }
+
+  incrementGauge(name: string, amount = 1): void {
+    this.gauges.set(name, (this.gauges.get(name) ?? 0) + amount);
+  }
+
+  decrementGauge(name: string, amount = 1): void {
+    this.gauges.set(name, (this.gauges.get(name) ?? 0) - amount);
+  }
+
+  getGauge(name: string): number {
+    return this.gauges.get(name) ?? 0;
+  }
 
   incrementCounter(name: string, labels: Readonly<Record<string, string>> = {}, amount = 1): void {
     const entries = this.counters.get(name) ?? [];
@@ -61,6 +78,11 @@ class MetricsRegistry {
   toPrometheus(): string {
     const lines: string[] = [];
 
+    for (const [name, value] of this.gauges) {
+      lines.push(`# TYPE ${name} gauge`);
+      lines.push(`${name} ${value}`);
+    }
+
     for (const [name, entries] of this.counters) {
       lines.push(`# TYPE ${name} counter`);
       for (const entry of entries) {
@@ -87,6 +109,7 @@ class MetricsRegistry {
   reset(): void {
     this.counters.clear();
     this.histograms.clear();
+    this.gauges.clear();
   }
 }
 

@@ -1,4 +1,5 @@
-import { Redis } from 'ioredis';
+import cluster from 'node:cluster';
+
 import postgres from 'postgres';
 
 import { loadConfig } from './config.js';
@@ -10,6 +11,7 @@ import { ServerRegistry } from './registry/server-registry.js';
 import { ToolLoader } from './registry/tool-loader.js';
 import { CircuitBreaker } from './resilience/circuit-breaker.js';
 import { ConnectionMonitor } from './resilience/connection-monitor.js';
+import { createRedisClient, closeRedis } from './redis.js';
 import { createApp } from './server.js';
 import { FallbackPoller } from './sync/fallback-poller.js';
 import { loadAllServers, fetchToolsForServer, fetchCredentialHeaders } from './sync/postgres-loader.js';
@@ -18,17 +20,27 @@ import { RedisSubscriber } from './sync/redis-subscriber.js';
 import { decrypt } from './vault/decrypt.js';
 import { clearKeyCache } from './vault/derive-key.js';
 
-async function main(): Promise<void> {
+export async function startWorker(): Promise<void> {
   const config = loadConfig();
   const logger = createLogger(config);
 
   logger.info('Starting MCP Runtime...');
 
   // Database connection (raw postgres.js for direct SQL)
+  const needsSsl =
+    config.databaseUrl.includes('sslmode=require') ||
+    config.databaseUrl.includes('sslmode=verify-full') ||
+    config.databaseUrl.includes('sslmode=verify-ca') ||
+    process.env['DATABASE_SSL'] === 'true';
+  const ssl = needsSsl
+    ? { rejectUnauthorized: process.env['DATABASE_SSL_REJECT_UNAUTHORIZED'] !== 'false' }
+    : false;
+
   const sql = postgres(config.databaseUrl, {
     max: config.databasePoolMax,
     idle_timeout: 20,
     connect_timeout: 10,
+    ssl,
   });
 
   const db: DbClient = {
@@ -41,8 +53,8 @@ async function main(): Promise<void> {
   };
 
   // Redis connections (separate for subscriber — ioredis requirement)
-  const redis = new Redis(config.redisUrl, { lazyConnect: true, maxRetriesPerRequest: 3 });
-  const redisSub = new Redis(config.redisUrl, { lazyConnect: true, maxRetriesPerRequest: 3 });
+  const redis = createRedisClient({ url: config.redisUrl });
+  const redisSub = createRedisClient({ url: config.redisUrl });
 
   // Vault decrypt function
   const decryptFn = (ciphertext: string): string =>
@@ -80,18 +92,20 @@ async function main(): Promise<void> {
     idleTimeoutMs: config.sseIdleTimeoutMs,
   });
 
+  const toolExecutorDeps = {
+    logger,
+    circuitBreaker,
+    authInjector: { credentialCache },
+    timeoutMs: config.upstreamTimeoutMs,
+  };
+
   // Protocol handler
   const protocolHandler = new ProtocolHandler({
     logger,
     registry,
     toolLoader,
     sessionManager,
-    toolExecutorDeps: {
-      logger,
-      circuitBreaker,
-      authInjector: { credentialCache },
-      timeoutMs: config.upstreamTimeoutMs,
-    },
+    toolExecutorDeps,
   });
 
   // Ready state
@@ -106,6 +120,8 @@ async function main(): Promise<void> {
     registry,
     redis,
     isReady: () => isReady,
+    toolLoader,
+    toolExecutorDeps,
   });
 
   // Start HTTP server
@@ -167,12 +183,7 @@ async function main(): Promise<void> {
       await sessionManager.drainAll(config.drainTimeoutMs);
       await redisSubscriber.disconnect();
 
-      try {
-        await redisSub.quit();
-        await redis.quit();
-      } catch {
-        // Redis may already be closed
-      }
+      await closeRedis();
 
       await sql.end();
       clearKeyCache();
@@ -186,10 +197,23 @@ async function main(): Promise<void> {
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
+
+  // In cluster mode, listen for shutdown message from primary
+  if (cluster.isWorker) {
+    process.on('message', (msg) => {
+      if (msg === 'shutdown') {
+        shutdown('cluster-shutdown').catch(() => process.exit(1));
+      }
+    });
+  }
 }
 
-main().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error('Fatal startup error:', err);
-  process.exit(1);
-});
+// Direct execution guard — allows `node dist/index.js` for dev/test
+const isDirectExecution = !cluster.isWorker && process.argv[1]?.endsWith('index.js');
+if (isDirectExecution) {
+  startWorker().catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('Fatal startup error:', err);
+    process.exit(1);
+  });
+}

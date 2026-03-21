@@ -9,12 +9,14 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc --project tsconfig.json",
     "start": "node dist/index.js",
+    "start:cluster": "node dist/cluster.js",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@apifold/logger": "workspace:*",
     "@apifold/transformer": "workspace:*",
     "@apifold/types": "workspace:*",
     "@apifold/vault": "workspace:*",

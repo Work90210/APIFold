@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { Logger } from '../observability/logger.js';
+import { metrics } from '../observability/metrics.js';
 import type { ServerRegistry } from '../registry/server-registry.js';
 import type { ToolLoader, ToolDefinition } from '../registry/tool-loader.js';
 
@@ -132,6 +133,9 @@ export class ProtocolHandler {
     const toolInput = (params['arguments'] ?? {}) as Readonly<Record<string, unknown>>;
     const context = { requestId: randomUUID(), sessionId: session.id };
 
+    metrics.incrementCounter('total_tool_calls');
+    const start = performance.now();
+
     try {
       const result: MCPToolResult = await executeTool(
         this.executorDeps,
@@ -140,8 +144,11 @@ export class ProtocolHandler {
         toolInput,
         context,
       );
+      metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
       return jsonRpcSuccess(req.id, result);
     } catch (err) {
+      metrics.incrementCounter('tool_call_errors');
+      metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
       this.logger.error({ err, tool: toolName, slug: session.slug }, 'Tool execution error');
       return jsonRpcError(req.id, -32603, 'Tool execution failed');
     }
