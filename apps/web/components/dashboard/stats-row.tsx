@@ -3,7 +3,7 @@
 import { FileJson, Server, Zap, Activity } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Skeleton } from "@apifold/ui";
-import { useSpecs, useServers, useUsage } from "@/lib/hooks";
+import { useSpecs, useUsage } from "@/lib/hooks";
 import { Sparkline } from "@/components/dashboard/sparkline";
 
 function StatSkeleton() {

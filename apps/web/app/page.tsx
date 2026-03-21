@@ -6,7 +6,6 @@ import {
   FileJson,
   Brain,
   Terminal,
-  Check,
   Download,
   Code,
   Users,
