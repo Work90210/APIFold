@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@apifold/ui";
 
 export default function DashboardNotFound() {
   return (
@@ -10,12 +11,9 @@ export default function DashboardNotFound() {
         <p className="text-sm text-muted-foreground leading-normal">
           The page you&apos;re looking for doesn&apos;t exist.
         </p>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          Back to Dashboard
-        </Link>
+        <Button asChild className="rounded-lg">
+          <Link href="/dashboard">Back to Dashboard</Link>
+        </Button>
       </div>
     </div>
   );

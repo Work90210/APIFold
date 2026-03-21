@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { cn, Button, Input } from "@apifold/ui";
 
 interface JsonSchema {
@@ -52,7 +52,7 @@ export function SchemaForm({ schema, onSubmit, isLoading }: SchemaFormProps) {
   };
 
   const properties = schema.properties ?? {};
-  const required = new Set(schema.required ?? []);
+  const required = useMemo(() => new Set(schema.required ?? []), [schema.required]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

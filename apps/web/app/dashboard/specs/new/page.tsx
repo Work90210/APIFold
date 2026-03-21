@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@apifold/ui";
+import { BackLink } from "@/components/shared/back-link";
+import { PageHeader } from "@/components/shared/page-header";
 import { useImportSpec, useToast } from "@/lib/hooks";
 import { useUIStore } from "@/lib/stores/ui-store";
 import { StepIndicator } from "@/components/specs/step-indicator";
@@ -99,23 +99,12 @@ export default function ImportSpecPage() {
 
   return (
     <div className="animate-in mx-auto max-w-3xl space-y-8">
-      {/* Back link */}
-      <Link
-        href="/dashboard/specs"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Specs
-      </Link>
+      <BackLink href="/dashboard/specs" label="Back to Specs" />
 
-      <div>
-        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
-          Import API Spec
-        </h1>
-        <p className="mt-1 text-muted-foreground leading-normal max-w-prose">
-          Upload an OpenAPI or Swagger spec to generate MCP tools.
-        </p>
-      </div>
+      <PageHeader
+        title="Import API Spec"
+        description="Upload an OpenAPI or Swagger spec to generate MCP tools."
+      />
 
       <StepIndicator steps={STEPS} currentStep={wizardStep} />
 

@@ -2,7 +2,8 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Plus, Server } from "lucide-react";
+import { Plus, Server } from "lucide-react";
+import { BackLink } from "@/components/shared/back-link";
 import {
   Button,
   Skeleton,
@@ -40,14 +41,7 @@ export default function SpecDetailPage({
 
   return (
     <div className="animate-in space-y-8">
-      {/* Back link */}
-      <Link
-        href="/dashboard/specs"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Specs
-      </Link>
+      <BackLink href="/dashboard/specs" label="Back to Specs" />
 
       <SpecHeader spec={spec} />
 

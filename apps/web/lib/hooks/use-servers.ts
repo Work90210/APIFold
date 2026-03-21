@@ -18,7 +18,6 @@ export function useServers(specId?: string) {
       }
       return servers;
     },
-    staleTime: 30_000,
   });
 }
 
@@ -26,7 +25,6 @@ export function useServer(id: string) {
   return useQuery({
     queryKey: ["servers", id],
     queryFn: () => api.get<McpServer>(`/servers/${id}`),
-    staleTime: 30_000,
     enabled: !!id,
   });
 }

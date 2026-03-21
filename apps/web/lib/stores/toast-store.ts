@@ -31,6 +31,8 @@ function nextId(): string {
   return `toast-${counter}-${Date.now()}`;
 }
 
+const timers = new Map<string, ReturnType<typeof setTimeout>>();
+
 export const useToastStore = create<ToastStore>((set) => ({
   toasts: [],
   toast: (input) => {
@@ -46,14 +48,22 @@ export const useToastStore = create<ToastStore>((set) => ({
       toasts: [...state.toasts.slice(-(MAX_TOASTS - 1)), item],
     }));
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      timers.delete(id);
       set((state) => ({
         toasts: state.toasts.filter((t) => t.id !== id),
       }));
     }, AUTO_DISMISS_MS);
+    timers.set(id, timer);
   },
-  dismiss: (id) =>
+  dismiss: (id) => {
+    const timer = timers.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timers.delete(id);
+    }
     set((state) => ({
       toasts: state.toasts.filter((t) => t.id !== id),
-    })),
+    }));
+  },
 }));

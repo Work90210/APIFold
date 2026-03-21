@@ -1,7 +1,5 @@
-import Link from "next/link";
-import { Zap, Github } from "lucide-react";
-
-const GITHUB_REPO = "https://github.com/Work90210/APIFold";
+import { LandingNav } from "@/components/marketing/landing-nav";
+import { LandingFooter } from "@/components/marketing/landing-footer";
 
 const CHANGELOG = [
   {
@@ -87,27 +85,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function ChangelogPage() {
   return (
     <div className="min-h-screen bg-[#060e20] text-[#dee5ff] overflow-x-hidden">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#40485d]/50 bg-[#060e20]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 font-heading text-lg font-bold tracking-tight text-white">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#645efb] to-[#a7a5ff]">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            APIFold
-          </Link>
-          <div className="hidden items-center gap-8 md:flex">
-            <Link href="/#features" className="text-sm text-[#a3aac4] transition-colors duration-200 hover:text-white">Features</Link>
-            <Link href="/pricing" className="text-sm text-[#a3aac4] transition-colors duration-200 hover:text-white">Pricing</Link>
-            <Link href="/docs" className="text-sm text-[#a3aac4] transition-colors duration-200 hover:text-white">Docs</Link>
-            <Link href="/changelog" className="border-b-2 border-indigo-500 pb-1 text-sm font-medium text-white transition-colors duration-200">Changelog</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="hidden text-sm text-[#a3aac4] transition-colors duration-200 hover:text-white sm:inline">Sign In</Link>
-            <Link href="/dashboard" className="rounded-lg bg-gradient-to-r from-[#645efb] to-[#a7a5ff] px-5 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-[#a7a5ff]/20">Get Started Free</Link>
-          </div>
-        </div>
-      </nav>
+      <LandingNav activePage="changelog" />
 
       <main className="pt-20">
         {/* Hero */}
@@ -160,19 +138,7 @@ export default function ChangelogPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/[0.06] px-6 py-12">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <p className="text-sm text-[#6d758c]">&copy; 2026 APIFold. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-sm text-[#6d758c] hover:text-white transition-colors">Home</Link>
-            <Link href="/docs" className="text-sm text-[#6d758c] hover:text-white transition-colors">Docs</Link>
-            <a href={GITHUB_REPO} className="text-[#6d758c] hover:text-white transition-colors" aria-label="GitHub">
-              <Github className="h-4 w-4" />
-            </a>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter variant="compact" />
     </div>
   );
 }

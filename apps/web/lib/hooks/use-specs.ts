@@ -8,8 +8,6 @@ export function useSpecs() {
   return useQuery({
     queryKey: ["specs"],
     queryFn: () => api.get<Spec[]>("/specs"),
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
   });
 }
 
@@ -17,7 +15,6 @@ export function useSpec(id: string) {
   return useQuery({
     queryKey: ["specs", id],
     queryFn: () => api.get<Spec>(`/specs/${id}`),
-    staleTime: 30_000,
     enabled: !!id,
   });
 }

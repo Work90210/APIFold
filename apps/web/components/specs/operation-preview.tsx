@@ -1,4 +1,5 @@
 import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@apifold/ui";
+import { METHOD_BADGE_VARIANTS } from "@/lib/constants";
 
 interface Operation {
   readonly method: string;
@@ -11,14 +12,6 @@ interface OperationPreviewProps {
   readonly operations: readonly Operation[];
   readonly specName: string;
 }
-
-const methodColors: Record<string, "default" | "success" | "warning" | "error" | "info"> = {
-  GET: "info",
-  POST: "success",
-  PUT: "warning",
-  PATCH: "warning",
-  DELETE: "error",
-};
 
 export function OperationPreview({ operations, specName }: OperationPreviewProps) {
   return (
@@ -51,7 +44,7 @@ export function OperationPreview({ operations, specName }: OperationPreviewProps
               >
                 <TableCell>
                   <Badge
-                    variant={methodColors[op.method] ?? "default"}
+                    variant={METHOD_BADGE_VARIANTS[op.method as keyof typeof METHOD_BADGE_VARIANTS] ?? "default"}
                     className="font-mono text-[10px] font-bold"
                   >
                     {op.method}

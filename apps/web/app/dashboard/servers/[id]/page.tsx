@@ -12,11 +12,11 @@ import {
   ShieldOff,
   Gauge,
   Server,
-  ArrowLeft,
 } from "lucide-react";
 import { Skeleton } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { useServer } from "@/lib/hooks";
+import { BackLink } from "@/components/shared/back-link";
 import { ConfigForm } from "@/components/servers/config-form";
 import { SnippetCopier } from "@/components/servers/snippet-copier";
 
@@ -51,14 +51,7 @@ export default function ServerDetailPage({
 
   return (
     <div className="space-y-8 animate-in">
-      {/* Back link */}
-      <Link
-        href="/dashboard/servers"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Servers
-      </Link>
+      <BackLink href="/dashboard/servers" label="Back to Servers" />
 
       {/* Header */}
       <div className="rounded-xl bg-card shadow-sm p-6">

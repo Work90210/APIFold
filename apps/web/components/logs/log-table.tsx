@@ -8,19 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@apifold/ui";
+import { METHOD_BADGE_VARIANTS } from "@/lib/constants";
 
 interface LogTableProps {
   readonly logs: readonly RequestLog[];
   readonly onSelectLog: (log: RequestLog) => void;
 }
-
-const methodColors: Record<string, "info" | "success" | "warning" | "error"> = {
-  GET: "info",
-  POST: "success",
-  PUT: "warning",
-  PATCH: "warning",
-  DELETE: "error",
-};
 
 function statusVariant(code: number): "success" | "warning" | "error" {
   if (code < 300) return "success";
@@ -49,7 +42,7 @@ export function LogTable({ logs, onSelectLog }: LogTableProps) {
               onClick={() => onSelectLog(log)}
             >
               <TableCell data-label="Method">
-                <Badge variant={methodColors[log.method] ?? "info"}>
+                <Badge variant={METHOD_BADGE_VARIANTS[log.method as keyof typeof METHOD_BADGE_VARIANTS] ?? "info"}>
                   {log.method}
                 </Badge>
               </TableCell>

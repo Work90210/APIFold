@@ -1,53 +1,53 @@
 import type { ApiResponse } from "@apifold/types";
 
+const ERROR_TEMPLATES: Record<string, { readonly why: string; readonly fix: string }> = {
+  NOT_FOUND: {
+    why: "The requested resource could not be found.",
+    fix: "Check the URL or ID you used and try again.",
+  },
+  UNAUTHORIZED: {
+    why: "Your session has expired or you are not signed in.",
+    fix: "Sign in again to continue.",
+  },
+  FORBIDDEN: {
+    why: "You don't have permission to perform this action.",
+    fix: "Contact your account administrator for access.",
+  },
+  VALIDATION_ERROR: {
+    why: "The data you submitted is invalid.",
+    fix: "Review the highlighted fields and correct any errors.",
+  },
+  RATE_LIMITED: {
+    why: "Too many requests were sent in a short time.",
+    fix: "Wait a moment and try again.",
+  },
+  CONFLICT: {
+    why: "This action conflicts with the current state of the resource.",
+    fix: "Refresh the page to see the latest data, then try again.",
+  },
+  SERVER_ERROR: {
+    why: "Something went wrong on our end.",
+    fix: "Try again in a few moments. If the problem persists, contact support.",
+  },
+};
+
+const STATUS_TEMPLATES: Record<number, { readonly why: string; readonly fix: string }> = {
+  401: ERROR_TEMPLATES.UNAUTHORIZED!,
+  403: ERROR_TEMPLATES.FORBIDDEN!,
+  404: ERROR_TEMPLATES.NOT_FOUND!,
+  409: ERROR_TEMPLATES.CONFLICT!,
+  422: ERROR_TEMPLATES.VALIDATION_ERROR!,
+  429: ERROR_TEMPLATES.RATE_LIMITED!,
+};
+
 /**
  * Builds a user-friendly error message following the formula:
  * What happened + Why it happened + How to fix it
  */
 function buildErrorMessage(code: string, serverMessage: string, status: number): string {
-  const errorTemplates: Record<string, { why: string; fix: string }> = {
-    NOT_FOUND: {
-      why: "The requested resource could not be found.",
-      fix: "Check the URL or ID you used and try again.",
-    },
-    UNAUTHORIZED: {
-      why: "Your session has expired or you are not signed in.",
-      fix: "Sign in again to continue.",
-    },
-    FORBIDDEN: {
-      why: "You don't have permission to perform this action.",
-      fix: "Contact your account administrator for access.",
-    },
-    VALIDATION_ERROR: {
-      why: "The data you submitted is invalid.",
-      fix: "Review the highlighted fields and correct any errors.",
-    },
-    RATE_LIMITED: {
-      why: "Too many requests were sent in a short time.",
-      fix: "Wait a moment and try again.",
-    },
-    CONFLICT: {
-      why: "This action conflicts with the current state of the resource.",
-      fix: "Refresh the page to see the latest data, then try again.",
-    },
-    SERVER_ERROR: {
-      why: "Something went wrong on our end.",
-      fix: "Try again in a few moments. If the problem persists, contact support.",
-    },
-  };
-
-  const statusTemplates: Record<number, { why: string; fix: string }> = {
-    401: errorTemplates.UNAUTHORIZED!,
-    403: errorTemplates.FORBIDDEN!,
-    404: errorTemplates.NOT_FOUND!,
-    409: errorTemplates.CONFLICT!,
-    422: errorTemplates.VALIDATION_ERROR!,
-    429: errorTemplates.RATE_LIMITED!,
-  };
-
-  const template = errorTemplates[code] ?? statusTemplates[status] ?? (
+  const template = ERROR_TEMPLATES[code] ?? STATUS_TEMPLATES[status] ?? (
     status >= 500
-      ? errorTemplates.SERVER_ERROR!
+      ? ERROR_TEMPLATES.SERVER_ERROR!
       : { why: serverMessage, fix: "Try again or contact support if the issue persists." }
   );
 

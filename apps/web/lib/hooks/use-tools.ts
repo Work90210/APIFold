@@ -8,7 +8,6 @@ export function useTools(serverId: string) {
   return useQuery({
     queryKey: ["tools", serverId],
     queryFn: () => api.get<McpTool[]>(`/servers/${serverId}/tools`),
-    staleTime: 30_000,
     enabled: !!serverId,
   });
 }
