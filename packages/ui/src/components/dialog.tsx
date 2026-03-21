@@ -1,12 +1,6 @@
-<<<<<<< Updated upstream
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-=======
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-import * as React from "react";
->>>>>>> Stashed changes
 
 import { cn } from "../lib/utils";
 

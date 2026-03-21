@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
+import type { Redis } from 'ioredis';
 
 import type { Logger } from '../observability/logger.js';
 import type { ServerRegistry } from '../registry/server-registry.js';
 import type { ToolLoader, ToolDefinition } from '../registry/tool-loader.js';
+import { checkAndIncrementUsage, getPlanLimitsForUser } from '../billing/usage-gate.js';
 
 import type { SessionManager, SSESession } from './session-manager.js';
 import type { ToolExecutorDeps, MCPToolResult } from './tool-executor.js';
@@ -30,6 +32,7 @@ export interface ProtocolHandlerDeps {
   readonly toolLoader: ToolLoader;
   readonly sessionManager: SessionManager;
   readonly toolExecutorDeps: ToolExecutorDeps;
+  readonly redis: Redis;
 }
 
 export class ProtocolHandler {
@@ -38,6 +41,7 @@ export class ProtocolHandler {
   private readonly toolLoader: ToolLoader;
   private readonly sessionManager: SessionManager;
   private readonly executorDeps: ToolExecutorDeps;
+  private readonly redis: Redis;
 
   constructor(deps: ProtocolHandlerDeps) {
     this.logger = deps.logger;
@@ -45,6 +49,7 @@ export class ProtocolHandler {
     this.toolLoader = deps.toolLoader;
     this.sessionManager = deps.sessionManager;
     this.executorDeps = deps.toolExecutorDeps;
+    this.redis = deps.redis;
   }
 
   async handleMessage(session: SSESession, message: JsonRpcRequest): Promise<void> {
@@ -108,6 +113,22 @@ export class ProtocolHandler {
     const server = this.registry.getBySlug(session.slug);
     if (!server) {
       return jsonRpcError(req.id, -32001, 'Server not found');
+    }
+
+    // Usage gate: check plan limits before executing
+    const planLimits = await getPlanLimitsForUser(this.redis, server.userId);
+    const usageCheck = await checkAndIncrementUsage(
+      { redis: this.redis, logger: this.logger },
+      server.userId,
+      planLimits,
+    );
+
+    if (!usageCheck.allowed) {
+      return jsonRpcError(
+        req.id,
+        -32003,
+        `Usage limit reached (${usageCheck.currentUsage}/${usageCheck.limit}). Upgrade your plan.`,
+      );
     }
 
     const params = req.params ?? {};

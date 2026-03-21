@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Terminal, ChevronDown } from "lucide-react";
 import { cn, Skeleton, EmptyState } from "@apifold/ui";
@@ -22,9 +22,9 @@ interface HistoryEntry {
 export default function ConsolePage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const { data: tools, isLoading: toolsLoading } = useTools(id);
   const testTool = useTestTool();
   const [selectedToolName, setSelectedToolName] = useState<string | null>(null);

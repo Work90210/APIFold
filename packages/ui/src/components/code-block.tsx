@@ -3,10 +3,6 @@
 import * as React from "react";
 
 import { cn } from "../lib/utils";
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 import { CopyButton } from "./copy-button";
 
 interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -39,11 +35,7 @@ function CodeBlock({
         {!title && (
           <CopyButton
             value={code}
-<<<<<<< Updated upstream
             className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 [div:hover>&]:opacity-100 focus-visible:opacity-100"
-=======
-            className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 [div:hover>&]:opacity-100"
->>>>>>> Stashed changes
           />
         )}
         <pre className="overflow-x-auto p-4">

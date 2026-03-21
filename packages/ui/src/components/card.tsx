@@ -32,12 +32,7 @@ CardHeader.displayName = "CardHeader";
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
-<<<<<<< Updated upstream
 >(({ className, ...props }, ref) => (
-=======
->(({ className, children, ...props }, ref) => (
-  // eslint-disable-next-line jsx-a11y/heading-has-content
->>>>>>> Stashed changes
   <h3
     ref={ref}
     className={cn(
@@ -45,13 +40,7 @@ const CardTitle = React.forwardRef<
       className,
     )}
     {...props}
-<<<<<<< Updated upstream
   />
-=======
-  >
-    {children}
-  </h3>
->>>>>>> Stashed changes
 ));
 CardTitle.displayName = "CardTitle";
 

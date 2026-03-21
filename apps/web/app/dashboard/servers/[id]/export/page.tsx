@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
 import { Button, CodeBlock, Skeleton } from "@apifold/ui";
@@ -12,9 +12,9 @@ type ExportFormat = "json" | "yaml";
 export default function ExportPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const [format, setFormat] = useState<ExportFormat>("json");
   const { data, isLoading, refetch } = useExport(id, format);
 

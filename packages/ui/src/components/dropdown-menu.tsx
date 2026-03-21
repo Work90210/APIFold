@@ -1,12 +1,6 @@
-<<<<<<< Updated upstream
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
-=======
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronRight, Circle } from "lucide-react";
-import * as React from "react";
->>>>>>> Stashed changes
 
 import { cn } from "../lib/utils";
 

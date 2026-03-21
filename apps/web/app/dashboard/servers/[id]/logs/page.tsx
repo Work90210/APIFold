@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, ScrollText } from "lucide-react";
 import type { RequestLog } from "@apifold/types";
@@ -14,9 +14,9 @@ import { LogRetentionNotice } from "@/components/logs/log-retention-notice";
 export default function LogsPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const [filters, setFilters] = useState({
     method: "",
     statusCode: "",

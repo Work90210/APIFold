@@ -92,6 +92,7 @@ async function main(): Promise<void> {
       authInjector: { credentialCache },
       timeoutMs: config.upstreamTimeoutMs,
     },
+    redis,
   });
 
   // Ready state

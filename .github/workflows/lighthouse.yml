@@ -1,0 +1,63 @@
+name: Lighthouse CI
+on:
+  pull_request:
+    paths:
+      - "apps/web/app/(marketing)/**"
+      - "apps/web/app/globals.css"
+      - "packages/ui/**"
+  push:
+    branches: [master]
+    paths:
+      - "apps/web/app/(marketing)/**"
+      - "apps/web/app/globals.css"
+      - "packages/ui/**"
+permissions:
+  contents: read
+  pull-requests: write
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run build --filter=@apifold/web
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+          CLERK_SECRET_KEY: sk_test_placeholder
+          DATABASE_URL: postgresql://placeholder@localhost:5432/placeholder
+          REDIS_URL: redis://localhost:6379
+          VAULT_SECRET: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          VAULT_SALT: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      - name: Lighthouse — Landing Page
+        id: lighthouse-landing
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: /
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: .github/lighthouse/config.json
+      - name: Lighthouse — Pricing Page
+        id: lighthouse-pricing
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: /pricing
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: .github/lighthouse/config.json
+      - name: Check Scores
+        run: |
+          echo "Landing page performance: ${{ fromJSON(steps.lighthouse-landing.outputs.manifest)[0].summary.performance }}"
+          echo "Pricing page performance: ${{ fromJSON(steps.lighthouse-pricing.outputs.manifest)[0].summary.performance }}"
+          LANDING_PERF=$(echo "${{ fromJSON(steps.lighthouse-landing.outputs.manifest)[0].summary.performance }}" | awk '{printf "%d", $1 * 100}')
+          if [ "$LANDING_PERF" -lt 90 ]; then
+            echo "::error::Landing page performance score ($LANDING_PERF) is below 90"
+            exit 1
+          fi

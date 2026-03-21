@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import Link from "next/link";
 import {
   Wrench,
@@ -22,9 +23,9 @@ import { SnippetCopier } from "@/components/servers/snippet-copier";
 export default function ServerDetailPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const { data: server, isLoading } = useServer(id);
 
   if (isLoading) {

@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-=======
-import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
->>>>>>> Stashed changes
 
 import { cn } from "../lib/utils";
 

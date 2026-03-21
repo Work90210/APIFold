@@ -241,6 +241,22 @@
     border: 1px solid hsl(var(--border) / 0.5);
   }
 
+  /* Marketing glass panel */
+  .glass-panel {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Marketing MCP glow */
+  .mcp-glow {
+    box-shadow: 0 0 40px -10px rgba(167, 165, 255, 0.3);
+  }
+
+  /* Marketing kinetic background */
+  .kinetic-bg {
+    background: radial-gradient(circle at 50% 50%, rgba(83, 221, 252, 0.05) 0%, transparent 50%);
+  }
+
   /* Pulse animation for live indicators */
   .pulse-live {
     animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;

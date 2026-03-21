@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Wrench } from "lucide-react";
 import { cn, Button, Badge, EmptyState, Skeleton } from "@apifold/ui";
@@ -8,9 +9,9 @@ import { useTools, useUpdateTool } from "@/lib/hooks";
 export default function ToolsPage({
   params,
 }: {
-  readonly params: { readonly id: string };
+  readonly params: Promise<{ readonly id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const { data: tools, isLoading } = useTools(id);
   const updateTool = useUpdateTool();
 

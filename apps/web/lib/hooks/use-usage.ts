@@ -6,6 +6,7 @@ import { api } from "../api-client";
 interface UsageResponse {
   readonly serverCount: number;
   readonly activeServers: number;
+  readonly requestsThisMonth: number;
 }
 
 export function useUsage() {

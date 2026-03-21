@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { createErrorResponse } from '@apifold/types';
 import { ErrorCodes, HttpStatusByErrorCode } from '@apifold/types';
 import { checkRateLimit } from './rate-limit';
+import { PLANS, type PlanId, type Plan } from './billing/plans';
 
 export async function getUserId(): Promise<string> {
   const { userId } = await auth();
@@ -54,6 +55,18 @@ export async function withRateLimit(userId: string): Promise<NextResponse | null
     return res;
   }
   return null;
+}
+
+export async function getUserPlan(userId: string): Promise<Plan> {
+  try {
+    const clerk = await clerkClient();
+    const user = await clerk.users.getUser(userId);
+    const planId = (user.publicMetadata?.plan as string) || 'free';
+    return PLANS[planId as PlanId] ?? PLANS.free;
+  } catch (err) {
+    console.error('[getUserPlan] Failed to fetch user plan from Clerk:', err);
+    return PLANS.free;
+  }
 }
 
 export function withErrorHandler(

@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
-=======
-import type { LucideIcon } from "lucide-react";
-import * as React from "react";
->>>>>>> Stashed changes
 
 import { cn } from "../lib/utils";
 
