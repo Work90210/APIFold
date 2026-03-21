@@ -30,12 +30,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run build --filter=@apifold/web
         env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
-          CLERK_SECRET_KEY: sk_test_placeholder
-          DATABASE_URL: postgresql://placeholder@localhost:5432/placeholder
-          REDIS_URL: redis://localhost:6379
-          VAULT_SECRET: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-          VAULT_SALT: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_CI }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_CI }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_CI }}
+          REDIS_URL: ${{ secrets.REDIS_URL_CI }}
+          VAULT_SECRET: ${{ secrets.VAULT_SECRET_CI }}
+          VAULT_SALT: ${{ secrets.VAULT_SALT_CI }}
       - name: Lighthouse — Landing Page
         id: lighthouse-landing
         uses: treosh/lighthouse-ci-action@v12
