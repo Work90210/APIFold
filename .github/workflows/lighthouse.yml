@@ -28,14 +28,17 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter=@apifold/web
+      - name: Build for Lighthouse
+        run: pnpm turbo run build --filter=@apifold/web
         env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_CI }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_CI }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL_CI }}
-          REDIS_URL: ${{ secrets.REDIS_URL_CI }}
-          VAULT_SECRET: ${{ secrets.VAULT_SECRET_CI }}
-          VAULT_SALT: ${{ secrets.VAULT_SALT_CI }}
+          # CI-only dummy values for build (not real keys)
+          # gitleaks:allow
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktbGlnaHRob3VzZS0wMC5jbGVyay5hY2NvdW50cy5kZXYk
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_CI || 'ci_placeholder_not_a_real_key' }}
+          DATABASE_URL: postgresql://ci@localhost:5432/ci
+          REDIS_URL: redis://localhost:6379
+          VAULT_SECRET: ci_placeholder_vault_secret_minimum_32_characters_long
+          VAULT_SALT: ci_placeholder_vault_salt_00000000000000000000000000000000
       - name: Lighthouse — Landing Page
         id: lighthouse-landing
         uses: treosh/lighthouse-ci-action@v12
