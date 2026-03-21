@@ -54,3 +54,15 @@ The server config page provides ready-to-copy configuration snippets for:
 - **Cursor** — `.cursor/mcp.json` format with direct URL
 
 Each snippet is pre-filled with your server's slug and domain.
+
+## Code Export
+
+For advanced use cases, you can export your configured MCP server as a standalone TypeScript file.
+
+- **What it generates:** A self-contained Express server file that includes all your tool definitions, authentication logic, and upstream proxy configuration.
+- **How to use:** Click the **"Export Code"** button on your server's configuration page.
+- **What you get:** A single `.ts` file that you can compile with `tsc` and run anywhere with Node.js.
+
+**Requirements for running exported code:**
+- Node.js 20+
+- `npm install express cors express-rate-limit`

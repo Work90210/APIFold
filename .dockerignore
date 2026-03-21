@@ -3,6 +3,8 @@ node_modules/
 .github/
 .claude/
 .cursor/
+.vscode/
+.idea/
 *.md
 !README.md
 coverage/
@@ -13,3 +15,9 @@ docs/
 vectors.db*
 logs_llm/
 .turbo/
+.next/
+dist/
+*.log
+tmp/
+playwright-report/
+test-results/

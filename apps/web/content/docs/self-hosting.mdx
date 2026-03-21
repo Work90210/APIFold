@@ -1,0 +1,154 @@
+---
+title: Self-Hosting ApiFold
+description: Deploy ApiFold on your own infrastructure with Docker Compose.
+---
+
+ApiFold is designed to be self-hosted on any server that supports Docker and Docker Compose. This guide will walk you through setting up the platform on your own infrastructure.
+
+## Prerequisites
+
+Before you begin, ensure your server meets the following requirements:
+
+- **Docker:** v24.0 or newer
+- **Docker Compose:** v2.0 or newer
+- **Resources:** Minimum 2 vCPU, 4GB RAM recommended
+- **Domain Name:** Optional, but recommended for production (required for SSL)
+
+## Quick Start
+
+Get ApiFold running in minutes with these commands:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/apifold/apifold.git
+cd apifold
+
+# 2. Configure environment variables
+cp .env.example .env
+# Edit .env with your secrets (see Configuration Reference below)
+nano .env
+
+# 3. Start the stack
+docker compose -f infra/docker-compose.yml up -d
+```
+
+Your instance will be available at `http://localhost:3000` (or your domain).
+
+## Configuration Reference
+
+ApiFold is configured via environment variables.
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | - | Yes |
+| `DATABASE_POOL_MAX` | Max database connections | `20` | No |
+| `POSTGRES_DB` | Database name | `apifold` | No |
+| `POSTGRES_USER` | Database user | `mt` | No |
+| `POSTGRES_PASSWORD` | Database password | - | Yes |
+| `REDIS_PASSWORD` | Redis password | - | Yes |
+| `REDIS_URL` | Redis connection string | - | Yes |
+| `VAULT_SECRET` | Encryption key (32+ chars) | - | Yes |
+| `VAULT_SALT` | Encryption salt (32+ chars) | - | Yes |
+| `MCP_RUNTIME_SECRET` | Internal service auth secret | - | Yes |
+| `NODE_ENV` | Environment mode | `development` | No |
+| `PORT` | Web app port | `3000` | No |
+| `RUNTIME_PORT` | Runtime server port | `3001` | No |
+| `MAX_SSE_SESSIONS` | Max concurrent SSE connections | `10000` | No |
+| `SSE_HEARTBEAT_INTERVAL_MS` | Keep-alive ping interval | `30000` | No |
+| `SSE_IDLE_TIMEOUT_MS` | Disconnect idle clients after | `300000` | No |
+| `CIRCUIT_BREAKER_THRESHOLD` | Failures before opening circuit | `5` | No |
+| `CIRCUIT_BREAKER_COOLDOWN_MS` | Time before retrying upstream | `30000` | No |
+| `UPSTREAM_TIMEOUT_MS` | Max time for upstream response | `30000` | No |
+| `CREDENTIAL_TTL_MS` | Cache duration for credentials | `300000` | No |
+| `FALLBACK_POLL_INTERVAL_MS` | Database polling frequency | `30000` | No |
+| `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | `*` | Yes (Prod) |
+| `GLOBAL_RATE_LIMIT_WINDOW_MS` | Rate limit window | `900000` | No |
+| `GLOBAL_RATE_LIMIT_MAX` | Max requests per window | `1000` | No |
+| `DRAIN_TIMEOUT_MS` | Graceful shutdown timeout | `30000` | No |
+| `LOG_LEVEL` | Logging verbosity | `info` | No |
+
+## TLS Setup
+
+For production deployments, secure your instance with SSL/TLS using Certbot.
+
+1. Install Certbot on your host machine
+2. Generate certificates for your domain
+3. Mount the certificates into the nginx container:
+
+```yaml
+# infra/docker-compose.yml
+services:
+  nginx:
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+```
+
+4. Update `infra/nginx/nginx.conf` with your domain name in the `ssl_certificate` and `ssl_certificate_key` paths.
+
+## Auto-Deploy
+
+Keep your instance up-to-date automatically using Watchtower. Add this service to your `docker-compose.yml`:
+
+```yaml
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300
+```
+
+> **Security note:** Mounting `/var/run/docker.sock` grants the Watchtower container root-equivalent access to the host. Only use this in trusted environments. Consider restricting Watchtower to specific containers using `--scope` labels, or use a CI/CD pipeline for production deployments instead.
+
+## Monitoring
+
+ApiFold exposes several endpoints for monitoring health and performance:
+
+- **Health Check:** `GET /api/health` (web) / `GET /health` (runtime) — Returns 200 OK
+- **Liveness Probe:** `GET /health/live`
+- **Readiness Probe:** `GET /health/ready`
+
+Nginx access logs are output in JSON format for easy ingestion by logging systems like ELK, Datadog, or CloudWatch.
+
+## Backup & Restore
+
+Regular backups are crucial. Use standard PostgreSQL tools to back up your data:
+
+```bash
+# Backup
+docker exec -t apifold-postgres pg_dump -U mt apifold > backup.sql
+
+# Restore
+cat backup.sql | docker exec -i apifold-postgres psql -U mt apifold
+```
+
+Ensure you also back up your `.env` file containing encryption keys. **Without the `VAULT_SECRET` and `VAULT_SALT`, your encrypted credentials cannot be recovered.**
+
+## Upgrading
+
+To upgrade to the latest version of ApiFold:
+
+1. Pull the latest images:
+   ```bash
+   docker compose -f infra/docker-compose.yml pull
+   ```
+
+2. Restart the containers:
+   ```bash
+   docker compose -f infra/docker-compose.yml up -d
+   ```
+
+Database migrations run automatically on startup.
+
+## Troubleshooting
+
+Common issues and solutions:
+
+| Issue | Possible Cause | Solution |
+|-------|----------------|----------|
+| **Container won't start** | Database not ready | Check `docker logs` for connection errors. Ensure Postgres is healthy. |
+| **Redis connection refused** | Wrong host/password | Verify `REDIS_URL` matches the service name in Docker Compose (e.g., `redis://:password@redis:6379`). |
+| **SSE disconnects** | Nginx timeout | Increase `proxy_read_timeout` in nginx config to match `SSE_IDLE_TIMEOUT_MS`. |
+| **502 Bad Gateway** | Runtime/Web down | Check container status with `docker ps`. View logs for crashes. |
+| **Encryption errors** | Missing vault keys | Ensure `VAULT_SECRET` and `VAULT_SALT` are set and at least 32 characters. |

@@ -6,6 +6,8 @@
     "connect-claude",
     "connect-cursor",
     "dashboard-guide",
-    "api-reference"
+    "api-reference",
+    "self-hosting",
+    "architecture"
   ]
 }

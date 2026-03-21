@@ -1,0 +1,80 @@
+---
+title: Architecture
+description: How ApiFold works under the hood — system design, data flow, and component overview.
+---
+
+import { ArchitectureDiagram } from "@/components/docs/architecture-diagram";
+
+ApiFold is built on a modular architecture designed for reliability, security, and scalability. This document provides a deep dive into the system's internal workings.
+
+## System Overview
+
+At a high level, ApiFold acts as a bridge between AI clients (like Claude or Cursor) and traditional REST APIs. It transforms OpenAPI specifications into Model Context Protocol (MCP) servers that can be consumed by AI agents.
+
+## Component Diagram
+
+<ArchitectureDiagram />
+
+## Web Application (Next.js)
+
+The **Web Application** (`apps/web`) is the control plane for the platform.
+
+- **Framework:** Next.js 14 (App Router)
+- **Authentication:** Clerk
+- **Database Access:** Drizzle ORM
+- **Key Responsibilities:**
+  - User management and authentication
+  - Importing and parsing OpenAPI specifications
+  - Configuring MCP servers (auth, rate limits, tool visibility)
+  - Dashboard UI for monitoring and management
+
+## MCP Runtime (Express)
+
+The **MCP Runtime** (`apps/runtime`) is the data plane that handles active connections.
+
+- **Framework:** Express.js
+- **Protocol:** Server-Sent Events (SSE) and JSON-RPC 2.0
+- **Key Responsibilities:**
+  - Managing SSE sessions for AI clients
+  - Executing tools requested by the AI
+  - Proxying requests to upstream APIs with auth injection
+  - Enforcing per-server rate limits and circuit breakers
+
+## Data Flow
+
+Here is the lifecycle of an MCP interaction:
+
+1. **Import:** A user imports an OpenAPI spec via the Web App.
+2. **Transform:** The `transformer` package converts OpenAPI paths into MCP tool definitions.
+3. **Store:** Tool definitions and server config are stored in PostgreSQL.
+4. **Connect:** An AI client connects to the Runtime via SSE (`/mcp/:slug/sse`).
+5. **Request:** The AI sends a JSON-RPC request to execute a tool (`/mcp/:slug/message`).
+6. **Proxy:** The Runtime validates the request, retrieves credentials from the Vault, and proxies the call to the upstream API.
+7. **Response:** The upstream API response is returned to the AI via SSE.
+
+## Tiered Loading
+
+To ensure low latency and high availability, the Runtime uses a tiered strategy for loading server configurations:
+
+1. **L1 — In-Memory Registry:** Configuration is cached in memory for immediate access.
+2. **L2 — Redis Pub/Sub:** Real-time updates from the Web App are broadcast via Redis to all Runtime instances.
+3. **L3 — PostgreSQL:** The authoritative source of truth for all configuration.
+4. **Fallback Poller:** A background poller checks PostgreSQL periodically in case Redis messages are missed.
+
+## Security
+
+Security is paramount when handling API credentials.
+
+- **Encryption at Rest:** All sensitive credentials (API keys, tokens) are encrypted using **AES-256-GCM** with keys derived via PBKDF2 before being stored in the database.
+- **Service Auth:** Internal communication between the Web App and Runtime is secured via a shared `MCP_RUNTIME_SECRET`.
+- **Isolation:** Each MCP server runs in its own logical scope within the Runtime — sessions are bound to a specific slug and cannot access other servers' data.
+- **Rate Limiting:** Dual-layer rate limiting at both nginx (per-IP) and application level (per-server, Redis-backed).
+- **CORS:** Configurable allowed origins, with wildcard warning in production.
+
+## Caching Strategy
+
+Performance is optimized through strategic caching:
+
+- **Credentials:** Decrypted credentials are cached in memory with a short TTL (`CREDENTIAL_TTL_MS`, default 5 minutes) to reduce database load and vault decryption overhead.
+- **Server Registry:** Active server configurations are held in an in-memory registry, updated in real-time via Redis pub/sub.
+- **Tools:** Tool definitions are loaded on-demand per server and cached until invalidated by a config change.
