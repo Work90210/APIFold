@@ -10,7 +10,7 @@ interface UsageMeterProps {
 }
 
 export function UsageMeter({ label, icon: Icon, current, max }: UsageMeterProps) {
-  const isUnlimited = !Number.isFinite(max);
+  const isUnlimited = !Number.isFinite(max) || max <= 0;
   const percent = isUnlimited ? 0 : Math.min((current / max) * 100, 100);
   const isWarning = percent >= 70 && percent < 90;
   const isCritical = percent >= 90;

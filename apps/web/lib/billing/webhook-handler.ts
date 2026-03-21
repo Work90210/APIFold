@@ -143,7 +143,11 @@ async function findUserByStripeCustomerId(
   try {
     const redis = getRedis();
     const userId = await redis.get(customerMapKey(customerId));
-    if (userId) return { id: userId };
+    if (userId) {
+      // Refresh TTL on successful lookup to prevent expiry for active customers
+      await redis.expire(customerMapKey(customerId), CUSTOMER_MAP_TTL);
+      return { id: userId };
+    }
   } catch (err) {
     console.error("[webhook] Redis customer lookup failed:", err);
   }
