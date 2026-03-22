@@ -44,9 +44,10 @@ export function POST(request: NextRequest): Promise<NextResponse> {
       throw new ApiError(ErrorCodes.VALIDATION_ERROR, 'Either sourceUrl or rawSpec is required', 400);
     }
 
-    // Parse and transform spec to MCP tools
-    const { parseSpec, transformSpec } = await import('@apifold/transformer');
-    const parseResult = parseSpec({ spec: rawSpec });
+    // Auto-convert Swagger 2.0 → OpenAPI 3.0 if needed, then parse + transform
+    const { autoConvert, parseSpec, transformSpec } = await import('@apifold/transformer');
+    const convertResult = await autoConvert(rawSpec);
+    const parseResult = parseSpec({ spec: convertResult.spec as Record<string, unknown> });
     const transformResult = transformSpec({ spec: parseResult.spec });
 
     const db = getDb();
@@ -99,6 +100,13 @@ export function POST(request: NextRequest): Promise<NextResponse> {
       slug: result.server.slug,
     });
 
-    return NextResponse.json(createSuccessResponse(result), { status: 201 });
+    return NextResponse.json(
+      createSuccessResponse({
+        ...result,
+        converted: convertResult.converted,
+        originalVersion: convertResult.originalVersion,
+      }),
+      { status: 201 },
+    );
   });
 }

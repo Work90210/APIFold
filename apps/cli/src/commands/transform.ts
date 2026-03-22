@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CommandModule } from 'yargs';
 import { load as yamlLoad, JSON_SCHEMA } from 'js-yaml';
-import { parseSpec, transformSpec, type HttpMethod } from '@apifold/transformer';
+import { parseSpec, transformSpec, autoConvert, type HttpMethod } from '@apifold/transformer';
 
 export const transformCommand: CommandModule = {
   command: 'transform <spec>',
@@ -36,7 +36,12 @@ export const transformCommand: CommandModule = {
       process.exit(1);
     }
 
-    const parsed = parseSpec({ spec: raw as Record<string, unknown> });
+    const converted = await autoConvert(raw);
+    if (converted.converted) {
+      process.stderr.write(`Auto-converted from Swagger ${converted.originalVersion} to OpenAPI 3.0\n`);
+    }
+
+    const parsed = parseSpec({ spec: converted.spec as Record<string, unknown> });
     const result = transformSpec({
       spec: parsed.spec,
       filterTags: argv['filterTags'] as string[] | undefined,
