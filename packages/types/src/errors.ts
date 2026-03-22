@@ -7,6 +7,7 @@ export const ErrorCodes = {
   INTERNAL_ERROR: 'INTERNAL_ERROR',
   CONFLICT: 'CONFLICT',
   FORBIDDEN: 'FORBIDDEN',
+  CREDENTIAL_EXPIRED: 'CREDENTIAL_EXPIRED',
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
@@ -20,4 +21,5 @@ export const HttpStatusByErrorCode: Record<ErrorCode, number> = {
   [ErrorCodes.RATE_LIMIT]: 429,
   [ErrorCodes.INTERNAL_ERROR]: 500,
   [ErrorCodes.UPSTREAM_ERROR]: 502,
+  [ErrorCodes.CREDENTIAL_EXPIRED]: 401,
 } as const;

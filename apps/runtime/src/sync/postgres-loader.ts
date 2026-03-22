@@ -4,7 +4,7 @@ import type { Logger } from '../observability/logger.js';
 import type { ServerRegistry, L0ServerMeta } from '../registry/server-registry.js';
 import type { ToolDefinition } from '../registry/tool-loader.js';
 
-const VALID_AUTH_MODES = new Set<string>(['none', 'api_key', 'bearer']);
+const VALID_AUTH_MODES = new Set<string>(['none', 'api_key', 'bearer', 'oauth2_authcode', 'oauth2_client_creds']);
 const VALID_TRANSPORTS = new Set<string>(['sse', 'streamable-http']);
 
 const BLOCKED_HOSTNAMES = new Set([
@@ -151,14 +151,19 @@ export async function fetchToolsForServer(
   );
 }
 
-/** Fetch decrypted credential headers for a server. */
+export type EncryptFn = (plaintext: string) => string;
+
+/** Fetch decrypted credential headers for a server, auto-refreshing OAuth tokens when expired. */
 export async function fetchCredentialHeaders(
   db: DbClient,
   serverId: string,
   decryptFn: (encrypted: string) => string,
+  deps?: { readonly logger?: Logger; readonly encryptFn?: EncryptFn; readonly redis?: unknown },
 ): Promise<Readonly<Record<string, string>>> {
-  const { rows } = await db.query<CredentialRow>(
-    `SELECT encrypted_key, auth_type, expires_at
+  const { rows } = await db.query<OAuthCredentialRow>(
+    `SELECT id, encrypted_key, auth_type, expires_at,
+            token_endpoint, client_id, encrypted_client_secret,
+            encrypted_refresh_token, token_expires_at
      FROM credentials
      WHERE server_id = $1
      ORDER BY created_at DESC
@@ -173,6 +178,11 @@ export async function fetchCredentialHeaders(
 
   if (row.expires_at && new Date(row.expires_at) < new Date()) {
     return Object.freeze({});
+  }
+
+  // OAuth token types — check token_expires_at and auto-refresh if needed
+  if (row.auth_type === 'oauth2_authcode' || row.auth_type === 'oauth2_client_creds') {
+    return fetchOAuthHeaders(db, row, decryptFn, deps);
   }
 
   let plaintext: string;
@@ -196,6 +206,50 @@ export async function fetchCredentialHeaders(
   throw new Error(`Unsupported auth type: ${row.auth_type}`);
 }
 
+async function fetchOAuthHeaders(
+  db: DbClient,
+  row: OAuthCredentialRow,
+  decryptFn: (encrypted: string) => string,
+  deps?: { readonly logger?: Logger; readonly encryptFn?: EncryptFn; readonly redis?: unknown },
+): Promise<Readonly<Record<string, string>>> {
+  const { isTokenExpired, refreshAndUpdateToken, CredentialExpiredError } = await import('../oauth/token-refresher.js');
+
+  // Check if token needs refresh
+  if (isTokenExpired(row.token_expires_at)) {
+    const logger = deps?.logger;
+    const encryptFn = deps?.encryptFn;
+    const redis = deps?.redis as import('ioredis').Redis | null | undefined;
+    if (!logger || !encryptFn) {
+      throw new Error('OAuth token expired and refresh deps not available');
+    }
+
+    try {
+      const newToken = await refreshAndUpdateToken(
+        { db, logger, decryptFn, encryptFn, redis: redis ?? null },
+        row,
+      );
+      const sanitized = newToken.replace(/[\r\n]/g, '');
+      return Object.freeze({ Authorization: `Bearer ${sanitized}` });
+    } catch (err) {
+      if (err instanceof CredentialExpiredError) {
+        throw err; // Let the caller handle expired credentials
+      }
+      throw new Error('OAuth token refresh failed');
+    }
+  }
+
+  // Token still valid — decrypt and return
+  let plaintext: string;
+  try {
+    plaintext = decryptFn(row.encrypted_key);
+  } catch {
+    throw new Error('Credential decryption failed');
+  }
+
+  const sanitized = plaintext.replace(/[\r\n]/g, '');
+  return Object.freeze({ Authorization: `Bearer ${sanitized}` });
+}
+
 interface ServerRow {
   readonly id: string;
   readonly slug: string;
@@ -214,8 +268,14 @@ interface ToolRow {
   readonly input_schema: unknown;
 }
 
-interface CredentialRow {
+interface OAuthCredentialRow {
+  readonly id: string;
   readonly encrypted_key: string;
   readonly auth_type: string;
   readonly expires_at: string | null;
+  readonly token_endpoint: string | null;
+  readonly client_id: string | null;
+  readonly encrypted_client_secret: string | null;
+  readonly encrypted_refresh_token: string | null;
+  readonly token_expires_at: string | null;
 }

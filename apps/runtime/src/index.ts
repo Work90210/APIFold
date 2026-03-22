@@ -19,6 +19,7 @@ import { loadAllServers, fetchToolsForServer, fetchCredentialHeaders } from './s
 import type { DbClient } from './sync/postgres-loader.js';
 import { RedisSubscriber } from './sync/redis-subscriber.js';
 import { decrypt } from './vault/decrypt.js';
+import { encrypt } from './vault/encrypt.js';
 import { clearKeyCache } from './vault/derive-key.js';
 
 export async function startWorker(): Promise<void> {
@@ -58,9 +59,11 @@ export async function startWorker(): Promise<void> {
   const redis = createRedisClient({ url: config.redisUrl });
   const redisSub = createRedisClient({ url: config.redisUrl });
 
-  // Vault decrypt function
+  // Vault functions
   const decryptFn = (ciphertext: string): string =>
     decrypt(ciphertext, config.vaultSecret, config.vaultSalt);
+  const encryptFn = (plaintext: string): string =>
+    encrypt(plaintext, config.vaultSecret, config.vaultSalt);
 
   // Registry tiers
   const registry = new ServerRegistry({ logger });
@@ -70,7 +73,8 @@ export async function startWorker(): Promise<void> {
   });
   const credentialCache = new CredentialCache({
     logger,
-    fetchHeaders: (serverId) => fetchCredentialHeaders(db, serverId, decryptFn),
+    fetchHeaders: (serverId) =>
+      fetchCredentialHeaders(db, serverId, decryptFn, { logger, encryptFn, redis }),
     ttlMs: config.credentialTtlMs,
   });
 

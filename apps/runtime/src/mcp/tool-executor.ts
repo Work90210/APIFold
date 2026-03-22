@@ -6,6 +6,7 @@ import type { CircuitBreaker } from '../resilience/circuit-breaker.js';
 
 import type { AuthInjectorDeps } from './auth-injector.js';
 import { buildAuthHeaders } from './auth-injector.js';
+import { CredentialExpiredError } from '../oauth/token-refresher.js';
 
 
 export interface MCPToolResult {
@@ -40,7 +41,20 @@ export async function executeTool(
   }
 
   const url = buildUpstreamUrl(server.baseUrl, tool.name);
-  const headers = await buildAuthHeaders(authInjector, server.id, server.authMode);
+
+  let headers: Readonly<Record<string, string>>;
+  try {
+    headers = await buildAuthHeaders(authInjector, server.id, server.authMode);
+  } catch (err) {
+    if (err instanceof CredentialExpiredError) {
+      logger.warn({ serverId: server.id, slug: server.slug }, 'OAuth credential expired — re-authorization required');
+      return errorResult(
+        'CREDENTIAL_EXPIRED',
+        'OAuth credential has expired and could not be refreshed. Please re-authorize the connection in the dashboard.',
+      );
+    }
+    throw err;
+  }
 
   const allHeaders: Record<string, string> = {
     ...headers,
