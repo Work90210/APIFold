@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: "fs"
           severity: "HIGH,CRITICAL"
@@ -53,7 +53,7 @@ jobs:
           - apps/runtime/Dockerfile
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: "config"
           scan-ref: ${{ matrix.dockerfile }}
@@ -74,14 +74,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Snyk Open Source (dependency vulnerabilities)
-        uses: snyk/actions/node@0.4.0
+        uses: snyk/actions/node@v0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --all-projects
 
       - name: Snyk Code (static analysis)
-        uses: snyk/actions/node@0.4.0
+        uses: snyk/actions/node@v0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
