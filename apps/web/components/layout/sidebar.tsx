@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FileJson,
   Server,
+  BarChart3,
   Settings,
   PanelLeftClose,
   PanelLeft,
@@ -19,6 +20,7 @@ const navItems = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
   { title: "Specs", href: "/dashboard/specs", icon: FileJson, exact: false },
   { title: "Servers", href: "/dashboard/servers", icon: Server, exact: false },
+  { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3, exact: false },
   { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
 ] as const;
 
