@@ -28,6 +28,7 @@ export type {
   CredentialFilters,
   CredentialAuthType,
   PlaintextKey,
+  OAuthConfig,
 } from './credential.js';
 export { createPlaintextKey } from './credential.js';
 

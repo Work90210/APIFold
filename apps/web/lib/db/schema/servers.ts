@@ -21,7 +21,7 @@ export const mcpServers = pgTable(
     slug: text('slug').notNull(),
     name: text('name').notNull(),
     transport: text('transport', { enum: ['sse', 'streamable-http'] }).default('sse').notNull(),
-    authMode: text('auth_mode', { enum: ['none', 'api_key', 'bearer'] }).notNull(),
+    authMode: text('auth_mode', { enum: ['none', 'api_key', 'bearer', 'oauth2_authcode', 'oauth2_client_creds'] }).notNull(),
     baseUrl: text('base_url').notNull(),
     rateLimitPerMinute: integer('rate_limit').default(100).notNull(),
     isActive: boolean('is_active').default(true).notNull(),

@@ -1,6 +1,6 @@
 export type TransportType = 'sse' | 'streamable-http';
 
-export type AuthMode = 'none' | 'api_key' | 'bearer';
+export type AuthMode = 'none' | 'api_key' | 'bearer' | 'oauth2_authcode' | 'oauth2_client_creds';
 
 export interface McpServer {
   readonly id: string;

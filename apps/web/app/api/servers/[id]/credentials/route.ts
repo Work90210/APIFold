@@ -28,6 +28,13 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       plaintextKey: createPlaintextKey(input.plaintextKey),
       authType: input.authType,
       expiresAt: input.expiresAt ?? null,
+      refreshToken: input.refreshToken ? createPlaintextKey(input.refreshToken) : undefined,
+      scopes: input.scopes,
+      tokenEndpoint: input.tokenEndpoint,
+      clientId: input.clientId,
+      clientSecret: input.clientSecret ? createPlaintextKey(input.clientSecret) : undefined,
+      tokenExpiresAt: input.tokenExpiresAt ?? null,
+      provider: input.provider,
     });
 
     return NextResponse.json(createSuccessResponse(credential), { status: 201 });
