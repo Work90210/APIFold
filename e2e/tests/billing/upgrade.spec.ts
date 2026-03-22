@@ -20,20 +20,18 @@ test.describe("Stripe Checkout Upgrade @billing @stripe", () => {
 
     // Should redirect to Stripe Checkout or open a checkout modal
     // In test mode, Stripe Checkout uses checkout.stripe.com
-    await page.waitForURL(
+    // Wait for navigation or modal to appear
+    const redirected = await page.waitForURL(
       /checkout\.stripe\.com|\/api\/billing\/checkout/,
       { timeout: 30_000 },
-    ).catch(() => {
-      // Alternatively, a plan comparison modal might appear first
-    });
+    ).then(() => true).catch(() => false);
 
-    const url = page.url();
-    const isOnStripe = url.includes("checkout.stripe.com");
-    const isOnCheckoutApi = url.includes("/api/billing/checkout");
-    const isStillOnSettings = url.includes("/dashboard/settings");
-
-    // Either we've been redirected to Stripe, or a modal/overlay appeared
-    expect(isOnStripe || isOnCheckoutApi || isStillOnSettings).toBe(true);
+    if (!redirected) {
+      // If no redirect, verify a modal/plan comparison UI appeared
+      await expect(
+        page.getByText(/choose.*plan|compare.*plans|select.*plan/i),
+      ).toBeVisible({ timeout: 5_000 });
+    }
   });
 
   test("Stripe checkout page renders with test mode badge", async ({

@@ -47,11 +47,12 @@ test.describe("Plan Limits Enforcement @billing", () => {
     expect(body).toHaveProperty("data");
   });
 
-  test("health endpoint is accessible without auth", async ({ page }) => {
-    const response = await page.request.get("/api/health");
+  test("health endpoint is accessible without auth", async ({ request }) => {
+    const response = await request.get("/api/health");
     expect(response.status()).toBe(200);
 
     const body = await response.json();
-    expect(body).toHaveProperty("success", true);
+    expect(body).toHaveProperty("status");
+    expect(body).toHaveProperty("timestamp");
   });
 });

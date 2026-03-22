@@ -4,10 +4,12 @@ import { ensureAuthenticated } from "../../helpers/auth";
 import { createTestSpec, deleteSpec } from "../../helpers/api";
 
 test.describe("Console Tool Execution @console", () => {
-  let specId: string;
-  let serverId: string;
+  let specId: string | null = null;
+  let serverId: string | null = null;
 
   test.beforeEach(async ({ page }) => {
+    specId = null;
+    serverId = null;
     const user = getTestUser();
     await ensureAuthenticated(page, user);
 
@@ -20,7 +22,9 @@ test.describe("Console Tool Execution @console", () => {
 
   test.afterEach(async ({ page }) => {
     try {
-      await deleteSpec(page, specId);
+      if (specId) {
+        await deleteSpec(page, specId);
+      }
     } catch {
       // Best-effort cleanup
     }
@@ -103,6 +107,8 @@ test.describe("Console Tool Execution @console", () => {
         '[data-testid="error-message"], [role="alert"], .text-destructive',
       );
       await expect(error.first()).toBeVisible({ timeout: 10_000 });
+    } else {
+      await expect(executeButton).toBeDisabled();
     }
   });
 });

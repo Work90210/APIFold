@@ -1,17 +1,29 @@
 import { test, expect } from "@playwright/test";
 import { getTestUser } from "../../fixtures/test-user";
 import { ensureAuthenticated } from "../../helpers/auth";
-import { cleanupTestSpecs } from "../../helpers/api";
+import { cleanupTestSpecs, deleteSpec } from "../../helpers/api";
 
 const PETSTORE_URL = "https://petstore3.swagger.io/api/v3/openapi.json";
 
 test.describe("Import Spec from URL @specs", () => {
+  let createdSpecId: string | null = null;
+
   test.beforeEach(async ({ page }) => {
+    createdSpecId = null;
     const user = getTestUser();
     await ensureAuthenticated(page, user);
   });
 
   test.afterEach(async ({ page }) => {
+    if (createdSpecId) {
+      try {
+        await deleteSpec(page, createdSpecId);
+      } catch {
+        // Best-effort
+      }
+      createdSpecId = null;
+      return;
+    }
     await cleanupTestSpecs(page);
   });
 
@@ -58,7 +70,8 @@ test.describe("Import Spec from URL @specs", () => {
 
     // Should redirect to the spec detail page
     await page.waitForURL(/\/dashboard\/specs\/.+/, { timeout: 30_000 });
-    await expect(page.getByText(/imported successfully|spec/i)).toBeVisible({
+    createdSpecId = page.url().match(/\/dashboard\/specs\/([^/?#]+)/)?.[1] ?? null;
+    await expect(page.getByText(/imported successfully/i)).toBeVisible({
       timeout: 10_000,
     });
   });

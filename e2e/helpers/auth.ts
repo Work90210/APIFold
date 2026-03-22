@@ -48,7 +48,7 @@ export async function signOut(page: Page): Promise<void> {
   await signOutButton.click();
 
   // Wait to be redirected away from dashboard
-  await page.waitForURL(/\/(sign-in)?$/, { timeout: 15_000 });
+  await page.waitForURL(/\/sign-in(?:[/?#].*)?$|\/$/, { timeout: 15_000 });
 }
 
 /**

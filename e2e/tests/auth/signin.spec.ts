@@ -21,7 +21,7 @@ test.describe("User Sign In @auth", () => {
       'input[name="identifier"], input[type="email"]',
     );
     await emailInput.waitFor({ state: "visible", timeout: 15_000 });
-    await emailInput.fill("test@example.com");
+    await emailInput.fill(getTestUser().email);
 
     const continueButton = page.getByRole("button", { name: /continue/i });
     await continueButton.click();

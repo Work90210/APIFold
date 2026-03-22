@@ -10,7 +10,9 @@ const RETRY_DELAY_MS = 2_000;
 async function waitForApp(): Promise<void> {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(HEALTH_URL);
+      const response = await fetch(HEALTH_URL, {
+        signal: AbortSignal.timeout(5_000),
+      });
       if (response.ok) {
         console.log(`[global-setup] App is ready (attempt ${attempt})`);
         return;
