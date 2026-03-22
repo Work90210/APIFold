@@ -97,29 +97,29 @@ export default function AnalyticsPage({
               <LineChart data={[...topTools]}>
                 <XAxis
                   dataKey="name"
-                  stroke="#888888"
+                  stroke="hsl(226, 20%, 70%)"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
-                  stroke="#888888"
+                  stroke="hsl(226, 20%, 70%)"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1f2937",
+                    backgroundColor: "hsl(222, 40%, 10%)",
                     border: "none",
                     borderRadius: "8px",
                   }}
-                  itemStyle={{ color: "#f3f4f6" }}
+                  itemStyle={{ color: "hsl(226, 100%, 93%)" }}
                 />
                 <Line
                   type="monotone"
                   dataKey="calls"
-                  stroke="#8b5cf6"
+                  stroke="hsl(243, 96%, 67%)"
                   strokeWidth={2}
                   dot={false}
                 />
@@ -140,7 +140,7 @@ export default function AnalyticsPage({
                   dataKey="name"
                   type="category"
                   width={120}
-                  stroke="#888888"
+                  stroke="hsl(226, 20%, 70%)"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -148,14 +148,14 @@ export default function AnalyticsPage({
                 <Tooltip
                   cursor={{ fill: "transparent" }}
                   contentStyle={{
-                    backgroundColor: "#1f2937",
+                    backgroundColor: "hsl(222, 40%, 10%)",
                     border: "none",
                     borderRadius: "8px",
                   }}
                 />
                 <Bar
                   dataKey="calls"
-                  fill="#8b5cf6"
+                  fill="hsl(243, 96%, 67%)"
                   radius={[0, 4, 4, 0]}
                   barSize={20}
                 />
