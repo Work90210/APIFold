@@ -3,7 +3,7 @@
 import { useState, use } from "react";
 import { ArrowUpDown } from "lucide-react";
 import { Skeleton } from "@apifold/ui";
-import { useAnalytics, type TimeRange, type ToolBreakdown } from "@/lib/hooks/use-analytics";
+import { useAnalytics, type TimeRange, type ToolStat } from "@/lib/hooks/use-analytics";
 import { cn } from "@apifold/ui";
 
 type SortField = "name" | "calls" | "avgMs";
@@ -30,7 +30,7 @@ export default function ToolsAnalyticsPage({
     );
   }
 
-  if (!data || data.toolBreakdown.length === 0) {
+  if (!data || data.topTools.length === 0) {
     return (
       <div className="flex items-center justify-center py-20 text-muted-foreground">
         No tool data available yet.
@@ -38,7 +38,7 @@ export default function ToolsAnalyticsPage({
     );
   }
 
-  const sortedTools = [...data.toolBreakdown].sort((a, b) => {
+  const sortedTools = [...data.topTools].sort((a, b) => {
     const multiplier = sortOrder === "asc" ? 1 : -1;
     if (sortField === "name") {
       return a.name.localeCompare(b.name) * multiplier;
@@ -105,7 +105,7 @@ export default function ToolsAnalyticsPage({
           <tbody>
             {sortedTools.map((tool) => (
               <tr
-                key={tool.toolId ?? tool.name}
+                key={tool.name}
                 className="border-b transition-colors last:border-0 hover:bg-muted/50"
               >
                 <td className="p-4 font-medium">{tool.name}</td>
