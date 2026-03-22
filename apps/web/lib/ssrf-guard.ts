@@ -104,9 +104,11 @@ function createPinnedAgent(
   return new AgentClass({ lookup, maxSockets: 1 });
 }
 
+const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
+
 /**
  * Low-level transport wrapper with DNS pinning for SSRF protection.
- * Only enforces DNS pinning — no redirect blocking or size limits.
+ * Blocks redirects and enforces response size limits.
  */
 async function pinnedTransport(
   url: string,
@@ -141,9 +143,23 @@ async function pinnedTransport(
       };
 
       const req = mod.request(url, reqOptions, (res) => {
+        // Block redirects — prevent redirect to private IPs (DNS rebinding)
+        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400) {
+          res.destroy();
+          reject(new Error(`Redirects are not allowed (HTTP ${res.statusCode})`));
+          return;
+        }
+
         const chunks: Buffer[] = [];
+        let totalLength = 0;
 
         res.on('data', (chunk: Buffer) => {
+          totalLength += chunk.length;
+          if (totalLength > MAX_RESPONSE_SIZE) {
+            res.destroy();
+            reject(new Error('Response body exceeds size limit'));
+            return;
+          }
           chunks.push(chunk);
         });
 
