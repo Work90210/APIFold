@@ -27,7 +27,7 @@
     "fumadocs-ui": "13.4.10",
     "ioredis": "^5.4.0",
     "lucide-react": "^0.577.0",
-    "next": "^15.5.14",
+    "next": "^16.2.1",
     "postgres": "^3.4.8",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
