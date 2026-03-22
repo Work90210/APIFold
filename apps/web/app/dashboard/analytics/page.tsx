@@ -14,8 +14,6 @@ import {
 } from "recharts";
 import {
   Activity,
-  Clock,
-  AlertTriangle,
   ChevronDown,
   BarChart3,
   Server,
@@ -61,6 +59,7 @@ export default function AnalyticsPage() {
             <select
               value={serverId}
               onChange={(e) => setSelectedServerId(e.target.value)}
+              aria-label="Select server"
               className="appearance-none rounded-md border border-border bg-card text-foreground pl-9 pr-8 py-1.5 text-sm transition-colors hover:border-input focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {serversLoading && <option>Loading...</option>}
@@ -150,7 +149,7 @@ function Dashboard({ data, range }: { readonly data: AnalyticsResponse; readonly
           <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
             <div
               className={cn(
-                "h-full rounded-full transition-all duration-500 ease-out-expo",
+                "h-full rounded-full transition-all duration-500 ease-out-expo motion-reduce:transition-none",
                 usage.monthlyCallsUsed / usage.monthlyCallsLimit > 0.9 ? "bg-status-error" : "bg-primary",
               )}
               style={{ width: `${Math.min((usage.monthlyCallsUsed / usage.monthlyCallsLimit) * 100, 100)}%` }}
@@ -211,7 +210,7 @@ function Dashboard({ data, range }: { readonly data: AnalyticsResponse; readonly
                     <span className="tabular-nums text-muted-foreground shrink-0">{tool.calls}</span>
                   </div>
                   <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary transition-all duration-500 ease-out-expo" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-primary transition-all duration-500 ease-out-expo motion-reduce:transition-none" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
@@ -311,7 +310,7 @@ function Metric({ label, value, detail, color }: {
     <div>
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <div className={cn("mt-1 text-2xl font-bold tabular-nums tracking-tight", color)}>{value}</div>
-      <span className="text-xs text-muted-foreground">{detail}</span>
+      <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span>
     </div>
   );
 }
@@ -327,7 +326,7 @@ function LatencyRow({ label, value, max, color }: {
         <span className="font-mono tabular-nums">{value}ms</span>
       </div>
       <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
-        <div className={cn("h-full rounded-full transition-all duration-500 ease-out-expo", color)} style={{ width: `${pct}%` }} />
+        <div className={cn("h-full rounded-full transition-all duration-500 ease-out-expo motion-reduce:transition-none", color)} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
