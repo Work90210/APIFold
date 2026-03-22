@@ -1,8 +1,23 @@
 {
   "name": "@apifold/cli",
   "version": "0.0.1",
-  "private": true,
   "license": "AGPL-3.0-or-later",
+  "description": "Turn any OpenAPI spec into a running MCP server with one command",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kylefuhri/apifold",
+    "directory": "apps/cli"
+  },
+  "keywords": [
+    "mcp",
+    "openapi",
+    "model-context-protocol",
+    "ai-agents",
+    "cli"
+  ],
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "bin": {
     "apifold": "./dist/index.js"
