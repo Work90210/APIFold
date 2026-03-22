@@ -13,6 +13,10 @@ function buildCallbackUrl(request: NextRequest): string {
   return `${url.origin}/api/oauth/callback`;
 }
 
+// Rate limiting intentionally omitted: the state token is cryptographically random
+// (256-bit) and single-use (deleted from Redis on first retrieval), so there is no
+// meaningful brute-force attack surface. Adding a rate limit here risks blocking
+// legitimate OAuth redirects from providers.
 export function GET(request: NextRequest): Promise<NextResponse> {
   return withErrorHandler(async () => {
     const userId = await getUserId();
