@@ -13,6 +13,7 @@ import {
   Gauge,
   Server,
   Key,
+  BarChart3,
 } from "lucide-react";
 import { Skeleton } from "@apifold/ui";
 import { cn } from "@apifold/ui";
@@ -47,6 +48,7 @@ export default function ServerDetailPage({
     { label: "Tools", href: `/dashboard/servers/${id}/tools`, icon: Wrench },
     { label: "Console", href: `/dashboard/servers/${id}/console`, icon: Terminal },
     { label: "Credentials", href: `/dashboard/servers/${id}/credentials`, icon: Key },
+    { label: "Analytics", href: `/dashboard/servers/${id}/analytics`, icon: BarChart3 },
     { label: "Logs", href: `/dashboard/servers/${id}/logs`, icon: ScrollText },
     { label: "Export", href: `/dashboard/servers/${id}/export`, icon: Download },
   ];
