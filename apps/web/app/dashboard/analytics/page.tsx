@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import {
   BarChart,
   Bar,
@@ -19,9 +19,6 @@ import {
   CheckCircle2,
   ChevronDown,
   BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Zap,
   Server,
 } from "lucide-react";
 import { Skeleton, EmptyState } from "@apifold/ui";
@@ -44,59 +41,51 @@ export default function AnalyticsPage() {
   const selectedServer = servers?.find((s) => s.id === serverId);
 
   const { data, isLoading: analyticsLoading } = useAnalytics(serverId, range);
-
-  const isLoading = serversLoading || (serverId && analyticsLoading);
+  const isLoading = serversLoading || (!!serverId && analyticsLoading);
 
   return (
-    <div className="space-y-8 animate-in">
-      {/* Header */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 ring-1 ring-violet-500/20">
-              <BarChart3 className="h-5 w-5 text-violet-400" />
-            </div>
-            <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
-              Analytics
-            </h1>
-          </div>
-          <p className="text-sm text-muted-foreground pl-[52px]">
-            {selectedServer
-              ? `Performance metrics for ${selectedServer.name}`
-              : "Monitor performance across your MCP servers"}
-          </p>
+    <div className="animate-in">
+      {/* Header — left-aligned, no icon badge */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
+            Analytics
+          </h1>
+          {selectedServer && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {selectedServer.name}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Server filter */}
           <div className="relative">
-            <Server className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Server className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <select
               value={serverId}
               onChange={(e) => setSelectedServerId(e.target.value)}
-              className="appearance-none rounded-lg border border-border/60 bg-card/80 backdrop-blur-sm pl-9 pr-9 py-2 text-sm font-medium transition-all hover:border-border focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50"
+              className="appearance-none rounded-md border border-border bg-card text-foreground pl-9 pr-8 py-1.5 text-sm transition-colors hover:border-input focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {serversLoading && <option>Loading...</option>}
               {servers?.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
-            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           </div>
 
-          {/* Time range */}
-          <div className="flex items-center rounded-lg border border-border/60 bg-card/80 backdrop-blur-sm p-0.5">
+          <div className="flex items-center rounded-md border border-border p-0.5">
             {(["24h", "7d", "30d"] as const).map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => setRange(r)}
+                aria-label={RANGE_LABELS[r]}
+                aria-pressed={range === r}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-all",
+                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
                   range === r
-                    ? "bg-violet-500/15 text-violet-300 shadow-sm shadow-violet-500/10"
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -107,22 +96,21 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Content */}
-      {!serverId || (!servers?.length && !serversLoading) ? (
-        <div className="rounded-2xl border border-dashed border-border/60 bg-card/50 p-16">
+      <div className="mt-8">
+        {!serverId || (!servers?.length && !serversLoading) ? (
           <EmptyState
             icon={BarChart3}
             title="No servers yet"
             description="Create an MCP server to start seeing analytics."
           />
-        </div>
-      ) : isLoading ? (
-        <AnalyticsSkeleton />
-      ) : !data || data.overview.totalCalls === 0 ? (
-        <EmptyAnalytics serverName={selectedServer?.name ?? "this server"} range={range} />
-      ) : (
-        <AnalyticsDashboard data={data} range={range} />
-      )}
+        ) : isLoading ? (
+          <AnalyticsSkeleton />
+        ) : !data || data.overview.totalCalls === 0 ? (
+          <EmptyAnalytics serverName={selectedServer?.name ?? "this server"} range={range} />
+        ) : (
+          <AnalyticsDashboard data={data} range={range} />
+        )}
+      </div>
     </div>
   );
 }
@@ -135,120 +123,99 @@ function AnalyticsDashboard({
   readonly range: TimeRange;
 }) {
   const { overview, topTools, toolBreakdown } = data;
+  const gradientId = useId();
 
   return (
-    <div className="space-y-6">
-      {/* Stat Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Calls"
+    <div>
+      {/* Key metrics — not cards, just numbers with breathing room */}
+      <div className="grid grid-cols-2 gap-x-8 gap-y-6 lg:grid-cols-4">
+        <Metric
+          label="Total calls"
           value={overview.totalCalls.toLocaleString()}
-          subtitle={RANGE_LABELS[range]}
-          icon={Zap}
-          iconColor="text-violet-400"
-          iconBg="from-violet-500/20 to-violet-600/10"
-          ringColor="ring-violet-500/20"
+          detail={RANGE_LABELS[range]}
         />
-        <StatCard
-          title="Success Rate"
+        <Metric
+          label="Success rate"
           value={`${overview.successRate.toFixed(1)}%`}
-          subtitle={`${overview.successCount.toLocaleString()} successful`}
-          icon={overview.successRate >= 95 ? TrendingUp : TrendingDown}
-          iconColor={overview.successRate >= 95 ? "text-emerald-400" : "text-amber-400"}
-          iconBg={overview.successRate >= 95 ? "from-emerald-500/20 to-emerald-600/10" : "from-amber-500/20 to-amber-600/10"}
-          ringColor={overview.successRate >= 95 ? "ring-emerald-500/20" : "ring-amber-500/20"}
+          detail={`${overview.successCount.toLocaleString()} OK`}
+          color={overview.successRate >= 95 ? "text-status-success" : "text-status-warning"}
         />
-        <StatCard
-          title="Avg Latency"
+        <Metric
+          label="Avg latency"
           value={`${overview.avgLatencyMs}ms`}
-          subtitle={`P95: ${overview.p95Ms}ms`}
-          icon={Clock}
-          iconColor="text-blue-400"
-          iconBg="from-blue-500/20 to-blue-600/10"
-          ringColor="ring-blue-500/20"
+          detail={`p95 ${overview.p95Ms}ms`}
         />
-        <StatCard
-          title="Errors"
+        <Metric
+          label="Errors"
           value={overview.errorCount.toLocaleString()}
-          subtitle={`${(100 - overview.successRate).toFixed(1)}% error rate`}
-          icon={AlertTriangle}
-          iconColor={overview.errorCount > 0 ? "text-red-400" : "text-emerald-400"}
-          iconBg={overview.errorCount > 0 ? "from-red-500/20 to-red-600/10" : "from-emerald-500/20 to-emerald-600/10"}
-          ringColor={overview.errorCount > 0 ? "ring-red-500/20" : "ring-emerald-500/20"}
+          detail={`${(100 - overview.successRate).toFixed(1)}% rate`}
+          color={overview.errorCount > 0 ? "text-status-error" : undefined}
         />
       </div>
 
-      {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Area Chart — wider */}
-        <div className="lg:col-span-3 rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold">Call Volume</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Calls per tool</p>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="inline-block h-2 w-2 rounded-full bg-violet-500" />
-              Calls
-            </div>
+      {/* Charts — separated by generous whitespace, not cards */}
+      <div className="mt-12 grid gap-12 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="text-sm font-medium text-muted-foreground">Call volume</h2>
+            <span className="text-xs text-muted-foreground">by tool</span>
           </div>
-          <div className="h-[280px] w-full">
+          <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={[...topTools]}>
                 <defs>
-                  <linearGradient id="callGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(243, 96%, 67%)" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(243, 96%, 67%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(225, 20%, 31%, 0.3)" vertical={false} />
                 <XAxis
                   dataKey="name"
-                  stroke="#888888"
+                  stroke="hsl(226, 20%, 70%)"
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
                   dy={8}
                 />
                 <YAxis
-                  stroke="#888888"
+                  stroke="hsl(226, 20%, 70%)"
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
                   dx={-8}
                 />
                 <Tooltip
+                  cursor={{ stroke: "hsl(243, 96%, 67%, 0.15)", strokeWidth: 1 }}
                   contentStyle={{
-                    backgroundColor: "rgba(15, 15, 20, 0.95)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: "10px",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                    padding: "10px 14px",
+                    backgroundColor: "hsl(222, 40%, 10%)",
+                    border: "1px solid hsl(225, 20%, 31%)",
+                    borderRadius: "6px",
+                    padding: "8px 12px",
+                    fontSize: "12px",
                   }}
-                  itemStyle={{ color: "#e5e7eb", fontSize: "12px" }}
-                  labelStyle={{ color: "#9ca3af", fontSize: "11px", marginBottom: "4px" }}
+                  labelStyle={{ color: "hsl(226, 20%, 70%)", marginBottom: "2px" }}
+                  itemStyle={{ color: "hsl(226, 100%, 93%)" }}
                 />
                 <Area
                   type="monotone"
                   dataKey="calls"
-                  stroke="#8b5cf6"
-                  strokeWidth={2}
-                  fill="url(#callGradient)"
-                  dot={{ r: 3, fill: "#8b5cf6", strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: "#8b5cf6", stroke: "#fff", strokeWidth: 2 }}
+                  stroke="hsl(243, 96%, 67%)"
+                  strokeWidth={1.5}
+                  fill={`url(#${gradientId})`}
+                  dot={false}
+                  activeDot={{ r: 3, fill: "hsl(243, 96%, 67%)", strokeWidth: 0 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Bar Chart — narrower */}
-        <div className="lg:col-span-2 rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-6">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold">Top Tools</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">By call count</p>
+        <div className="lg:col-span-2">
+          <div className="mb-3">
+            <h2 className="text-sm font-medium text-muted-foreground">Top tools</h2>
           </div>
-          <div className="h-[280px] w-full">
+          <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={[...topTools]} layout="vertical">
                 <XAxis type="number" hide />
@@ -256,28 +223,27 @@ function AnalyticsDashboard({
                   dataKey="name"
                   type="category"
                   width={100}
-                  stroke="#888888"
+                  stroke="hsl(226, 20%, 70%)"
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(139, 92, 246, 0.05)" }}
+                  cursor={{ fill: "hsl(243, 96%, 67%, 0.04)" }}
                   contentStyle={{
-                    backgroundColor: "rgba(15, 15, 20, 0.95)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: "10px",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                    padding: "10px 14px",
+                    backgroundColor: "hsl(222, 40%, 10%)",
+                    border: "1px solid hsl(225, 20%, 31%)",
+                    borderRadius: "6px",
+                    padding: "8px 12px",
+                    fontSize: "12px",
                   }}
-                  itemStyle={{ color: "#e5e7eb", fontSize: "12px" }}
+                  itemStyle={{ color: "hsl(226, 100%, 93%)" }}
                 />
                 <Bar
                   dataKey="calls"
-                  fill="#8b5cf6"
-                  radius={[0, 6, 6, 0]}
-                  barSize={24}
-                  background={{ fill: "rgba(255,255,255,0.02)", radius: 6 }}
+                  fill="hsl(243, 96%, 67%)"
+                  radius={[0, 3, 3, 0]}
+                  barSize={18}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -285,144 +251,88 @@ function AnalyticsDashboard({
         </div>
       </div>
 
-      {/* Latency + Tool Breakdown */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Latency Percentiles */}
-        <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-6">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold">Latency</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Response time percentiles</p>
-          </div>
-          <div className="space-y-5">
-            <LatencyRow label="P50" sublabel="Median" value={overview.p50Ms} max={overview.p99Ms || 1} color="bg-emerald-500" />
-            <LatencyRow label="P95" sublabel="Fast" value={overview.p95Ms} max={overview.p99Ms || 1} color="bg-amber-500" />
-            <LatencyRow label="P99" sublabel="Slow" value={overview.p99Ms} max={overview.p99Ms || 1} color="bg-red-500" />
+      {/* Latency + breakdown — asymmetric */}
+      <div className="mt-12 grid gap-12 lg:grid-cols-3">
+        <div>
+          <h2 className="mb-4 text-sm font-medium text-muted-foreground">Latency percentiles</h2>
+          <div className="space-y-4">
+            <LatencyRow label="p50" value={overview.p50Ms} max={overview.p99Ms || 1} color="bg-status-success" />
+            <LatencyRow label="p95" value={overview.p95Ms} max={overview.p99Ms || 1} color="bg-status-warning" />
+            <LatencyRow label="p99" value={overview.p99Ms} max={overview.p99Ms || 1} color="bg-status-error" />
           </div>
         </div>
 
-        {/* Tool Breakdown Table */}
-        <div className="lg:col-span-2 rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
-          <div className="p-6 pb-0">
-            <h3 className="text-sm font-semibold">Tool Breakdown</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Performance by tool</p>
+        {toolBreakdown.length > 0 && (
+          <div className="lg:col-span-2">
+            <h2 className="mb-4 text-sm font-medium text-muted-foreground">Per-tool breakdown</h2>
+            <div className="border-t border-border/50">
+              {toolBreakdown.map((tool, i) => (
+                <div
+                  key={tool.toolId ?? tool.name}
+                  className={cn(
+                    "flex items-center justify-between py-2.5",
+                    i < toolBreakdown.length - 1 && "border-b border-border/30",
+                  )}
+                >
+                  <span className="text-sm font-medium">{tool.name}</span>
+                  <div className="flex items-center gap-6 text-sm tabular-nums text-muted-foreground">
+                    <span>{tool.calls.toLocaleString()} calls</span>
+                    <span className="font-mono w-16 text-right">{tool.avgMs}ms</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          {toolBreakdown.length > 0 ? (
-            <div className="mt-4">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-t border-border/40">
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Tool
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Calls
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Avg Latency
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {toolBreakdown.map((tool, i) => (
-                    <tr
-                      key={tool.toolId ?? tool.name}
-                      className={cn(
-                        "transition-colors hover:bg-white/[0.02]",
-                        i < toolBreakdown.length - 1 && "border-b border-border/20",
-                      )}
-                    >
-                      <td className="px-6 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block h-2 w-2 rounded-full bg-violet-500" />
-                          <span className="font-medium">{tool.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 text-right tabular-nums text-muted-foreground">
-                        {tool.calls.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-3 text-right font-mono tabular-nums text-muted-foreground">
-                        {tool.avgMs}ms
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              No per-tool data available
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-function StatCard({
-  title,
+function Metric({
+  label,
   value,
-  subtitle,
-  icon: Icon,
-  iconColor,
-  iconBg,
-  ringColor,
+  detail,
+  color,
 }: {
-  readonly title: string;
+  readonly label: string;
   readonly value: string;
-  readonly subtitle: string;
-  readonly icon: typeof Activity;
-  readonly iconColor: string;
-  readonly iconBg: string;
-  readonly ringColor: string;
+  readonly detail: string;
+  readonly color?: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-5 transition-all hover:border-border/60 hover:shadow-lg hover:shadow-black/5">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {title}
-          </span>
-          <div className="text-3xl font-bold tracking-tight">{value}</div>
-          <span className="text-xs text-muted-foreground">{subtitle}</span>
-        </div>
-        <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ring-1", iconBg, ringColor)}>
-          <Icon className={cn("h-4 w-4", iconColor)} />
-        </div>
+    <div>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <div className={cn("mt-1 text-2xl font-bold tabular-nums tracking-tight", color)}>
+        {value}
       </div>
-      {/* Subtle glow on hover */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity group-hover:opacity-100 bg-gradient-to-br from-violet-500/[0.03] to-transparent" />
+      <span className="text-xs text-muted-foreground">{detail}</span>
     </div>
   );
 }
 
 function LatencyRow({
   label,
-  sublabel,
   value,
   max,
   color,
 }: {
   readonly label: string;
-  readonly sublabel: string;
   readonly value: number;
   readonly max: number;
   readonly color: string;
 }) {
-  const percentage = Math.min((value / max) * 100, 100);
+  const pct = Math.min((value / max) * 100, 100);
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-sm font-semibold">{label}</span>
-          <span className="ml-2 text-xs text-muted-foreground">{sublabel}</span>
-        </div>
-        <span className="font-mono text-sm font-bold tabular-nums">{value}ms</span>
+    <div>
+      <div className="flex items-baseline justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span className="font-mono tabular-nums">{value}ms</span>
       </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.04]">
+      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className={cn("h-full rounded-full transition-all duration-700 ease-out", color)}
-          style={{ width: `${percentage}%` }}
+          className={cn("h-full rounded-full transition-all duration-500 ease-out-expo", color)}
+          style={{ width: `${pct}%` }}
         />
       </div>
     </div>
@@ -437,36 +347,31 @@ function EmptyAnalytics({
   readonly range: TimeRange;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/40 bg-card/30 p-16">
-      <div className="mx-auto max-w-md text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/15 to-violet-600/5 ring-1 ring-violet-500/15">
-          <Activity className="h-7 w-7 text-violet-400/70" />
-        </div>
-        <h3 className="text-lg font-semibold">No data yet</h3>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          No tool calls recorded for <span className="font-medium text-foreground">{serverName}</span> in the {RANGE_LABELS[range].toLowerCase()}.
-          Start making MCP tool calls and analytics will appear here.
-        </p>
-      </div>
+    <div className="py-16 text-center">
+      <Activity className="mx-auto h-8 w-8 text-muted-foreground/50" />
+      <h3 className="mt-3 text-sm font-semibold">No data yet</h3>
+      <p className="mt-1 text-sm text-muted-foreground max-w-sm mx-auto">
+        No calls recorded for {serverName} in the {RANGE_LABELS[range].toLowerCase()}.
+      </p>
     </div>
   );
 }
 
 function AnalyticsSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-4 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-2xl" />
+          <div key={`metric-${i}`} className="space-y-2">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-7 w-24" />
+            <Skeleton className="h-3 w-20" />
+          </div>
         ))}
       </div>
-      <div className="grid gap-6 lg:grid-cols-5">
-        <Skeleton className="lg:col-span-3 h-[360px] rounded-2xl" />
-        <Skeleton className="lg:col-span-2 h-[360px] rounded-2xl" />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Skeleton className="h-[240px] rounded-2xl" />
-        <Skeleton className="lg:col-span-2 h-[240px] rounded-2xl" />
+      <div className="mt-12 grid gap-12 lg:grid-cols-5">
+        <Skeleton className="lg:col-span-3 h-[280px]" />
+        <Skeleton className="lg:col-span-2 h-[280px]" />
       </div>
     </div>
   );
