@@ -1,0 +1,17 @@
+{
+  "swagger": "2.0",
+  "info": { "title": "Test API", "version": "1.0" },
+  "host": "api.example.com",
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List users",
+        "produces": ["application/json"],
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  }
+}
