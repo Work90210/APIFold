@@ -27,6 +27,8 @@ interface JsonRpcResponse {
   readonly error?: { readonly code: number; readonly message: string };
 }
 
+export type ProfileFetcher = (serverId: string) => Promise<readonly string[] | null>;
+
 export interface ProtocolHandlerDeps {
   readonly logger: Logger;
   readonly registry: ServerRegistry;
@@ -34,6 +36,7 @@ export interface ProtocolHandlerDeps {
   readonly sessionManager: SessionManager;
   readonly toolExecutorDeps: ToolExecutorDeps;
   readonly redis: Redis;
+  readonly fetchProfileToolIds?: ProfileFetcher;
 }
 
 export class ProtocolHandler {
@@ -43,6 +46,7 @@ export class ProtocolHandler {
   private readonly sessionManager: SessionManager;
   private readonly executorDeps: ToolExecutorDeps;
   private readonly redis: Redis;
+  private readonly fetchProfileToolIds: ProfileFetcher | null;
 
   constructor(deps: ProtocolHandlerDeps) {
     this.logger = deps.logger;
@@ -51,6 +55,7 @@ export class ProtocolHandler {
     this.sessionManager = deps.sessionManager;
     this.executorDeps = deps.toolExecutorDeps;
     this.redis = deps.redis;
+    this.fetchProfileToolIds = deps.fetchProfileToolIds ?? null;
   }
 
   async handleMessage(session: SSESession, message: JsonRpcRequest): Promise<void> {
@@ -99,8 +104,19 @@ export class ProtocolHandler {
 
     try {
       const toolMap = await this.toolLoader.getTools(server.id);
-      const tools = [...toolMap.values()].map(toMcpToolDef);
-      return jsonRpcSuccess(req.id, { tools });
+      let tools = [...toolMap.values()];
+
+      // Profile-based filtering: only show tools allowed by the active profile
+      const allowedToolIds = this.fetchProfileToolIds
+        ? await this.fetchProfileToolIds(server.id)
+        : null;
+
+      if (allowedToolIds) {
+        const allowedSet = new Set(allowedToolIds);
+        tools = tools.filter((t) => allowedSet.has(t.id));
+      }
+
+      return jsonRpcSuccess(req.id, { tools: tools.map(toMcpToolDef) });
     } catch (err) {
       this.logger.error({ err, slug: session.slug }, 'Failed to load tools');
       return jsonRpcError(req.id, -32603, 'Failed to load tools');
@@ -132,6 +148,15 @@ export class ProtocolHandler {
 
     const tool = toolMap.get(toolName);
     if (!tool) {
+      return jsonRpcError(req.id, -32002, 'Tool not found');
+    }
+
+    // Profile-based enforcement: reject calls to tools outside the active profile
+    const allowedToolIds = this.fetchProfileToolIds
+      ? await this.fetchProfileToolIds(server.id)
+      : null;
+
+    if (allowedToolIds && !allowedToolIds.includes(tool.id)) {
       return jsonRpcError(req.id, -32002, 'Tool not found');
     }
 
