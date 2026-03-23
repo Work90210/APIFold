@@ -1,6 +1,14 @@
 // Spec
 export type { Spec, CreateSpecInput, UpdateSpecInput, SpecFilters } from './spec.js';
 
+// Profile
+export type {
+  AccessProfile,
+  CreateProfileInput,
+  UpdateProfileInput,
+  ProfileFilters,
+} from './profile.js';
+
 // Server
 export type {
   McpServer,
