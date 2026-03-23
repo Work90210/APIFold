@@ -1,0 +1,1 @@
+{"id":"slack","name":"Slack","description":"Messaging, channels, users, and workspace management","category":"communication","authType":"oauth","docsUrl":"https://api.slack.com/methods","tags":["messaging","channels","teams","bots"]}

@@ -1,0 +1,1 @@
+{"id":"stripe","name":"Stripe","description":"Payment processing, subscriptions, and billing management","category":"payments","authType":"bearer","docsUrl":"https://stripe.com/docs/api","tags":["payments","billing","subscriptions","invoices"]}
