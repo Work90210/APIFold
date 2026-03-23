@@ -75,15 +75,14 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
   }, SESSION_CLEANUP_INTERVAL_MS);
   cleanupTimer.unref();
 
-  // Streamable HTTP endpoint — stateless per-request
-  router.post('/mcp/:slug', async (req: Request, res: Response) => {
-    const slug = req.params['slug']!;
-    if (!isValidSlug(slug)) {
-      res.status(400).json({ error: 'Invalid server slug' });
-      return;
-    }
+  // Streamable HTTP endpoint — routes by endpoint ID with slug fallback
+  router.post('/mcp/:identifier', async (req: Request, res: Response) => {
+    const identifier = req.params['identifier']!;
 
-    const server = registry.getBySlug(slug);
+    // Try endpoint ID first (12 hex chars), then fall back to slug
+    const server = /^[a-f0-9]{12}$/.test(identifier)
+      ? registry.getByEndpointId(identifier)
+      : registry.getBySlug(identifier);
 
     if (!server || !server.isActive) {
       res.status(404).json({ error: 'Server not found' });
@@ -106,7 +105,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
     let session = sessionId ? sessions.get(sessionId) : undefined;
 
     // Validate session belongs to this slug (prevent cross-slug access)
-    if (session && session.slug !== slug) {
+    if (session && session.slug !== server.slug) {
       res.status(403).json({ error: 'Session does not belong to this server' });
       return;
     }
@@ -129,7 +128,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
           }
           // Create a new session bound to the originating client IP
           sessionId = randomUUID();
-          session = { id: sessionId, slug, clientIp: req.ip ?? 'unknown', createdAt: Date.now() };
+          session = { id: sessionId, slug: server.slug, clientIp: req.ip ?? 'unknown', createdAt: Date.now() };
           sessions.set(sessionId, session);
 
           response = jsonRpcSuccess(message.id, {
@@ -186,7 +185,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
           } catch (err) {
             metrics.incrementCounter('tool_call_errors');
             metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
-            logger.error({ err, tool: toolName, slug }, 'Tool execution error');
+            logger.error({ err, tool: toolName, slug: server.slug }, 'Tool execution error');
             response = jsonRpcError(message.id, -32603, 'Tool execution failed');
           }
           break;
@@ -207,7 +206,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
 
       res.json(response);
     } catch (err) {
-      logger.error({ err, slug }, 'Streamable HTTP error');
+      logger.error({ err, slug: server.slug }, 'Streamable HTTP error');
       res.status(500).json(jsonRpcError(message.id, -32603, 'Internal error'));
     }
   });

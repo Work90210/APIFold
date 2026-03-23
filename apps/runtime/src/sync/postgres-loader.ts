@@ -72,7 +72,7 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
   const { db, logger, registry } = deps;
 
   const { rows } = await db.query<ServerRow>(
-    `SELECT id, slug, user_id, transport, auth_mode, base_url, rate_limit, is_active
+    `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active, custom_domain
      FROM mcp_servers
      WHERE is_active = true`,
   );
@@ -81,12 +81,14 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
     Object.freeze({
       id: row.id,
       slug: row.slug,
+      endpointId: row.endpoint_id,
       userId: row.user_id,
       transport: validateTransport(row.transport),
       authMode: validateAuthMode(row.auth_mode),
       baseUrl: validateBaseUrl(row.base_url),
       rateLimit: row.rate_limit,
       isActive: row.is_active,
+      customDomain: row.custom_domain ?? null,
     }),
   );
 
@@ -102,7 +104,7 @@ export async function reloadServer(
   const { db, registry } = deps;
 
   const { rows } = await db.query<ServerRow>(
-    `SELECT id, slug, user_id, transport, auth_mode, base_url, rate_limit, is_active
+    `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active, custom_domain
      FROM mcp_servers
      WHERE id = $1`,
     [serverId],
@@ -117,12 +119,14 @@ export async function reloadServer(
   const server: L0ServerMeta = Object.freeze({
     id: row.id,
     slug: row.slug,
+    endpointId: row.endpoint_id,
     userId: row.user_id,
     transport: validateTransport(row.transport),
     authMode: validateAuthMode(row.auth_mode),
     baseUrl: validateBaseUrl(row.base_url),
     rateLimit: row.rate_limit,
     isActive: row.is_active,
+    customDomain: row.custom_domain ?? null,
   });
 
   registry.upsert(server);
@@ -253,12 +257,14 @@ async function fetchOAuthHeaders(
 interface ServerRow {
   readonly id: string;
   readonly slug: string;
+  readonly endpoint_id: string;
   readonly user_id: string;
   readonly transport: string | null;
   readonly auth_mode: string;
   readonly base_url: string;
   readonly rate_limit: number;
   readonly is_active: boolean;
+  readonly custom_domain: string | null;
 }
 
 interface ToolRow {
