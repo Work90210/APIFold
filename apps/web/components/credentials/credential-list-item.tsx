@@ -23,11 +23,11 @@ export function CredentialListItem({
     <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground">
             {credential.authType.startsWith("oauth") ? (
-              <Globe className="h-5 w-5" />
+              <Globe className="h-4 w-4" />
             ) : (
-              <Key className="h-5 w-5" />
+              <Key className="h-4 w-4" />
             )}
           </div>
           <div>

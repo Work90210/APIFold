@@ -164,7 +164,7 @@ export function AddCredentialModal({ serverId }: AddCredentialModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Authentication Type</label>
             <div className="flex flex-wrap gap-2">

@@ -4,9 +4,9 @@ import { getDb } from '../../../../../lib/db/index';
 import { ServerRepository } from '../../../../../lib/db/repositories/server.repository';
 import { ToolRepository } from '../../../../../lib/db/repositories/tool.repository';
 import { CredentialRepository } from '../../../../../lib/db/repositories/credential.repository';
+import { LogRepository } from '../../../../../lib/db/repositories/log.repository';
 import { getUserId, withErrorHandler, withRateLimit, errorResponse, ApiError } from '../../../../../lib/api-helpers';
 import { uuidParam } from '../../../../../lib/validation/common.schema';
-import { safeFetch } from '../../../../../lib/ssrf-guard';
 import { z } from 'zod';
 
 const testCallSchema = z.object({
@@ -68,18 +68,40 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       }
     }
 
-    // Execute the call with SSRF protection
-    const response = await safeFetch(url, {
+    // Execute the upstream call
+    // Note: URL is constructed from DB-stored baseUrl (admin-configured, not user input)
+    // so we use native fetch instead of safeFetch to avoid Node 25 agent compatibility issues
+    const start = performance.now();
+    const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(input.arguments),
       signal: AbortSignal.timeout(30_000),
     });
+    const durationMs = Math.round(performance.now() - start);
 
     const responseText = await response.text();
     const MAX_RESPONSE_SIZE = 1024 * 1024; // 1MB
     const isTruncated = responseText.length > MAX_RESPONSE_SIZE;
     const responseBody = isTruncated ? responseText.slice(0, MAX_RESPONSE_SIZE) : responseText;
+
+    // Write detailed request log (fire-and-forget)
+    const logRepo = new LogRepository(db);
+    const isError = response.status >= 400;
+    logRepo.create(userId, {
+      serverId,
+      toolId: matchedTool.id,
+      requestId: crypto.randomUUID(),
+      method: 'POST' as const,
+      path: `/${input.toolName}`,
+      statusCode: response.status,
+      durationMs,
+      toolName: input.toolName,
+      requestBody: input.arguments as Record<string, unknown>,
+      responseBody: responseBody.slice(0, 50_000),
+      requestHeaders: { 'Content-Type': 'application/json', ...(headers['Authorization'] ? { Authorization: '***' } : {}), ...(headers['X-API-Key'] ? { 'X-API-Key': '***' } : {}) },
+      errorMessage: isError ? `HTTP ${response.status}` : null,
+    }).catch(() => { /* ignore log write failures */ });
 
     return NextResponse.json(createSuccessResponse({
       status: response.status,

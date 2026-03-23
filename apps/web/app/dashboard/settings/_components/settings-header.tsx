@@ -33,13 +33,10 @@ export function SettingsHeader() {
   }, [searchParams, router, toast, queryClient]);
 
   return (
-    <div className="animate-in">
-      <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
+    <div>
+      <h1 className="text-xl font-semibold tracking-tight">
         Settings
       </h1>
-      <p className="mt-1 text-sm text-muted-foreground max-w-prose leading-normal">
-        Manage your account, plan, and billing.
-      </p>
     </div>
   );
 }

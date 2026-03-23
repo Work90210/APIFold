@@ -90,6 +90,11 @@ export class LogRepository extends BaseRepository<
           path: input.path,
           statusCode: input.statusCode,
           durationMs: input.durationMs,
+          requestBody: input.requestBody ?? null,
+          responseBody: input.responseBody ?? null,
+          requestHeaders: input.requestHeaders ?? null,
+          errorMessage: input.errorMessage ?? null,
+          toolName: input.toolName ?? null,
         })
         .returning();
 

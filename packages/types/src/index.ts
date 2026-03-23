@@ -49,6 +49,12 @@ export type { UsageEvent, CreateUsageEventInput } from './usage.js';
 // Log
 export type { RequestLog, CreateRequestLogInput, HttpMethod } from './log.js';
 
+// Spec Version
+export type { SpecVersion, CreateSpecVersionInput } from './spec-version.js';
+
+// Spec Release
+export type { SpecRelease, CreateReleaseInput, ReleaseEnvironment } from './spec-release.js';
+
 // API Response
 export type {
   ApiResponse,

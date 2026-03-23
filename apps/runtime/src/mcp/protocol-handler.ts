@@ -29,6 +29,10 @@ interface JsonRpcResponse {
 
 export type ProfileFetcher = (serverId: string) => Promise<readonly string[] | null>;
 
+export type DbClient = {
+  (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]>;
+};
+
 export interface ProtocolHandlerDeps {
   readonly logger: Logger;
   readonly registry: ServerRegistry;
@@ -36,6 +40,7 @@ export interface ProtocolHandlerDeps {
   readonly sessionManager: SessionManager;
   readonly toolExecutorDeps: ToolExecutorDeps;
   readonly redis: Redis;
+  readonly db?: DbClient;
   readonly fetchProfileToolIds?: ProfileFetcher;
 }
 
@@ -46,6 +51,7 @@ export class ProtocolHandler {
   private readonly sessionManager: SessionManager;
   private readonly executorDeps: ToolExecutorDeps;
   private readonly redis: Redis;
+  private readonly db: DbClient | null;
   private readonly fetchProfileToolIds: ProfileFetcher | null;
 
   constructor(deps: ProtocolHandlerDeps) {
@@ -55,6 +61,7 @@ export class ProtocolHandler {
     this.sessionManager = deps.sessionManager;
     this.executorDeps = deps.toolExecutorDeps;
     this.redis = deps.redis;
+    this.db = deps.db ?? null;
     this.fetchProfileToolIds = deps.fetchProfileToolIds ?? null;
   }
 
@@ -190,14 +197,43 @@ export class ProtocolHandler {
         toolInput,
         context,
       );
-      metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
+      const durationMs = Math.round(performance.now() - start);
+      metrics.observeHistogram('tool_call_duration_ms', durationMs);
+
+      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, toolName, `/${server.slug}/sse`, 200, durationMs);
+
       return jsonRpcSuccess(req.id, result);
     } catch (err) {
+      const durationMs = Math.round(performance.now() - start);
       metrics.incrementCounter('tool_call_errors');
-      metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
+      metrics.observeHistogram('tool_call_duration_ms', durationMs);
       this.logger.error({ err, tool: toolName, slug: session.slug }, 'Tool execution error');
+
+      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, toolName, `/${server.slug}/sse`, 500, durationMs);
+
       return jsonRpcError(req.id, -32603, 'Tool execution failed');
     }
+  }
+
+  private writeRequestLog(
+    serverId: string,
+    toolId: string,
+    userId: string,
+    requestId: string,
+    method: string,
+    path: string,
+    statusCode: number,
+    durationMs: number,
+  ): void {
+    if (!this.db) return;
+
+    // Fire-and-forget — don't block the response
+    (this.db`
+      INSERT INTO request_logs (server_id, tool_id, user_id, request_id, method, path, status_code, duration_ms)
+      VALUES (${serverId}, ${toolId}, ${userId}, ${requestId}, ${method}, ${path}, ${statusCode}, ${durationMs})
+    ` as Promise<unknown>).catch((err) => {
+      this.logger.warn({ err }, 'Failed to write request log');
+    });
   }
 }
 

@@ -116,6 +116,7 @@ export async function startWorker(): Promise<void> {
     sessionManager,
     toolExecutorDeps,
     redis,
+    db: db as unknown as import('./mcp/protocol-handler.js').DbClient,
   });
 
   // Ready state
@@ -226,7 +227,7 @@ export async function startWorker(): Promise<void> {
 }
 
 // Direct execution guard — allows `node dist/index.js` for dev/test
-const isDirectExecution = !cluster.isWorker && process.argv[1]?.endsWith('index.js');
+const isDirectExecution = !cluster.isWorker && (process.argv[1]?.endsWith('index.js') || process.argv[1]?.endsWith('index.ts'));
 if (isDirectExecution) {
   startWorker().catch((err) => {
     // eslint-disable-next-line no-console

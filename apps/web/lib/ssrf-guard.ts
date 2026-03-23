@@ -87,17 +87,11 @@ function createPinnedAgent(
   const pinnedAddr = ipv4 ?? validatedAddresses[0]!;
   const family = pinnedAddr.includes(':') ? 6 : 4;
 
-  const lookup = (
-    _hostname: string,
-    options: unknown,
-    cb: (err: Error | null, address: string, family: number) => void,
-  ): void => {
-    if (typeof options === 'function') {
-      // lookup(hostname, cb) overload
-      (options as (err: Error | null, address: string, family: number) => void)(null, pinnedAddr, family);
-    } else {
-      cb(null, pinnedAddr, family);
-    }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lookup = (...args: any[]): void => {
+    // Supports both (hostname, cb) and (hostname, options, cb) signatures
+    const cb = typeof args[1] === 'function' ? args[1] : args[2];
+    cb(null, pinnedAddr, family);
   };
 
   const AgentClass = protocol === 'https:' ? https.Agent : http.Agent;

@@ -8,13 +8,13 @@ interface SpecHeaderProps {
 
 export function SpecHeader({ spec }: SpecHeaderProps) {
   return (
-    <div className="rounded-xl bg-card shadow-sm p-6">
-      <div className="flex items-start gap-4">
-        <FileJson className="mt-0.5 h-6 w-6 shrink-0 text-muted-foreground" />
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="flex items-start gap-3">
+        <FileJson className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
+            <h1 className="text-lg font-semibold tracking-tight">
               {spec.name}
             </h1>
             <Badge variant="secondary" className="text-xs">
@@ -35,7 +35,7 @@ export function SpecHeader({ spec }: SpecHeaderProps) {
                 href={spec.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-foreground transition-colors duration-200 hover:underline"
+                className="flex items-center gap-1.5 text-foreground transition-colors duration-150 hover:underline"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 Source

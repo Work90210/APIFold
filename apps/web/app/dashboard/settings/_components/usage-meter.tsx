@@ -41,7 +41,7 @@ export function UsageMeter({ label, icon: Icon, current, max }: UsageMeterProps)
         >
           <div
             className={cn(
-              "h-full rounded-full transition-all duration-700 ease-out-expo",
+              "h-full rounded-full transition-all duration-500 ease-out",
               isCritical
                 ? "bg-destructive"
                 : isWarning

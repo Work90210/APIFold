@@ -28,7 +28,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           onChange={(e) =>
             onChange({ ...filters, method: e.target.value })
           }
-          className="flex h-9 rounded-xl border border-input bg-background px-3 text-sm transition-all duration-300 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex h-9 rounded-lg border border-input bg-transparent px-3 text-sm transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {HTTP_METHODS.map((m) => (
             <option key={m} value={m}>
@@ -46,7 +46,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           onChange={(e) =>
             onChange({ ...filters, statusCode: e.target.value })
           }
-          className="flex h-9 rounded-xl border border-input bg-background px-3 text-sm transition-all duration-300 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex h-9 rounded-lg border border-input bg-transparent px-3 text-sm transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <option value="">All</option>
           <option value="2xx">2xx Success</option>

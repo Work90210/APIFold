@@ -21,7 +21,7 @@ export function ToolDetail({ tool, serverId }: ToolDetailProps) {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-mono text-lg font-semibold">{tool.name}</h2>

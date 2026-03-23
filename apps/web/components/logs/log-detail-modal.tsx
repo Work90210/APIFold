@@ -1,12 +1,11 @@
 import type { RequestLog } from "@apifold/types";
 import {
-  Badge,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@apifold/ui";
+import { cn } from "@apifold/ui";
 
 interface LogDetailModalProps {
   readonly log: RequestLog | null;
@@ -14,52 +13,97 @@ interface LogDetailModalProps {
   readonly onClose: () => void;
 }
 
+function CodeBlock({ label, content }: { readonly label: string; readonly content: string }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
+        <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+      </div>
+      <pre className="max-h-56 overflow-auto p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+        {content}
+      </pre>
+    </div>
+  );
+}
+
 export function LogDetailModal({ log, open, onClose }: LogDetailModalProps) {
   if (!log) return null;
 
+  const reqBody = log.requestBody;
+  const resBody = log.responseBody;
+  const headers = log.requestHeaders;
+  const isError = log.statusCode >= 400;
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-lg rounded-2xl">
-        <DialogHeader>
-          <DialogTitle className="font-heading tracking-tight">
-            {log.method} {log.path}
+      <DialogContent className="max-w-2xl rounded-lg p-0 gap-0 max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="px-4 py-3 border-b border-border shrink-0">
+          <DialogTitle className="flex items-center gap-3 text-sm font-normal tracking-tight">
+            <span className={cn(
+              "font-mono text-xs font-semibold tabular-nums",
+              isError ? "text-destructive" : "text-status-success",
+            )}>
+              {log.statusCode}
+            </span>
+            <span className="font-mono text-xs">{log.method}</span>
+            <span className="font-medium">{log.toolName ?? log.path}</span>
+            <span className="ml-auto text-xs text-muted-foreground tabular-nums">{log.durationMs}ms</span>
           </DialogTitle>
-          <DialogDescription className="font-mono text-xs leading-normal">
-            Request ID: {log.requestId}
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="gradient-divider" />
+        <div className="overflow-y-auto flex-1">
+          {/* Key-value metadata */}
+          <div className="grid grid-cols-2 gap-px bg-border">
+            {[
+              { label: "Time", value: new Date(log.timestamp).toLocaleString() },
+              { label: "Request ID", value: log.requestId, mono: true },
+              { label: "Tool", value: log.toolName ?? "—", mono: true },
+              { label: "Path", value: log.path, mono: true },
+              ...(log.errorMessage ? [{ label: "Error", value: log.errorMessage, error: true }] : []),
+            ].map((item) => (
+              <div key={item.label} className="bg-background px-4 py-2.5">
+                <dt className="text-[11px] text-muted-foreground">{item.label}</dt>
+                <dd className={cn(
+                  "mt-0.5 text-xs truncate",
+                  'mono' in item && item.mono && "font-mono",
+                  'error' in item && item.error && "text-destructive",
+                )}>
+                  {item.value}
+                </dd>
+              </div>
+            ))}
+          </div>
 
-        <dl className="grid gap-3 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Status</dt>
-            <dd>
-              <Badge
-                variant={log.statusCode < 400 ? "success" : "error"}
-                className="tabular-nums"
-              >
-                {log.statusCode}
-              </Badge>
-            </dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Duration</dt>
-            <dd className="tabular-nums">{log.durationMs}ms</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Timestamp</dt>
-            <dd className="tabular-nums">
-              {new Date(log.timestamp).toLocaleString()}
-            </dd>
-          </div>
-          {log.toolId && (
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Tool ID</dt>
-              <dd className="font-mono text-xs">{log.toolId}</dd>
+          {/* Headers */}
+          {headers && Object.keys(headers).length > 0 && (
+            <div className="border-t border-border">
+              <CodeBlock
+                label="Request Headers"
+                content={Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join("\n")}
+              />
             </div>
           )}
-        </dl>
+
+          {/* Request Body */}
+          {reqBody && Object.keys(reqBody as Record<string, unknown>).length > 0 && (
+            <div className="border-t border-border">
+              <CodeBlock
+                label="Request Body"
+                content={JSON.stringify(reqBody, null, 2)}
+              />
+            </div>
+          )}
+
+          {/* Response Body */}
+          {resBody && (
+            <div className="border-t border-border">
+              <CodeBlock
+                label="Response"
+                content={(() => { try { return JSON.stringify(JSON.parse(resBody), null, 2); } catch { return resBody; } })()}
+              />
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

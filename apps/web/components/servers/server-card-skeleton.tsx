@@ -2,7 +2,7 @@ import { Skeleton } from "@apifold/ui";
 
 export function ServerCardSkeleton() {
   return (
-    <div className="rounded-xl bg-card shadow-sm p-5">
+    <div className="rounded-lg border border-border bg-card p-4">
       {/* Header: icon + name/slug + status dot */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">

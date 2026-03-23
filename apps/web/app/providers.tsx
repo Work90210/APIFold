@@ -23,7 +23,19 @@ export function Providers({ children }: { readonly children: ReactNode }) {
   const [queryClient] = useState(makeQueryClient);
 
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: 'hsl(217, 91%, 60%)',
+          colorBackground: 'hsl(0, 0%, 100%)',
+          colorText: 'hsl(0, 0%, 9%)',
+          colorInputBackground: 'transparent',
+          colorInputText: 'hsl(0, 0%, 9%)',
+          borderRadius: '0.375rem',
+          fontFamily: 'var(--font-sans)',
+        },
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           {children}

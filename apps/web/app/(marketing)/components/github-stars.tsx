@@ -39,11 +39,11 @@ export async function GithubStars() {
       href={GITHUB_REPO}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex h-12 items-center gap-2 rounded-xl border border-[#40485d] bg-[#0f1930] px-6 text-base font-semibold text-[#dee5ff] transition-all duration-300 hover:border-[#a7a5ff]/30 hover:bg-[#141f38] active:scale-[0.98]"
+      className="inline-flex h-12 items-center gap-2 rounded-md border border-border bg-transparent px-6 text-base font-semibold text-foreground transition-all duration-300 hover:bg-muted/50 active:scale-[0.98]"
     >
       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
       Star on GitHub
-      <span className="ml-1 rounded-md bg-[#060e20]/60 px-2 py-0.5 text-sm tabular-nums text-[#a3aac4] ring-1 ring-[#40485d]/50">
+      <span className="ml-1 rounded-md border border-border px-2 py-0.5 text-sm tabular-nums text-muted-foreground">
         {stars}
       </span>
     </a>

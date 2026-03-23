@@ -75,26 +75,26 @@ const CHANGELOG = [
 ] as const;
 
 const TYPE_COLORS: Record<string, string> = {
-  feat: "text-[#a7a5ff] bg-[#a7a5ff]/10",
-  fix: "text-[#53ddfc] bg-[#53ddfc]/10",
-  perf: "text-emerald-400 bg-emerald-400/10",
-  docs: "text-amber-400 bg-amber-400/10",
-  ci: "text-[#ec63ff] bg-[#ec63ff]/10",
+  feat: "text-primary bg-primary/10",
+  fix: "text-status-info bg-status-info/10",
+  perf: "text-status-success bg-status-success/10",
+  docs: "text-status-warning bg-status-warning/10",
+  ci: "text-muted-foreground bg-muted",
 };
 
 export default function ChangelogPage() {
   return (
-    <div className="min-h-screen bg-[#060e20] text-[#dee5ff] overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <LandingNav activePage="changelog" />
 
       <main className="pt-20">
         {/* Hero */}
         <section className="px-6 pb-16 pt-24 text-center md:pt-32">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#a7a5ff]">Changelog</p>
-          <h1 className="mt-4 font-heading text-4xl font-extrabold tracking-tighter text-white sm:text-5xl">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Changelog</p>
+          <h1 className="mt-4 text-4xl font-bold tracking-tighter sm:text-5xl">
             What&apos;s new in APIFold
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-[#a3aac4]">
+          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Follow our journey from transformer library to full-stack MCP platform.
           </p>
         </section>
@@ -103,17 +103,17 @@ export default function ChangelogPage() {
         <section className="mx-auto max-w-3xl px-6 pb-32">
           <div className="relative space-y-12">
             {/* Vertical line */}
-            <div className="absolute left-[19px] top-2 bottom-2 w-px bg-gradient-to-b from-[#645efb] via-[#40485d] to-transparent" aria-hidden="true" />
+            <div className="absolute left-[19px] top-2 bottom-2 w-px bg-border" aria-hidden="true" />
 
             {CHANGELOG.map((release) => (
               <div key={release.version} className="relative pl-14">
                 {/* Dot */}
-                <div className="absolute left-3 top-1.5 h-3 w-3 rounded-full bg-[#645efb] ring-4 ring-[#060e20]" />
+                <div className="absolute left-3 top-1.5 h-3 w-3 rounded-full bg-foreground ring-4 ring-background" />
 
                 {/* Header */}
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <h2 className="font-heading text-xl font-bold tracking-tight text-white">{release.version}</h2>
-                  <span className="text-sm text-[#6d758c] tabular-nums">{release.date}</span>
+                  <h2 className="text-xl font-semibold tracking-tight">{release.version}</h2>
+                  <span className="text-sm text-muted-foreground/60 tabular-nums">{release.date}</span>
                   {release.tag && (
                     <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${release.tagColor}`}>
                       {release.tag}
@@ -125,10 +125,10 @@ export default function ChangelogPage() {
                 <ul className="space-y-2">
                   {release.changes.map((change, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm">
-                      <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${TYPE_COLORS[change.type] ?? "text-[#a3aac4] bg-white/5"}`}>
+                      <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${TYPE_COLORS[change.type] ?? "text-muted-foreground bg-muted"}`}>
                         {change.type}
                       </span>
-                      <span className="text-[#a3aac4] leading-relaxed">{change.text}</span>
+                      <span className="text-muted-foreground leading-relaxed">{change.text}</span>
                     </li>
                   ))}
                 </ul>

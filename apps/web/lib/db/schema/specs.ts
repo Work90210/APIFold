@@ -10,6 +10,7 @@ export const specs = pgTable(
     sourceUrl: text('source_url'),
     rawSpec: jsonb('raw_spec').notNull().$type<Record<string, unknown>>(),
     toolCount: integer('tool_count').default(0).notNull(),
+    currentVersionId: uuid('current_version_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },

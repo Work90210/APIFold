@@ -22,7 +22,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
             <li key={step.label} className="flex items-center gap-2">
               <div
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors duration-200",
+                  "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors duration-150",
                   isCompleted &&
                     "border-foreground bg-foreground text-background",
                   isCurrent &&
@@ -40,9 +40,9 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
               </div>
               <span
                 className={cn(
-                  "hidden text-sm font-medium sm:inline transition-colors duration-200",
+                  "hidden text-sm font-medium sm:inline transition-colors duration-150",
                   isCurrent
-                    ? "text-foreground font-heading"
+                    ? "text-foreground"
                     : isCompleted
                       ? "text-foreground"
                       : "text-muted-foreground",
@@ -53,7 +53,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    "h-0.5 w-10 rounded-full transition-colors duration-200",
+                    "h-0.5 w-10 rounded-full transition-colors duration-150",
                     isCompleted
                       ? "bg-foreground"
                       : "bg-muted",

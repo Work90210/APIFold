@@ -63,6 +63,7 @@ export {
 export { CopyButton } from "./copy-button";
 export { CodeBlock } from "./code-block";
 export { EmptyState } from "./empty-state";
+export { StatusDot, type StatusDotVariant } from "./status-dot";
 export {
   Sheet,
   SheetPortal,

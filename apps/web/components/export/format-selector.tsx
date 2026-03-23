@@ -16,14 +16,14 @@ const formats: readonly { readonly value: ExportFormat; readonly label: string }
 
 export function FormatSelector({ selected, onChange }: FormatSelectorProps) {
   return (
-    <div className="flex rounded-xl border bg-muted/50 p-0.5">
+    <div className="flex rounded-lg border bg-muted/50 p-0.5">
       {formats.map((fmt) => (
         <button
           key={fmt.value}
           type="button"
           onClick={() => onChange(fmt.value)}
           className={cn(
-            "rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ease-out-expo",
+            "rounded-md px-4 py-1.5 text-sm font-medium transition-colors duration-150 ease-out",
             selected === fmt.value
               ? "bg-foreground text-background"
               : "text-muted-foreground hover:text-foreground",

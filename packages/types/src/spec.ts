@@ -6,6 +6,7 @@ export interface Spec {
   readonly sourceUrl: string | null;
   readonly rawSpec: Record<string, unknown>;
   readonly toolCount: number;
+  readonly currentVersionId: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }

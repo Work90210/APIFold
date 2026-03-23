@@ -21,17 +21,15 @@ function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center animate-fade-in",
+        "flex flex-col items-center justify-center rounded-lg border border-dashed border-border/50 py-16 text-center",
         className,
       )}
       {...props}
     >
       {Icon && (
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent">
-          <Icon className="h-6 w-6 text-accent-foreground" />
-        </div>
+        <Icon className="h-6 w-6 text-muted-foreground/50" />
       )}
-      <h3 className="mt-4 text-lg font-semibold font-heading leading-tight">
+      <h3 className="mt-3 text-sm font-medium text-foreground">
         {title}
       </h3>
       {description && (

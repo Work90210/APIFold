@@ -66,14 +66,11 @@ export function ConfigForm({ server }: ConfigFormProps) {
   const isOAuth = form.authMode === "oauth2_authcode" || form.authMode === "oauth2_client_creds";
 
   return (
-    <div className="rounded-xl bg-card shadow-sm p-6">
-      <h2 className="text-fluid-xl font-semibold font-heading tracking-tight">
+    <div className="rounded-lg border border-border bg-card p-4">
+      <h2 className="text-sm font-semibold tracking-tight">
         Server Configuration
       </h2>
-      <p className="mt-1 text-sm text-muted-foreground leading-normal max-w-prose">
-        Configure how your MCP server connects to the upstream API.
-      </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
         <Input
           label="Server Name"
           value={form.name}

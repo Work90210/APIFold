@@ -36,12 +36,12 @@ export function BillingSection() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-lg border border-border bg-card p-4">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
         Billing
       </h2>
 
-      <p className="text-sm text-muted-foreground mb-5">
+      <p className="text-sm text-muted-foreground mb-4">
         Update your payment method, view invoices, or change your subscription
         through the Stripe billing portal.
       </p>

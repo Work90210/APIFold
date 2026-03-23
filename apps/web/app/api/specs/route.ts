@@ -5,6 +5,7 @@ import { SpecRepository } from '../../../lib/db/repositories/spec.repository';
 import { ServerRepository } from '../../../lib/db/repositories/server.repository';
 import { ToolRepository } from '../../../lib/db/repositories/tool.repository';
 import { ProfileRepository } from '../../../lib/db/repositories/profile.repository';
+import { SpecVersionRepository } from '../../../lib/db/repositories/spec-version.repository';
 import { getUserId, withErrorHandler, withRateLimit, ApiError } from '../../../lib/api-helpers';
 import { autoGenerateProfiles } from '../../../lib/profiles/auto-generate';
 import { createSpecSchema } from '../../../lib/validation/spec.schema';
@@ -97,6 +98,21 @@ export function POST(request: NextRequest): Promise<NextResponse> {
 
       // Auto-generate default access profiles (Read Only, Read/Write, Full Access)
       await autoGenerateProfiles(profileRepo, userId, server.id, createdTools);
+
+      // Create initial spec version with tool snapshot
+      const specVersionRepo = new SpecVersionRepository(tx);
+      const toolSnapshot = transformResult.tools.map((tool) => ({
+        name: tool.name,
+        description: tool.description ?? null,
+        inputSchema: tool.inputSchema ?? {},
+      }));
+      await specVersionRepo.create(userId, {
+        specId: spec.id,
+        rawSpec,
+        toolSnapshot,
+        versionLabel: input.version ?? '1.0.0',
+        sourceUrl: input.sourceUrl ?? null,
+      });
 
       return { spec, server };
     });

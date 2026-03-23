@@ -17,7 +17,7 @@ export function OperationPreview({ operations, specName }: OperationPreviewProps
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-fluid-xl font-semibold font-heading tracking-tight">
+        <h3 className="text-lg font-semibold tracking-tight">
           {specName}
         </h3>
         <p className="text-sm text-muted-foreground leading-normal">
@@ -25,7 +25,7 @@ export function OperationPreview({ operations, specName }: OperationPreviewProps
           detected
         </p>
       </div>
-      <div className="overflow-hidden rounded-xl bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

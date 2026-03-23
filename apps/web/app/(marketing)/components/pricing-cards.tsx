@@ -75,38 +75,38 @@ export function PricingCards() {
           key={tier.name}
           className={`relative flex flex-col rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-0.5 ${
             tier.highlight
-              ? "border-[#645efb] bg-[#0f1930] shadow-[0_0_40px_-10px_rgba(100,94,251,0.3)]"
-              : "border-[#40485d]/30 bg-[#0f1930]/60"
+              ? "border-foreground bg-card"
+              : "border-border bg-card"
           }`}
         >
           {tier.highlight && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#645efb] to-[#a7a5ff] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-background">
               Most Popular
             </div>
           )}
 
           <div className="mb-6">
-            <h3 className="font-heading text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-foreground">
               {tier.name}
             </h3>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="font-heading text-4xl font-extrabold text-white">
+              <span className="text-4xl font-extrabold text-foreground">
                 {tier.price}
               </span>
               {tier.period && (
-                <span className="text-sm text-[#a3aac4]">{tier.period}</span>
+                <span className="text-sm text-muted-foreground">{tier.period}</span>
               )}
             </div>
-            <p className="mt-2 text-sm text-[#a3aac4]">{tier.description}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{tier.description}</p>
           </div>
 
           <div className="mb-8 flex-1 space-y-3">
             {tier.features.map((feature) => (
               <div
                 key={feature}
-                className="flex items-start gap-3 text-sm text-[#dee5ff]"
+                className="flex items-start gap-3 text-sm text-foreground"
               >
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#a7a5ff]" />
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
                 <span>{feature}</span>
               </div>
             ))}
@@ -114,10 +114,10 @@ export function PricingCards() {
 
           <Link
             href={tier.href}
-            className={`inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#638bff] focus-visible:outline-none ${
+            className={`inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
               tier.highlight
-                ? "bg-gradient-to-r from-[#645efb] to-[#a7a5ff] text-white hover:shadow-lg hover:shadow-[#a7a5ff]/20"
-                : "border border-[#40485d] bg-[#0f1930] text-[#dee5ff] hover:border-[#a7a5ff]/30 hover:bg-[#141f38]"
+                ? "bg-foreground text-background hover:bg-foreground/90"
+                : "border border-border bg-transparent text-foreground hover:bg-muted/50"
             }`}
           >
             {tier.cta}

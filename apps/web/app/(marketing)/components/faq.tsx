@@ -51,7 +51,7 @@ export function Faq() {
         return (
           <div
             key={index}
-            className="rounded-xl border border-[#40485d]/30 bg-[#0f1930]/60 transition-colors duration-200 hover:border-[#40485d]/60"
+            className="rounded-lg border border-border transition-colors duration-200 hover:border-border"
           >
             <button
               type="button"
@@ -61,11 +61,11 @@ export function Faq() {
               aria-expanded={isOpen}
               aria-controls={`faq-panel-${index}`}
             >
-              <span className="pr-4 text-sm font-medium text-white">
+              <span className="pr-4 text-sm font-medium text-foreground">
                 {faq.question}
               </span>
               <ChevronDown
-                className={`h-4 w-4 shrink-0 text-[#a3aac4] transition-transform duration-200 ${
+                className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
                   isOpen ? "rotate-180" : ""
                 }`}
               />
@@ -79,7 +79,7 @@ export function Faq() {
               }`}
             >
               <div className="overflow-hidden">
-                <p className="px-6 pb-4 text-sm leading-relaxed text-[#a3aac4]">
+                <p className="px-6 pb-4 text-sm leading-relaxed text-muted-foreground">
                   {faq.answer}
                 </p>
               </div>

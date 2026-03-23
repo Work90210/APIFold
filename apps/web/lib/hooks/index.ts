@@ -15,3 +15,4 @@ export type { AnalyticsResponse, AnalyticsOverview, ToolStat, ToolBreakdown, Tim
 export { useExport } from "./use-export";
 export { useToast } from "./use-toast";
 export { useRuntimeHealth } from "./use-runtime-health";
+export { useSpecVersions, useCreateVersion, usePromoteVersion } from "./use-spec-versions";

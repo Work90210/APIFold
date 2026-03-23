@@ -29,8 +29,8 @@ export default function ServerCredentialsPage({
         <div className="flex justify-end">
           <Skeleton className="h-10 w-32" />
         </div>
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-24 w-full rounded-lg" />
       </div>
     );
   }

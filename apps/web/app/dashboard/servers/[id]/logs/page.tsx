@@ -1,14 +1,11 @@
 "use client";
 
 import { useState, useMemo, use } from "react";
-import Link from "next/link";
-import { ArrowLeft, ScrollText } from "lucide-react";
-import type { RequestLog } from "@apifold/types";
+import { ScrollText } from "lucide-react";
 import { Button, Skeleton, EmptyState } from "@apifold/ui";
 import { useLogs } from "@/lib/hooks";
 import { FilterBar } from "@/components/logs/filter-bar";
 import { LogTable } from "@/components/logs/log-table";
-import { LogDetailModal } from "@/components/logs/log-detail-modal";
 import { LogRetentionNotice } from "@/components/logs/log-retention-notice";
 
 export default function LogsPage({
@@ -23,7 +20,6 @@ export default function LogsPage({
     from: "",
     to: "",
   });
-  const [selectedLog, setSelectedLog] = useState<RequestLog | null>(null);
 
   const activeFilters = useMemo(() => {
     const result: Record<string, string> = {};
@@ -41,34 +37,16 @@ export default function LogsPage({
   const isLoading = status === "pending" || (status === "success" && fetchStatus === "fetching" && logs.length === 0);
 
   return (
-    <div className="animate-in space-y-8">
-      {/* Back link */}
-      <Link
-        href={`/dashboard/servers/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-all duration-300 ease-out-expo hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Server
-      </Link>
-
+    <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
-          Logs
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground leading-normal max-w-prose">
-          Inspect incoming requests and responses.
-        </p>
-      </div>
-
-      <div className="border-t border-border/40" />
+      <h1 className="text-lg font-semibold tracking-tight">Logs</h1>
 
       {/* Retention notice */}
       <LogRetentionNotice />
 
       {/* Filter bar */}
-      <div className="rounded-xl bg-card shadow-sm p-6">
-        <h3 className="mb-4 text-sm font-semibold text-muted-foreground">
+      <div className="rounded-lg border border-border p-4">
+        <h3 className="mb-3 text-sm font-semibold text-muted-foreground">
           Filters
         </h3>
         <FilterBar filters={filters} onChange={setFilters} />
@@ -76,12 +54,10 @@ export default function LogsPage({
 
       {/* Log table */}
       {isLoading ? (
-        <Skeleton className="h-96 rounded-xl" />
+        <Skeleton className="h-96 rounded-lg" />
       ) : logs.length > 0 ? (
         <div className="space-y-4">
-          <div className="overflow-hidden rounded-xl bg-card shadow-sm">
-            <LogTable logs={logs} onSelectLog={setSelectedLog} />
-          </div>
+          <LogTable logs={logs} />
           {hasNextPage && (
             <div className="flex justify-center pt-2">
               <Button
@@ -96,7 +72,7 @@ export default function LogsPage({
           )}
         </div>
       ) : (
-        <div className="rounded-xl bg-card shadow-sm p-12">
+        <div className="rounded-lg border border-border p-12">
           <EmptyState
             icon={ScrollText}
             title="No logs yet"
@@ -105,11 +81,6 @@ export default function LogsPage({
         </div>
       )}
 
-      <LogDetailModal
-        log={selectedLog}
-        open={!!selectedLog}
-        onClose={() => setSelectedLog(null)}
-      />
     </div>
   );
 }

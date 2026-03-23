@@ -53,7 +53,7 @@ export default function BrowseRegistryPage() {
   };
 
   return (
-    <div className="animate-in space-y-8">
+    <div className="space-y-6">
       <div>
         <Link
           href="/dashboard/specs/new"
@@ -65,12 +65,9 @@ export default function BrowseRegistryPage() {
       </div>
 
       <div>
-        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
+        <h1 className="text-xl font-semibold tracking-tight">
           API Registry
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground max-w-prose">
-          Deploy a pre-configured MCP server from our curated catalog. One click to go live.
-        </p>
       </div>
 
       {/* Search + category filter */}
@@ -125,7 +122,7 @@ export default function BrowseRegistryPage() {
             return (
               <div
                 key={entry.id}
-                className="group flex flex-col rounded-xl border border-border/60 bg-card p-5 transition-colors hover:border-border"
+                className="group flex flex-col rounded-lg border border-border/60 bg-card p-4 transition-colors duration-150 hover:border-border"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">

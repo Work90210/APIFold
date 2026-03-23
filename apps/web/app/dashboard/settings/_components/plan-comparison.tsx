@@ -115,7 +115,7 @@ export function PlanComparison() {
   const currentTierIndex = TIERS.findIndex((t) => t.id === currentPlanId);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-lg border border-border bg-card p-4">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-6">
         Compare Plans
       </h2>
@@ -131,7 +131,7 @@ export function PlanComparison() {
             <div
               key={tier.id}
               className={cn(
-                "relative flex flex-col rounded-xl border p-5 transition-all duration-200",
+                "relative flex flex-col rounded-lg border p-5 transition-all duration-150",
                 isCurrent
                   ? "border-primary ring-2 ring-primary/20 bg-primary/[0.03]"
                   : "border-border/60 hover:border-border",
@@ -157,12 +157,12 @@ export function PlanComparison() {
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <TierIcon className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-heading font-semibold text-sm">
+                  <span className="font-semibold text-sm">
                     {tier.name}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-0.5">
-                  <span className="text-2xl font-bold font-heading">
+                  <span className="text-xl font-semibold">
                     {tier.price}
                   </span>
                   {tier.period && (

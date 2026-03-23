@@ -5,3 +5,5 @@ export { credentials } from './credentials';
 export { usageEvents } from './usage-events';
 export { requestLogs } from './request-logs';
 export { accessProfiles } from './profiles';
+export { specVersions } from './spec-versions';
+export { specReleases } from './spec-releases';

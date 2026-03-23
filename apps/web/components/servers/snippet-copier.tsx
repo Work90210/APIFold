@@ -51,10 +51,10 @@ export function SnippetCopier({ server }: SnippetCopierProps) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl bg-card shadow-sm p-6">
-        <div className="flex items-center gap-2.5 mb-4">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex items-center gap-2.5 mb-3">
           <Monitor className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold font-heading text-sm">Claude Desktop</h3>
+          <h3 className="font-semibold text-sm">Claude Desktop</h3>
         </div>
         <CodeBlock
           code={claudeConfig}
@@ -63,10 +63,10 @@ export function SnippetCopier({ server }: SnippetCopierProps) {
         />
       </div>
 
-      <div className="rounded-xl bg-card shadow-sm p-6">
-        <div className="flex items-center gap-2.5 mb-4">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex items-center gap-2.5 mb-3">
           <Code2 className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold font-heading text-sm">Cursor</h3>
+          <h3 className="font-semibold text-sm">Cursor</h3>
         </div>
         <CodeBlock
           code={cursorConfig}

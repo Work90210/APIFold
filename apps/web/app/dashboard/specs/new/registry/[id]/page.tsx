@@ -60,7 +60,7 @@ export default function RegistryDeployPage({
   };
 
   return (
-    <div className="animate-in max-w-2xl">
+    <div className="max-w-2xl">
       <Link
         href="/dashboard/specs/new/registry"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -71,11 +71,11 @@ export default function RegistryDeployPage({
 
       <div className="mt-8">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted text-2xl font-bold shrink-0">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-xl font-bold shrink-0">
             {entry.name[0]}
           </div>
           <div>
-            <h1 className="text-fluid-2xl font-bold font-heading tracking-tight">{entry.name}</h1>
+            <h1 className="text-xl font-semibold tracking-tight">{entry.name}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{entry.description}</p>
           </div>
         </div>

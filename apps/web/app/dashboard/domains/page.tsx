@@ -22,7 +22,7 @@ export default function DomainsOverviewPage() {
 
   if (isLoading) {
     return (
-      <div className="animate-in space-y-6">
+      <div className="space-y-6">
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-[200px]" />
       </div>
@@ -30,15 +30,10 @@ export default function DomainsOverviewPage() {
   }
 
   return (
-    <div className="animate-in">
-      <div>
-        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">Domains</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Custom domains across your MCP servers.
-        </p>
-      </div>
+    <div>
+      <h1 className="text-xl font-semibold tracking-tight">Domains</h1>
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-8 space-y-6">
         {/* Servers with domains */}
         {withDomains.length > 0 && (
           <div>

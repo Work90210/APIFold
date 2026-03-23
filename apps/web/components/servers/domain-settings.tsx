@@ -67,10 +67,10 @@ export function DomainSettings({ serverId }: DomainSettingsProps) {
   const hasDomain = !!status?.customDomain;
 
   return (
-    <div className="rounded-xl bg-card shadow-sm p-6">
-      <div className="flex items-center gap-2.5 mb-4">
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center gap-2.5 mb-3">
         <Globe className="h-4 w-4 text-muted-foreground" />
-        <h3 className="font-semibold font-heading text-sm">Custom Domain</h3>
+        <h3 className="font-semibold text-sm">Custom Domain</h3>
         {hasDomain && (
           <Badge variant={isVerified ? "default" : "outline"} className="text-xs">
             {isVerified ? "Verified" : "Pending"}
