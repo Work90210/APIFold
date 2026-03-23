@@ -1,4 +1,4 @@
-import type { RegistryEntry, RegistrySearchOptions, RegistryMeta } from './types.js';
+import type { RegistryEntry, RegistrySearchOptions } from './types.js';
 
 export type { RegistryEntry, RegistryMeta, RegistrySearchOptions, Category, AuthType } from './types.js';
 

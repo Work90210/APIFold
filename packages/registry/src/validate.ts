@@ -1,7 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { parseSpec, transformSpec } from '@apifold/transformer';
+
 import { listAll } from './index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/",
+    "lint": "eslint --ext .ts src/",
     "test": "vitest run",
     "validate": "tsx src/validate.ts"
   },
