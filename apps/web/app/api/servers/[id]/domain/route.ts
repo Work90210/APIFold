@@ -48,10 +48,24 @@ export function GET(_request: NextRequest, context: RouteParams): Promise<NextRe
       return errorResponse(ErrorCodes.NOT_FOUND, 'Server not found', 404);
     }
 
+    // For verified domains, do a quick CNAME health check
+    let dnsHealthy: boolean | null = null;
+    if (server.customDomain && server.domainVerifiedAt) {
+      try {
+        const cnameRecords = await dns.resolveCname(server.customDomain);
+        dnsHealthy = cnameRecords.some((r) =>
+          r.toLowerCase().includes(PLATFORM_DOMAINS.values().next().value ?? ''),
+        );
+      } catch {
+        dnsHealthy = false;
+      }
+    }
+
     return NextResponse.json(
       createSuccessResponse({
         customDomain: server.customDomain,
         domainVerifiedAt: server.domainVerifiedAt,
+        dnsHealthy,
         verificationRecord: server.customDomain
           ? `${VERIFICATION_PREFIX}.${server.customDomain}`
           : null,

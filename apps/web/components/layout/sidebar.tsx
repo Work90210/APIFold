@@ -7,6 +7,7 @@ import {
   FileJson,
   Server,
   BarChart3,
+  Globe,
   Settings,
   PanelLeftClose,
   PanelLeft,
@@ -21,6 +22,7 @@ const navItems = [
   { title: "Specs", href: "/dashboard/specs", icon: FileJson, exact: false },
   { title: "Servers", href: "/dashboard/servers", icon: Server, exact: false },
   { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3, exact: false },
+  { title: "Domains", href: "/dashboard/domains", icon: Globe, exact: false },
   { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
 ] as const;
 
