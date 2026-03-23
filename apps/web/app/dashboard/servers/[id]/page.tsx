@@ -13,13 +13,14 @@ import {
   Gauge,
   Server,
   Key,
+  Globe,
 } from "lucide-react";
 import { Skeleton } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { useServer } from "@/lib/hooks";
 import { BackLink } from "@/components/shared/back-link";
 import { ConfigForm } from "@/components/servers/config-form";
-import { DomainSettings } from "@/components/servers/domain-settings";
+// DomainSettings is now a full tab at /servers/[id]/domain
 import { SnippetCopier } from "@/components/servers/snippet-copier";
 
 export default function ServerDetailPage({
@@ -48,6 +49,7 @@ export default function ServerDetailPage({
     { label: "Tools", href: `/dashboard/servers/${id}/tools`, icon: Wrench },
     { label: "Console", href: `/dashboard/servers/${id}/console`, icon: Terminal },
     { label: "Credentials", href: `/dashboard/servers/${id}/credentials`, icon: Key },
+    { label: "Domain", href: `/dashboard/servers/${id}/domain`, icon: Globe },
     { label: "Logs", href: `/dashboard/servers/${id}/logs`, icon: ScrollText },
     { label: "Export", href: `/dashboard/servers/${id}/export`, icon: Download },
   ];
@@ -141,7 +143,6 @@ export default function ServerDetailPage({
         </div>
         <div className="space-y-6">
           <SnippetCopier server={server} />
-          <DomainSettings serverId={id} />
         </div>
       </div>
     </div>
