@@ -20,6 +20,7 @@ import { cn } from "@apifold/ui";
 import { useServer } from "@/lib/hooks";
 import { BackLink } from "@/components/shared/back-link";
 import { ConfigForm } from "@/components/servers/config-form";
+import { DomainSettings } from "@/components/servers/domain-settings";
 import { SnippetCopier } from "@/components/servers/snippet-copier";
 
 export default function ServerDetailPage({
@@ -142,6 +143,7 @@ export default function ServerDetailPage({
         </div>
         <div className="space-y-6">
           <SnippetCopier server={server} />
+          <DomainSettings serverId={id} />
         </div>
       </div>
     </div>
