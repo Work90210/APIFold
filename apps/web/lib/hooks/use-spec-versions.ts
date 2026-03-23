@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { SpecVersion, SpecRelease, CreateSpecVersionInput, ReleaseEnvironment } from "@apifold/types";
+import type { SpecVersion, SpecRelease, ReleaseEnvironment } from "@apifold/types";
 import { api } from "../api-client";
 
 export function useSpecVersions(specId: string) {
