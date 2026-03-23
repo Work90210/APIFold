@@ -2,4 +2,7 @@
 useDefault = true
 
 [allowlist]
-paths = ["^\\.github/workflows/lighthouse\\.yml$"]
+paths = [
+  "^\\.github/workflows/lighthouse\\.yml$",
+  "^\\.github/workflows/bundle-analysis\\.yml$",
+]

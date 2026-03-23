@@ -38,7 +38,9 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "tsup"
+    "prepublishOnly": "tsup",
+    "size": "size-limit",
+    "size:check": "size-limit --json"
   },
   "devDependencies": {
     "@apifold/eslint-config": "workspace:*",
@@ -48,6 +50,8 @@
     "eslint": "^8.57.0",
     "tsup": "^8.5.1",
     "typescript": "^5.6.0",
+    "@size-limit/file": "^11.2.0",
+    "size-limit": "^11.2.0",
     "vitest": "^2.1.0"
   },
   "dependencies": {

@@ -3,62 +3,82 @@ title: Changelog
 description: Release history and notable changes for APIFold.
 ---
 
-## v0.1.0-beta — March 2026
+## v0.1.0 -- March 2026
 
-Initial public beta release.
+First stable release. APIFold is ready for production use on the managed cloud platform and self-hosted deployments.
 
-### Dashboard & UI
+### Transformer Package (Sprint 1)
 
-- Full dashboard with server management, spec import, tool testing, and log viewing
-- Dark mode support with Impeccable Design System
-- Command palette for keyboard-driven navigation
-- Responsive design with mobile sidebar
+- OpenAPI 3.0.x and 3.1.x parsing with full `$ref` resolution
+- Swagger 2.0 support via automatic conversion
+- Automatic tool name generation from `operationId` or path slugs
+- JSON Schema extraction for tool input parameters
+- Flexible filtering by methods, paths (glob patterns), and tags
+- Security hardening against prototype pollution, ReDoS, and stack overflow
+- Published as `@apifold/transformer` under MIT license
 
-### MCP Runtime
+### Database Layer and Credential Vault (Sprint 2)
 
-- SSE and Streamable HTTP transport support
+- PostgreSQL schema with Drizzle ORM (specs, servers, tools, credentials, logs)
+- AES-256-GCM credential encryption with PBKDF2 key derivation
+- Vault secret rotation tooling (`scripts/rotate-vault-secret.ts`)
+- Repository pattern for all data access
+
+### MCP Runtime Service (Sprint 3)
+
+- Express-based MCP runtime with SSE transport
+- JSON-RPC 2.0 message handling for tool execution
+- Upstream API proxying with credential injection
 - Circuit breaker pattern for upstream resilience
 - Connection pooling and session management
-- Request logging and usage event tracking
+- Redis pub/sub for real-time config updates across instances
+- Tiered loading: in-memory registry, Redis cache, PostgreSQL fallback
 
-### API Layer
+### Web API with Auth (Sprint 4)
 
-- RESTful API with Clerk authentication
-- Spec import from URL or file upload (OpenAPI 3.x, Swagger 2.x)
-- Automatic MCP tool generation from OpenAPI operations
-- Server CRUD with slug-based routing
-- Credential vault with AES-256-GCM encryption
+- RESTful API for specs, servers, tools, credentials, and logs
+- Clerk authentication with OAuth support (Google, GitHub)
+- SSRF protection on outbound spec fetches
 - Rate limiting with Redis-backed sliding window
-- SSRF protection on outbound requests
+- Zod schema validation on all endpoints
+- Consistent API response envelope
 
-### Billing
+### Dashboard UI and Docs Site (Sprint 5)
 
+- Full dashboard with server management, spec import, and tool testing
+- Interactive console for testing tools with schema-driven forms
+- Request log viewer with filtering and pagination
+- Dark mode support
+- Command palette for keyboard-driven navigation
+- Responsive design with mobile sidebar
+- Fumadocs documentation site at `/docs`
+
+### Landing Page and Billing (Sprint 6)
+
+- Marketing landing page with feature overview and pricing
 - Four-tier pricing: Free, Starter, Pro, Enterprise
 - Stripe Checkout integration for subscription management
 - Usage metering with Redis atomic counters
-- Webhook handling for plan changes and payment events
-- Billing Portal for self-service subscription management
+- Overage billing with configurable spending caps
+- Stripe Billing Portal for self-service management
+- Webhook handling for subscription lifecycle events
 
-### Transformer (MIT)
+### Docker, Self-Host, and Code Export (Sprint 7)
 
-- OpenAPI 3.0, 3.1, and Swagger 2.0 parsing
-- Automatic tool name and description generation
-- JSON Schema extraction for tool input parameters
-- Warning system for unsupported features
+- Production Docker Compose stack (Nginx, Next.js, Express, PostgreSQL, Redis)
+- Development Docker Compose with hot-reload support
+- Multi-stage Dockerfiles for optimized image sizes
+- Nginx reverse proxy with SSL/TLS support
+- Cluster mode for horizontal scaling
+- Streamable HTTP transport support
+- Code export: download configured MCP servers as standalone TypeScript files
+- Self-hosting guide with configuration reference
 
-### Documentation
+### E2E Tests, Docs, and Launch Prep (Sprint 8)
 
-- Fumadocs-powered documentation site
-- Getting Started guide
-- Server configuration guide
-- Client connection guides (Claude Desktop, Cursor)
-- API reference
-- Billing and authentication docs
-- FAQ and changelog
-
-### Infrastructure
-
-- Monorepo with Turborepo and pnpm workspaces
-- Docker Compose deployment (Nginx, Next.js, Express, PostgreSQL, Redis)
-- Drizzle ORM with PostgreSQL
-- Vitest test suite with 80%+ coverage target
+- End-to-end test suite for critical user flows
+- Documentation finalization and accuracy review
+- API reference with all billing and usage endpoints
+- Architecture Decision Records (ADRs) for all major technical choices
+- Security policy with responsible disclosure process
+- Changelog and release notes

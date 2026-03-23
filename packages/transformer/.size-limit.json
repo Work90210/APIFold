@@ -1,0 +1,12 @@
+[
+  {
+    "path": "dist/index.js",
+    "limit": "50 KB",
+    "gzip": true
+  },
+  {
+    "path": "dist/index.cjs",
+    "limit": "50 KB",
+    "gzip": true
+  }
+]

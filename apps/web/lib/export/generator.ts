@@ -56,7 +56,7 @@ export function generateStandaloneServer(config: ExportConfig): string {
  * Environment variables:
  *   PORT          — Server port (default: 3001)
  *   BASE_URL      — Upstream API base URL
- *   CORS_ORIGIN   — Allowed CORS origin (default: * — MUST be set to your domain in production)
+ *   CORS_ORIGIN   — Required. Allowed CORS origin (e.g. "http://localhost:3000" or your domain)
  *   RATE_LIMIT_MAX — Max requests per 15-minute window (default: 100)
  *   API_KEY / API_TOKEN — Upstream API credentials (depending on auth mode)
  */
@@ -143,7 +143,7 @@ async function executeTool(
     options.body = JSON.stringify(bodyParams);
   }
 
-  const response = await fetch(url, options);
+  const response = await fetch(url, { ...options, signal: AbortSignal.timeout(30_000) });
   if (!response.ok) {
     const text = await response.text();
     const safeMessage = text.length > 500 ? text.slice(0, 500) + '...' : text;
@@ -247,7 +247,10 @@ async function handleMessage(
 }
 
 const app = express();
-const CORS_ORIGIN = process.env['CORS_ORIGIN'] ?? '*';
+const CORS_ORIGIN = process.env['CORS_ORIGIN'];
+if (!CORS_ORIGIN) {
+  throw new Error('CORS_ORIGIN environment variable is required. Set it to your client origin (e.g. "http://localhost:3000") or "*" for development only.');
+}
 app.use(cors({ origin: CORS_ORIGIN }));
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,

@@ -149,10 +149,17 @@ OpenAPI 2.0 (Swagger) is **not supported**. Convert to 3.x first using tools lik
 The package exports typed error classes for precise error handling:
 
 ```typescript
-import { ParseError, ValidationError, TransformError } from '@apifold/transformer';
+import {
+  TransformerError,
+  ParseError,
+  ValidationError,
+  ResolveError,
+  TransformError,
+} from '@apifold/transformer';
 
 try {
   const parsed = parseSpec({ spec: untrustedInput });
+  const result = transformSpec({ spec: parsed.spec });
 } catch (err) {
   if (err instanceof ParseError) {
     // Invalid input (null, array, non-object)
@@ -160,6 +167,13 @@ try {
   if (err instanceof ValidationError) {
     // Structural issues (missing openapi field, unsupported version)
   }
+  if (err instanceof ResolveError) {
+    // $ref resolution failures (missing refs, exceeded limits)
+  }
+  if (err instanceof TransformError) {
+    // Transformation failures
+  }
+  // All error classes extend TransformerError
 }
 ```
 

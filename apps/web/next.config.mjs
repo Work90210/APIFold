@@ -1,5 +1,9 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
 import createMDX from "fumadocs-mdx/config";
 
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
@@ -63,4 +67,4 @@ const nextConfig = {
   },
 };
 
-export default withMDX(nextConfig);
+export default withBundleAnalyzer(withMDX(nextConfig));

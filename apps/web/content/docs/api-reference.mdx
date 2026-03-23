@@ -222,11 +222,102 @@ Returns aggregate usage statistics for the authenticated user.
 {
   "success": true,
   "data": {
-    "totalSpecs": 5,
-    "totalServers": 3,
-    "totalTools": 42,
-    "totalRequests": 12500,
+    "serverCount": 3,
+    "activeServers": 2,
     "requestsThisMonth": 1200
   }
 }
 ```
+
+## Billing
+
+### Create Checkout Session
+
+```
+POST /api/billing/checkout
+Content-Type: application/json
+
+{
+  "planId": "starter"
+}
+```
+
+Creates a Stripe Checkout session for subscribing to a paid plan. `planId` must be `"starter"` or `"pro"`.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://checkout.stripe.com/c/pay/cs_..."
+  }
+}
+```
+
+### Create Portal Session
+
+```
+POST /api/billing/portal
+```
+
+Creates a Stripe Billing Portal session for managing subscriptions, payment methods, and invoices. Returns `404` if the user has no billing account.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://billing.stripe.com/p/session/..."
+  }
+}
+```
+
+### Get Budget Cap
+
+```
+GET /api/billing/budget
+```
+
+Returns the user's configured overage spending cap. A `null` value means no cap is set.
+
+```json
+{
+  "success": true,
+  "data": {
+    "capEur": 10.00
+  }
+}
+```
+
+### Set Budget Cap
+
+```
+POST /api/billing/budget
+Content-Type: application/json
+
+{
+  "capEur": 10.00
+}
+```
+
+Sets or removes the overage spending cap. Pass `null` to remove the cap. Value must be between 0 and 10,000 EUR.
+
+## Webhooks
+
+> Webhook endpoints use provider-specific signature verification (not Clerk Bearer tokens) and may return non-standard response payloads.
+
+### Stripe Webhook
+
+```
+POST /api/webhooks/stripe
+```
+
+Receives Stripe webhook events for subscription lifecycle management. Authenticated via `stripe-signature` header (not Bearer token). Returns `{ "received": true }` on success.
+
+### Clerk Webhook
+
+```
+POST /api/webhooks/clerk
+```
+
+Receives Clerk webhook events for user lifecycle management. Authenticated via Clerk signature verification.

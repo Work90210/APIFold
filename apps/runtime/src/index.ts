@@ -7,6 +7,7 @@ import { ProtocolHandler } from './mcp/protocol-handler.js';
 import { SessionManager } from './mcp/session-manager.js';
 import { createLogger } from './observability/logger.js';
 import { metrics } from './observability/metrics.js';
+import { createMonitoredDb } from './observability/query-monitor.js';
 import { CredentialCache } from './registry/credential-cache.js';
 import { ServerRegistry } from './registry/server-registry.js';
 import { ToolLoader } from './registry/tool-loader.js';
@@ -45,7 +46,7 @@ export async function startWorker(): Promise<void> {
     ssl,
   });
 
-  const db: DbClient = {
+  const rawDb: DbClient = {
     async query<T>(queryStr: string, params?: readonly unknown[]): Promise<{ readonly rows: readonly T[] }> {
       // All queries MUST use $1/$2 parameterization. The queryStr is always a
       // compile-time constant from postgres-loader.ts — never user input.
@@ -54,6 +55,8 @@ export async function startWorker(): Promise<void> {
       return { rows: result as unknown as readonly T[] };
     },
   };
+
+  const db = createMonitoredDb({ logger, db: rawDb });
 
   // Redis connections (separate for subscriber — ioredis requirement)
   const redis = createRedisClient({ url: config.redisUrl });

@@ -14,8 +14,8 @@ Thank you for your interest in contributing to APIFold!
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/apifold.git
-cd apifold
+git clone https://github.com/Work90210/APIFold.git
+cd APIFold
 
 # Install dependencies
 pnpm install

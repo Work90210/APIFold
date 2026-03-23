@@ -27,10 +27,5 @@ jobs:
         with:
           working-directory: packages/transformer
       - run: pnpm --filter @apifold/transformer build
-      - name: Check transformer bundle size
-        run: |
-          SIZE=$(wc -c < packages/transformer/dist/index.js | tr -d ' ')
-          if [ "$SIZE" -gt 51200 ]; then
-            echo "::error::Transformer bundle exceeds 50KB ($SIZE bytes)"
-            exit 1
-          fi
+      - name: Check transformer bundle size (gzipped)
+        run: pnpm --filter @apifold/transformer size

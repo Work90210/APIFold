@@ -21,7 +21,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: pnpm audit
         run: pnpm audit --audit-level=high
-        continue-on-error: true
 
   gitleaks:
     runs-on: ubuntu-latest
@@ -33,19 +32,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  trivy:
+  trivy-fs:
+    name: Trivy filesystem scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@master
+      - uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: "fs"
           severity: "HIGH,CRITICAL"
           exit-code: "1"
-        continue-on-error: true
+
+  trivy-docker:
+    name: Trivy Dockerfile scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - apps/web/Dockerfile
+          - apps/runtime/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: "config"
+          scan-ref: ${{ matrix.dockerfile }}
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
 
   snyk:
     runs-on: ubuntu-latest
+    # Snyk requires SNYK_TOKEN — skipped on fork PRs where secrets are unavailable
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v5
@@ -56,16 +74,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Snyk Open Source (dependency vulnerabilities)
-        uses: snyk/actions/node@master
-        continue-on-error: true
+        uses: snyk/actions/node@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --all-projects
 
       - name: Snyk Code (static analysis)
-        uses: snyk/actions/node@master
-        continue-on-error: true
+        uses: snyk/actions/node@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
