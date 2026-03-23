@@ -366,12 +366,12 @@ describe('AnalyticsResponse', () => {
   it('satisfies the full shape with nested values intact', () => {
     expect(fullResponse.overview.totalCalls).toBe(100);
     expect(fullResponse.overview.successRate).toBe(95.0);
-    expect(fullResponse.timeSeries[0].bucket).toBe('2026-03-15T00:00:00.000Z');
-    expect(fullResponse.topTools[0].name).toBe('list_files');
-    expect(fullResponse.errorBreakdown[0].statusCode).toBe(404);
-    expect(fullResponse.errorBreakdown[1].errorCode).toBeNull();
-    expect(fullResponse.failingTools[0].errorRate).toBe(25.0);
-    expect(fullResponse.recentActivity[0].tool).toBe('read_file');
+    expect(fullResponse.timeSeries[0]!.bucket).toBe('2026-03-15T00:00:00.000Z');
+    expect(fullResponse.topTools[0]!.name).toBe('list_files');
+    expect(fullResponse.errorBreakdown[0]!.statusCode).toBe(404);
+    expect(fullResponse.errorBreakdown[1]!.errorCode).toBeNull();
+    expect(fullResponse.failingTools[0]!.errorRate).toBe(25.0);
+    expect(fullResponse.recentActivity[0]!.tool).toBe('read_file');
     expect(fullResponse.usage.planName).toBe('pro');
   });
 });
