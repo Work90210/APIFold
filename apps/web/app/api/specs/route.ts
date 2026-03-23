@@ -4,7 +4,9 @@ import { getDb } from '../../../lib/db/index';
 import { SpecRepository } from '../../../lib/db/repositories/spec.repository';
 import { ServerRepository } from '../../../lib/db/repositories/server.repository';
 import { ToolRepository } from '../../../lib/db/repositories/tool.repository';
+import { ProfileRepository } from '../../../lib/db/repositories/profile.repository';
 import { getUserId, withErrorHandler, withRateLimit, ApiError } from '../../../lib/api-helpers';
+import { autoGenerateProfiles } from '../../../lib/profiles/auto-generate';
 import { createSpecSchema } from '../../../lib/validation/spec.schema';
 import { randomBytes } from 'node:crypto';
 import { fetchSpecFromUrl } from '../../../lib/ssrf-guard';
@@ -65,6 +67,7 @@ export function POST(request: NextRequest): Promise<NextResponse> {
       const specRepo = new SpecRepository(tx);
       const serverRepo = new ServerRepository(tx);
       const toolRepo = new ToolRepository(tx);
+      const profileRepo = new ProfileRepository(tx);
 
       const spec = await specRepo.create(userId, {
         name: input.name,
@@ -81,14 +84,19 @@ export function POST(request: NextRequest): Promise<NextResponse> {
         baseUrl: '',
       });
 
+      const createdTools = [];
       for (const tool of transformResult.tools) {
-        await toolRepo.create(userId, {
+        const created = await toolRepo.create(userId, {
           serverId: server.id,
           name: tool.name,
           description: tool.description ?? null,
           inputSchema: (tool.inputSchema ?? {}) as Record<string, unknown>,
         });
+        createdTools.push({ id: created.id, name: created.name, inputSchema: tool.inputSchema ?? {} });
       }
+
+      // Auto-generate default access profiles (Read Only, Read/Write, Full Access)
+      await autoGenerateProfiles(profileRepo, userId, server.id, createdTools);
 
       return { spec, server };
     });

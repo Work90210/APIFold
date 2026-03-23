@@ -72,7 +72,8 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
   const { db, logger, registry } = deps;
 
   const { rows } = await db.query<ServerRow>(
-    `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active, custom_domain
+    `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active,
+            CASE WHEN domain_verified_at IS NOT NULL THEN custom_domain ELSE NULL END AS custom_domain
      FROM mcp_servers
      WHERE is_active = true`,
   );
@@ -104,7 +105,8 @@ export async function reloadServer(
   const { db, registry } = deps;
 
   const { rows } = await db.query<ServerRow>(
-    `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active, custom_domain
+    `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active,
+            CASE WHEN domain_verified_at IS NOT NULL THEN custom_domain ELSE NULL END AS custom_domain
      FROM mcp_servers
      WHERE id = $1`,
     [serverId],
