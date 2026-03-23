@@ -7,6 +7,7 @@ export interface McpServer {
   readonly specId: string;
   readonly userId: string;
   readonly slug: string;
+  readonly endpointId: string;
   readonly name: string;
   readonly transport: TransportType;
   readonly authMode: AuthMode;
@@ -14,6 +15,8 @@ export interface McpServer {
   /** Maximum requests allowed per minute */
   readonly rateLimitPerMinute: number;
   readonly isActive: boolean;
+  readonly customDomain: string | null;
+  readonly domainVerifiedAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -35,6 +38,7 @@ export interface UpdateServerInput {
   readonly baseUrl?: string;
   readonly rateLimitPerMinute?: number;
   readonly isActive?: boolean;
+  readonly customDomain?: string | null;
 }
 
 export interface ServerFilters {

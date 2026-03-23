@@ -74,12 +74,16 @@ export class ServerRepository extends BaseRepository<
         throw new Error('Spec not found or access denied');
       }
 
+      const { randomBytes } = await import('node:crypto');
+      const endpointId = randomBytes(6).toString('hex');
+
       const rows = await tx
         .insert(mcpServers)
         .values({
         userId,
         specId: input.specId,
         slug: input.slug,
+        endpointId,
         name: input.name,
         transport: input.transport ?? 'sse',
         authMode: input.authMode,
