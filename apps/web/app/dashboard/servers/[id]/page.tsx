@@ -51,6 +51,9 @@ export default function ServerDetailPage({
   const activeTools = tools?.filter((t) => t.isActive).length ?? 0;
   const totalTools = tools?.length ?? 0;
 
+  // TODO: versions[0] is the newest version, not necessarily the one deployed
+  // to production. Once spec_releases query is wired, replace this with the
+  // actual promoted production release to avoid showing a preview version here.
   const latestVersion = versions?.[0];
   const productionUrl = `https://${server.slug}.${PLATFORM_DOMAIN}`;
 
@@ -207,6 +210,7 @@ export default function ServerDetailPage({
             <h2 className="text-sm font-medium">Deployments</h2>
           </div>
           <div className="rounded-lg border border-border">
+            {/* TODO: isProduction should be determined from spec_releases table, not index */}
             {versions.map((v, i) => {
               const isProduction = i === 0;
               const url = isProduction

@@ -14,12 +14,25 @@ export interface LogFilters {
 
 type NoOp = Record<string, never>;
 
+const REDACTED_HEADERS = new Set(['authorization', 'cookie', 'x-api-key']);
+const REDACTED_VALUE = '***';
+
 export class LogRepository extends BaseRepository<
   RequestLog,
   CreateRequestLogInput,
   NoOp,
   LogFilters
 > {
+  private sanitizeHeaders(
+    headers: Record<string, string> | null | undefined,
+  ): Record<string, string> | null {
+    if (!headers) return null;
+    return Object.fromEntries(
+      Object.entries(headers).map(([key, value]) =>
+        REDACTED_HEADERS.has(key.toLowerCase()) ? [key, REDACTED_VALUE] : [key, value],
+      ),
+    );
+  }
   async findAll(userId: string, filters?: LogFilters): Promise<readonly RequestLog[]> {
     const conditions = [eq(requestLogs.userId, userId)];
 
@@ -92,7 +105,7 @@ export class LogRepository extends BaseRepository<
           durationMs: input.durationMs,
           requestBody: input.requestBody ?? null,
           responseBody: input.responseBody ?? null,
-          requestHeaders: input.requestHeaders ?? null,
+          requestHeaders: this.sanitizeHeaders(input.requestHeaders as Record<string, string> | null | undefined),
           errorMessage: input.errorMessage ?? null,
           toolName: input.toolName ?? null,
         })

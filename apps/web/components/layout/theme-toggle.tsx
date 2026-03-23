@@ -20,11 +20,10 @@ function getStoredDark(): boolean {
 }
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    setDark(getStoredDark());
-  }, []);
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return getStoredDark();
+  });
 
   useEffect(() => {
     if (dark) {

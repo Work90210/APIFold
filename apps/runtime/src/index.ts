@@ -116,7 +116,7 @@ export async function startWorker(): Promise<void> {
     sessionManager,
     toolExecutorDeps,
     redis,
-    db: db as unknown as import('./mcp/protocol-handler.js').DbClient,
+    db,
   });
 
   // Ready state

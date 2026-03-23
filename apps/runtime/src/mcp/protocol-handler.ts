@@ -30,7 +30,7 @@ interface JsonRpcResponse {
 export type ProfileFetcher = (serverId: string) => Promise<readonly string[] | null>;
 
 export type DbClient = {
-  (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]>;
+  query<T>(sql: string, params?: readonly unknown[]): Promise<{ readonly rows: readonly T[] }>;
 };
 
 export interface ProtocolHandlerDeps {
@@ -159,9 +159,15 @@ export class ProtocolHandler {
     }
 
     // Profile-based enforcement: reject calls to tools outside the active profile
-    const allowedToolIds = this.fetchProfileToolIds
-      ? await this.fetchProfileToolIds(server.id)
-      : null;
+    let allowedToolIds: readonly string[] | null;
+    try {
+      allowedToolIds = this.fetchProfileToolIds
+        ? await this.fetchProfileToolIds(server.id)
+        : null;
+    } catch (err) {
+      this.logger.error({ err, slug: session.slug }, 'Failed to fetch profile tool IDs');
+      return jsonRpcError(req.id, -32603, 'Failed to load profile');
+    }
 
     if (allowedToolIds && !allowedToolIds.includes(tool.id)) {
       return jsonRpcError(req.id, -32002, 'Tool not found');
@@ -228,10 +234,11 @@ export class ProtocolHandler {
     if (!this.db) return;
 
     // Fire-and-forget — don't block the response
-    (this.db`
-      INSERT INTO request_logs (server_id, tool_id, user_id, request_id, method, path, status_code, duration_ms)
-      VALUES (${serverId}, ${toolId}, ${userId}, ${requestId}, ${method}, ${path}, ${statusCode}, ${durationMs})
-    ` as Promise<unknown>).catch((err) => {
+    this.db.query(
+      `INSERT INTO request_logs (server_id, tool_id, user_id, request_id, method, path, status_code, duration_ms)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [serverId, toolId, userId, requestId, method, path, statusCode, durationMs],
+    ).catch((err) => {
       this.logger.warn({ err }, 'Failed to write request log');
     });
   }
