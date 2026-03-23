@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@apifold/registry": "workspace:^",
     "@apifold/transformer": "workspace:*",
     "@apifold/types": "workspace:*",
     "@apifold/ui": "workspace:*",
@@ -25,12 +26,14 @@
     "fumadocs-core": "13.4.10",
     "fumadocs-mdx": "9.0.4",
     "fumadocs-ui": "13.4.10",
+    "geist": "^1.7.0",
     "ioredis": "^5.4.0",
     "lucide-react": "^0.577.0",
     "next": "^15.5.14",
     "postgres": "^3.4.8",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "recharts": "^3.8.0",
     "stripe": "^20.4.1",
     "svix": "^1.45.0",
     "tailwind-merge": "^3.5.0",
@@ -38,9 +41,9 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^15.5.14",
     "@apifold/eslint-config": "workspace:*",
     "@apifold/tsconfig": "workspace:*",
+    "@next/bundle-analyzer": "^15.5.14",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

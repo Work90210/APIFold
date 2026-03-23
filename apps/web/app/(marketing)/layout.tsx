@@ -9,7 +9,7 @@ export default function MarketingLayout({
   readonly children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#060e20] text-[#dee5ff] overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
         <Script
           defer

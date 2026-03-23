@@ -20,7 +20,7 @@ export function UsageDashboard() {
 
   if (usageLoading || specsLoading) {
     return (
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-lg border border-border bg-card p-4">
         <Skeleton className="mb-4 h-5 w-40 rounded-lg" />
         <div className="space-y-6">
           <Skeleton className="h-12 rounded-lg" />
@@ -40,8 +40,8 @@ export function UsageDashboard() {
   });
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Usage This Month
         </h2>
@@ -65,9 +65,9 @@ export function UsageDashboard() {
         />
       </div>
 
-      <div className="border-t border-border/40 mt-6" />
+      <div className="border-t border-border/40 mt-4" />
 
-      <dl className="mt-5 grid grid-cols-2 gap-y-3 gap-x-8 text-sm">
+      <dl className="mt-4 grid grid-cols-2 gap-y-3 gap-x-8 text-sm">
         <div className="flex justify-between">
           <dt className="text-muted-foreground">Specs imported</dt>
           <dd className="font-semibold tabular-nums">{specs?.length ?? 0}</dd>

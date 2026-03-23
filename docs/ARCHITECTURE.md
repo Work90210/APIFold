@@ -193,3 +193,65 @@
 - Usage-based overage billing via Stripe's metered billing API
 - Customer IDs stored in Clerk user metadata, linking identity to billing
 - Self-hosted deployments bypass all billing logic -- no Stripe dependency required
+
+## ADR-013: CLI Tool for Zero-Friction Adoption
+
+**Status**: Accepted
+
+**Context**: The hosted platform requires a database, Redis, Clerk, and Stripe to run. Developers evaluating APIFold need a way to try it without any infrastructure setup.
+
+**Decision**: Ship `@apifold/cli` -- a standalone CLI tool that converts any OpenAPI spec into a running MCP server with a single command: `npx apifold serve ./spec.yaml`.
+
+**Architecture**:
+- Imports `@apifold/transformer` for spec parsing and tool generation
+- Lightweight Express server (no Postgres, no Redis, no Clerk)
+- Tools generated at startup and held in memory
+- HTTP proxy forwards tool calls to the upstream API with auth injection
+- Supports both SSE and Streamable HTTP transports
+- Config via CLI flags, YAML config file, or env var interpolation
+
+**Security**:
+- Server binds to `127.0.0.1` only (not exposed to the network)
+- CORS restricted to same-origin (`origin: false`)
+- SSE sessions require `X-Session-Id` header verification
+- YAML files parsed with `JSON_SCHEMA` to prevent prototype pollution
+- Upstream proxy validates protocol (HTTP/HTTPS only) with 30s timeout
+- Error messages sanitized before returning to MCP clients
+
+**Commands**:
+- `apifold serve <spec>` -- Start an MCP server from an OpenAPI spec
+- `apifold transform <spec>` -- Output MCP tool definitions as JSON
+- `apifold validate <spec>` -- Parse-only validation with detailed warnings
+- `apifold init [spec]` -- Generate an `apifold.config.yaml` template
+
+**Consequences**:
+- Zero-config quick start: `npx apifold serve ./stripe-openapi.yaml`
+- Single-tenant, local-only -- no multi-user model
+- No credential encryption (tokens passed via CLI flags or env vars)
+- Shares `@apifold/transformer` with the hosted platform for consistency
+
+## ADR-014: OAuth 2.0 Credential Foundation
+
+**Status**: Accepted
+
+**Context**: Many upstream APIs require OAuth 2.0 for authentication (Google, Slack, Microsoft, GitHub, etc.). The credential system only supported static API keys and bearer tokens.
+
+**Decision**: Extend the credential model to support OAuth 2.0 Authorization Code and Client Credentials flows. Ship with pre-configured provider presets for 8 common OAuth providers.
+
+**Schema Changes** (migration `0003_oauth_credentials`):
+- `auth_type` CHECK constraint widened to include `oauth2_authcode` and `oauth2_client_creds`
+- New columns: `encrypted_refresh_token`, `scopes`, `token_endpoint`, `client_id`, `encrypted_client_secret`, `token_expires_at`, `provider`
+- All new columns are nullable -- existing `api_key`/`bearer` credentials are unaffected
+
+**Provider Presets**: Google, Slack, Microsoft Graph, HubSpot, Salesforce, Notion, GitHub, Spotify. Each preset provides `authorizationEndpoint`, `tokenEndpoint`, and `defaultScopes`. Users supply only their own `client_id` and `client_secret`.
+
+**Security**:
+- `refresh_token` and `client_secret` encrypted via AES-256-GCM vault (same as API keys)
+- `token_endpoint` validated as HTTPS with private hostname rejection (SSRF prevention)
+- `SafeCredential` type excludes all encrypted fields from API responses
+- Expiry check enforced on all decrypt operations
+
+**Consequences**:
+- OAuth token refresh flow not yet implemented (Sprint 10)
+- Authorization endpoint resolved at runtime from provider presets, not stored in DB
+- Frontend OAuth UI deferred to Sprint 10

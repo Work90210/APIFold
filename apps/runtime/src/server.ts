@@ -17,6 +17,7 @@ import type { Logger } from './observability/logger.js';
 import { metrics } from './observability/metrics.js';
 import type { ServerRegistry } from './registry/server-registry.js';
 import type { ToolLoader } from './registry/tool-loader.js';
+import { createDomainRouter } from './transports/domain-router.js';
 import { createSSETransportRouter } from './transports/sse.js';
 import { createStreamableHTTPRouter } from './transports/streamable-http.js';
 
@@ -66,6 +67,13 @@ export function createApp(deps: AppDeps): Express {
       }),
     );
   }
+
+  // Custom domain routing — rewrites /sse → /mcp/:endpointId/sse for custom domain requests
+  app.use(createDomainRouter({
+    logger,
+    registry,
+    platformDomain: process.env['PLATFORM_DOMAIN'] ?? 'apifold.dev',
+  }));
 
   // Transport routers — SSE and Streamable HTTP
   app.use(createSSETransportRouter({

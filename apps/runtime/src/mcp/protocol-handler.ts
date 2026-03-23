@@ -27,6 +27,12 @@ interface JsonRpcResponse {
   readonly error?: { readonly code: number; readonly message: string };
 }
 
+export type ProfileFetcher = (serverId: string) => Promise<readonly string[] | null>;
+
+export type DbClient = {
+  query<T>(sql: string, params?: readonly unknown[]): Promise<{ readonly rows: readonly T[] }>;
+};
+
 export interface ProtocolHandlerDeps {
   readonly logger: Logger;
   readonly registry: ServerRegistry;
@@ -34,6 +40,8 @@ export interface ProtocolHandlerDeps {
   readonly sessionManager: SessionManager;
   readonly toolExecutorDeps: ToolExecutorDeps;
   readonly redis: Redis;
+  readonly db?: DbClient;
+  readonly fetchProfileToolIds?: ProfileFetcher;
 }
 
 export class ProtocolHandler {
@@ -43,6 +51,8 @@ export class ProtocolHandler {
   private readonly sessionManager: SessionManager;
   private readonly executorDeps: ToolExecutorDeps;
   private readonly redis: Redis;
+  private readonly db: DbClient | null;
+  private readonly fetchProfileToolIds: ProfileFetcher | null;
 
   constructor(deps: ProtocolHandlerDeps) {
     this.logger = deps.logger;
@@ -51,6 +61,8 @@ export class ProtocolHandler {
     this.sessionManager = deps.sessionManager;
     this.executorDeps = deps.toolExecutorDeps;
     this.redis = deps.redis;
+    this.db = deps.db ?? null;
+    this.fetchProfileToolIds = deps.fetchProfileToolIds ?? null;
   }
 
   async handleMessage(session: SSESession, message: JsonRpcRequest): Promise<void> {
@@ -99,8 +111,19 @@ export class ProtocolHandler {
 
     try {
       const toolMap = await this.toolLoader.getTools(server.id);
-      const tools = [...toolMap.values()].map(toMcpToolDef);
-      return jsonRpcSuccess(req.id, { tools });
+      let tools = [...toolMap.values()];
+
+      // Profile-based filtering: only show tools allowed by the active profile
+      const allowedToolIds = this.fetchProfileToolIds
+        ? await this.fetchProfileToolIds(server.id)
+        : null;
+
+      if (allowedToolIds) {
+        const allowedSet = new Set(allowedToolIds);
+        tools = tools.filter((t) => allowedSet.has(t.id));
+      }
+
+      return jsonRpcSuccess(req.id, { tools: tools.map(toMcpToolDef) });
     } catch (err) {
       this.logger.error({ err, slug: session.slug }, 'Failed to load tools');
       return jsonRpcError(req.id, -32603, 'Failed to load tools');
@@ -135,6 +158,21 @@ export class ProtocolHandler {
       return jsonRpcError(req.id, -32002, 'Tool not found');
     }
 
+    // Profile-based enforcement: reject calls to tools outside the active profile
+    let allowedToolIds: readonly string[] | null;
+    try {
+      allowedToolIds = this.fetchProfileToolIds
+        ? await this.fetchProfileToolIds(server.id)
+        : null;
+    } catch (err) {
+      this.logger.error({ err, slug: session.slug }, 'Failed to fetch profile tool IDs');
+      return jsonRpcError(req.id, -32603, 'Failed to load profile');
+    }
+
+    if (allowedToolIds && !allowedToolIds.includes(tool.id)) {
+      return jsonRpcError(req.id, -32002, 'Tool not found');
+    }
+
     // Usage gate: check plan limits after tool validation, before executing
     const planLimits = await getPlanLimitsForUser(this.redis, server.userId);
     const usageCheck = await checkAndIncrementUsage(
@@ -165,14 +203,44 @@ export class ProtocolHandler {
         toolInput,
         context,
       );
-      metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
+      const durationMs = Math.round(performance.now() - start);
+      metrics.observeHistogram('tool_call_duration_ms', durationMs);
+
+      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, toolName, `/${server.slug}/sse`, 200, durationMs);
+
       return jsonRpcSuccess(req.id, result);
     } catch (err) {
+      const durationMs = Math.round(performance.now() - start);
       metrics.incrementCounter('tool_call_errors');
-      metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
+      metrics.observeHistogram('tool_call_duration_ms', durationMs);
       this.logger.error({ err, tool: toolName, slug: session.slug }, 'Tool execution error');
+
+      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, toolName, `/${server.slug}/sse`, 500, durationMs);
+
       return jsonRpcError(req.id, -32603, 'Tool execution failed');
     }
+  }
+
+  private writeRequestLog(
+    serverId: string,
+    toolId: string,
+    userId: string,
+    requestId: string,
+    method: string,
+    path: string,
+    statusCode: number,
+    durationMs: number,
+  ): void {
+    if (!this.db) return;
+
+    // Fire-and-forget — don't block the response
+    this.db.query(
+      `INSERT INTO request_logs (server_id, tool_id, user_id, request_id, method, path, status_code, duration_ms, tool_name)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [serverId, toolId, userId, requestId, 'POST', path, statusCode, durationMs, method],
+    ).catch((err) => {
+      this.logger.warn({ err }, 'Failed to write request log');
+    });
   }
 }
 

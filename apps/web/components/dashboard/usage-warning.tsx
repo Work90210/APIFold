@@ -32,7 +32,7 @@ export function UsageWarning() {
 
   return (
     <div
-      className={`rounded-xl border px-4 py-3 text-sm flex items-center gap-3 ${
+      className={`rounded-lg border px-4 py-3 text-sm flex items-center gap-3 ${
         isAtLimit
           ? "border-destructive/30 bg-destructive/[0.05] text-destructive"
           : "border-amber-500/30 bg-amber-500/[0.05] text-amber-600 dark:text-amber-400"

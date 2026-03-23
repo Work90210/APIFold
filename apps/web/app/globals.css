@@ -22,9 +22,9 @@
     line-height: var(--leading-normal);
   }
 
-  /* Dark mode: reduce font weight for better readability on dark backgrounds */
+  /* Dark mode: Geist renders well at 400 */
   .dark body {
-    font-weight: 350;
+    font-weight: 400;
   }
 
   /* OpenType: disable ligatures on monospace/code for readability */
@@ -38,15 +38,10 @@
 
   /* Headings */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+    font-family: var(--font-sans);
     line-height: var(--leading-tight);
     letter-spacing: var(--tracking-tight);
     font-weight: 600;
-  }
-
-  /* Optical alignment: headings get slight negative left margin for visual alignment */
-  h1, h2, h3 {
-    margin-left: -0.05em;
   }
 
   /* Tabular numbers for data */
@@ -74,11 +69,6 @@
     max-width: var(--prose-max-width);
   }
 
-  /* Font display swap for web fonts */
-  @font-face {
-    font-display: swap;
-  }
-
   /* Selection styling */
   ::selection {
     background-color: hsl(var(--selection-bg));
@@ -97,24 +87,16 @@
     outline: none;
   }
 
-  /* Dark mode: use lighter surfaces instead of shadows for depth */
-  .dark .shadow-sm,
-  .dark .shadow,
-  .dark .shadow-md {
-    box-shadow: none;
-    border-color: hsl(var(--border));
-  }
-
-  .dark .shadow-lg,
-  .dark .shadow-xl {
+  /* Strip shadows in both themes — Vercel aesthetic uses borders for depth */
+  .shadow-sm,
+  .shadow,
+  .shadow-md {
     box-shadow: none;
   }
 
-  /* Dark mode: elevate with surface color instead */
-  .dark .hover\:shadow-lg:hover,
-  .dark .hover\:shadow-xl:hover {
+  .shadow-lg,
+  .shadow-xl {
     box-shadow: none;
-    background-color: hsl(var(--surface-2));
   }
 }
 
@@ -224,109 +206,7 @@
     background-color: hsl(var(--muted-foreground) / 0.4);
   }
 
-  /* Page entry animation — slide up + fade */
-  .animate-in {
-    animation: slide-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .animate-in-slow {
-    animation: slide-up 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  /* Glass card utility */
-  .glass-card {
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  /* Marketing glass panel */
-  .glass-panel {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-
-  /* Marketing MCP glow */
-  .mcp-glow {
-    box-shadow: 0 0 40px -10px rgba(167, 165, 255, 0.3);
-  }
-
-  /* Marketing kinetic background */
-  .kinetic-bg {
-    background: radial-gradient(circle at 50% 50%, rgba(83, 221, 252, 0.05) 0%, transparent 50%);
-  }
-
-  /* Pulse animation for live indicators */
-  .pulse-live {
-    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  @keyframes pulse-ring {
-    0%, 100% {
-      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
-    }
-    50% {
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
-    }
-  }
-
-  /* Progress bar mount animation */
-  .animate-progress {
-    animation: progress-fill 800ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both;
-  }
-
-  @keyframes progress-fill {
-    from {
-      width: 0%;
-    }
-  }
-
-  /* Count-up fade for stat values */
-  .animate-value {
-    animation: value-in 600ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 50ms + 200ms) both;
-  }
-
-  @keyframes value-in {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Gradient divider */
-  .gradient-divider {
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--border)),
-      transparent
-    );
-  }
-
-
-  /* Sidebar brand animation */
-  .animate-brand {
-    animation: brand-in 800ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
-  }
-
-  @keyframes brand-in {
-    from {
-      opacity: 0;
-      transform: translateX(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  /* Auto-fit responsive grid — replaces fixed-column grids */
+  /* Auto-fit responsive grid */
   .grid-auto-fill {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -359,7 +239,7 @@
       padding: 1rem;
       margin-bottom: 0.75rem;
       border: 1px solid hsl(var(--border));
-      border-radius: var(--radius-xl);
+      border-radius: var(--radius-lg);
       background: hsl(var(--card));
     }
 

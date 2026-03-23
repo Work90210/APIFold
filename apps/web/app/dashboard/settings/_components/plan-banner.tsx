@@ -37,9 +37,9 @@ export function PlanBanner() {
 
   if (!isLoaded) {
     return (
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-lg border border-border bg-card p-4">
         <Skeleton className="mb-4 h-5 w-32 rounded-lg" />
-        <Skeleton className="h-20 rounded-xl" />
+        <Skeleton className="h-20 rounded-lg" />
       </div>
     );
   }
@@ -50,8 +50,8 @@ export function PlanBanner() {
   const PlanIcon = ui.icon;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 h-full">
-      <div className="flex items-center justify-between mb-5">
+    <div className="rounded-lg border border-border bg-card p-4 h-full">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Current Plan
         </h2>
@@ -62,27 +62,27 @@ export function PlanBanner() {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg bg-surface-2 p-3.5 text-center">
+        <div className="rounded-lg bg-muted/50 p-3.5 text-center">
           <Server className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
-          <p className="text-xl font-bold font-heading tabular-nums">
+          <p className="text-xl font-semibold tabular-nums">
             {formatLimit(plan.maxServers)}
           </p>
           <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
             Servers
           </p>
         </div>
-        <div className="rounded-lg bg-surface-2 p-3.5 text-center">
+        <div className="rounded-lg bg-muted/50 p-3.5 text-center">
           <Activity className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
-          <p className="text-xl font-bold font-heading tabular-nums">
+          <p className="text-xl font-semibold tabular-nums">
             {formatLimit(plan.maxRequestsPerMonth)}
           </p>
           <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
             Requests/mo
           </p>
         </div>
-        <div className="rounded-lg bg-surface-2 p-3.5 text-center">
+        <div className="rounded-lg bg-muted/50 p-3.5 text-center">
           <Clock className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
-          <p className="text-xl font-bold font-heading tabular-nums">
+          <p className="text-xl font-semibold tabular-nums">
             {formatRetention(plan.logRetentionDays)}
           </p>
           <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">

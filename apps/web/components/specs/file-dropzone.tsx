@@ -65,16 +65,16 @@ export function FileDropzone({ onFileSelect }: FileDropzoneProps) {
     <div className="space-y-2">
       <div
         className={cn(
-          "flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center transition-all duration-300 ease-out-expo",
+          "flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors duration-150 ease-out",
           isDragging
-            ? "border-brand-500 bg-brand-500/5 shadow-inner"
+            ? "border-primary bg-primary/5"
             : "border-muted-foreground/20 hover:border-muted-foreground/40 hover:bg-accent/30",
         )}
         style={
           isDragging
             ? {
                 borderImage:
-                  "linear-gradient(135deg, hsl(var(--brand-500)), hsl(var(--brand-400))) 1",
+                  "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--ring))) 1",
               }
             : undefined
         }
@@ -85,15 +85,15 @@ export function FileDropzone({ onFileSelect }: FileDropzoneProps) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
       >
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500/10">
-          <Upload className="h-6 w-6 text-brand-500" />
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-muted">
+          <Upload className="h-5 w-5 text-muted-foreground" />
         </div>
-        <p className="text-sm font-medium font-heading tracking-tight">
+        <p className="text-sm font-medium tracking-tight">
           Drop your spec file here
         </p>
         <p className="mt-1.5 text-xs text-muted-foreground leading-normal">
           or{" "}
-          <label className="cursor-pointer text-primary underline underline-offset-2 transition-colors duration-200 ease-out-expo hover:text-brand-600">
+          <label className="cursor-pointer text-primary underline underline-offset-2 transition-colors duration-150 ease-out hover:text-primary/80">
             browse files
             <input
               type="file"

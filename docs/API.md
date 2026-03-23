@@ -158,6 +158,8 @@ Content-Type: application/json
 }
 ```
 
+**Supported `authMode` values:** `none`, `api_key`, `bearer`, `oauth2_authcode`, `oauth2_client_creds`
+
 **Auth:** Required (Bearer token)
 
 **Error Codes:** `VALIDATION_ERROR` (400), `NOT_FOUND` (404), `CONFLICT` (409)
@@ -278,12 +280,42 @@ Content-Type: application/json
 
 The key is encrypted at rest using AES-256-GCM and never returned in API responses.
 
+**Supported `authType` values:** `api_key`, `bearer`, `oauth2_authcode`, `oauth2_client_creds`
+
+**OAuth Fields** (optional, for `oauth2_*` auth types):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `refreshToken` | string | OAuth refresh token (encrypted at rest) |
+| `scopes` | string[] | Granted OAuth scopes (max 50) |
+| `tokenEndpoint` | string | Token endpoint URL (must be HTTPS, no private IPs) |
+| `clientId` | string | OAuth client ID |
+| `clientSecret` | string | OAuth client secret (encrypted at rest) |
+| `tokenExpiresAt` | ISO date | When the access token expires |
+| `provider` | string | Provider preset ID (e.g., `google`, `slack`, `github`) |
+
+**Example (OAuth):**
+
+```json
+{
+  "label": "Google Calendar",
+  "plaintextKey": "ya29.access-token...",
+  "authType": "oauth2_authcode",
+  "refreshToken": "1//refresh-token...",
+  "scopes": ["https://www.googleapis.com/auth/calendar.readonly"],
+  "tokenEndpoint": "https://oauth2.googleapis.com/token",
+  "clientId": "123456.apps.googleusercontent.com",
+  "clientSecret": "GOCSPX-...",
+  "provider": "google"
+}
+```
+
 **Error Codes:** `VALIDATION_ERROR` (400), `NOT_FOUND` (404)
 
 ### Delete Credential
 
 ```
-DELETE /api/servers/:serverId/credentials/:credentialId
+DELETE /api/servers/:serverId/credentials?credentialId=:credentialId
 ```
 
 **Auth:** Required (Bearer token)
@@ -309,17 +341,20 @@ Returns cursor-paginated request logs. Supports optional query parameters: `meth
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "id": "log_xyz",
-      "method": "GET",
-      "path": "/users",
-      "statusCode": 200,
-      "durationMs": 145,
-      "createdAt": "2026-03-20T14:30:00Z"
-    }
-  ],
-  "meta": { "cursor": "next_abc", "hasMore": true }
+  "data": {
+    "logs": [
+      {
+        "id": "log_xyz",
+        "method": "GET",
+        "path": "/users",
+        "statusCode": 200,
+        "durationMs": 145,
+        "timestamp": "2026-03-20T14:30:00Z"
+      }
+    ],
+    "cursor": "next_abc",
+    "hasMore": true
+  }
 }
 ```
 

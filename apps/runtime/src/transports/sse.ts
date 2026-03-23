@@ -14,26 +14,19 @@ export interface SSETransportDeps {
   readonly maxConnectionsPerWorker?: number;
 }
 
-const SLUG_MAX_LENGTH = 64;
-const SLUG_PATTERN = /^[a-z0-9-]+$/;
-
-function isValidSlug(slug: string | undefined): slug is string {
-  return typeof slug === 'string' && slug.length > 0 && slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug);
-}
-
 export function createSSETransportRouter(deps: SSETransportDeps): Router {
   const { logger, sessionManager, protocolHandler, registry } = deps;
   const maxConns = deps.maxConnectionsPerWorker ?? 100;
   const router = express.Router();
 
-  // SSE endpoint — persistent connection
-  router.get('/mcp/:slug/sse', (req: Request, res: Response) => {
-    const slug = req.params['slug']!;
-    if (!isValidSlug(slug)) {
-      res.status(400).json({ error: 'Invalid server slug' });
-      return;
-    }
-    const server = registry.getBySlug(slug);
+  // SSE endpoint — routes by endpoint ID (12 hex chars) with slug fallback
+  router.get('/mcp/:identifier/sse', (req: Request, res: Response) => {
+    const identifier = req.params['identifier']!;
+
+    // Try endpoint ID first (12 hex chars), then fall back to slug
+    const server = /^[a-f0-9]{12}$/.test(identifier)
+      ? registry.getByEndpointId(identifier)
+      : registry.getBySlug(identifier);
 
     if (!server || !server.isActive) {
       res.status(404).json({ error: 'Server not found' });
@@ -41,7 +34,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     }
 
     if (server.transport !== 'sse') {
-      res.status(400).json({ error: 'This server uses streamable-http transport. Use POST /mcp/:slug instead.' });
+      res.status(400).json({ error: 'This server uses streamable-http transport. Use POST /mcp/:identifier instead.' });
       return;
     }
 
@@ -61,7 +54,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
 
-    const session = sessionManager.create(slug, res, req.ip ?? 'unknown');
+    const session = sessionManager.create(server.slug, res, req.ip ?? 'unknown');
     if (!session) {
       // Race: capacity filled between check and create
       res.status(503).json({ error: 'Too many active sessions' });
@@ -73,19 +66,15 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     sessionManager.sendEvent(
       session,
       'endpoint',
-      JSON.stringify({ sessionId: session.id, url: `/mcp/${slug}/message` }),
+      JSON.stringify({ sessionId: session.id, url: `/mcp/${identifier}/message` }),
     );
 
-    logger.info({ sessionId: session.id, slug }, 'SSE session established');
+    logger.info({ sessionId: session.id, endpointId: server.endpointId, slug: server.slug }, 'SSE session established');
   });
 
   // Message endpoint — receives JSON-RPC from agents via SSE session
-  router.post('/mcp/:slug/message', async (req: Request, res: Response) => {
-    const slug = req.params['slug']!;
-    if (!isValidSlug(slug)) {
-      res.status(400).json({ error: 'Invalid server slug' });
-      return;
-    }
+  router.post('/mcp/:identifier/message', async (req: Request, res: Response) => {
+    const identifier = req.params['identifier']!;
 
     const sessionId = req.headers['x-session-id'] as string | undefined;
     if (!sessionId) {
@@ -98,7 +87,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       res.status(404).json({ error: 'Session not found' });
       return;
     }
-    if (session.slug !== slug) {
+    if (session.slug !== identifier && session.slug !== (registry.getByEndpointId(identifier)?.slug)) {
       res.status(403).json({ error: 'Session does not belong to this server' });
       return;
     }

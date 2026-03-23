@@ -1,0 +1,27 @@
+name: Validate Registry
+
+on:
+  pull_request:
+    paths:
+      - "packages/registry/**"
+  push:
+    branches: [master]
+    paths:
+      - "packages/registry/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @apifold/transformer build
+      - run: pnpm --filter @apifold/registry validate

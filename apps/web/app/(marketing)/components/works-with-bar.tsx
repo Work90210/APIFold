@@ -8,16 +8,16 @@ const CLIENTS = [
 
 export function WorksWithBar() {
   return (
-    <section className="border-t border-[#40485d]/50 px-6 py-12">
+    <section className="border-t border-border px-6 py-12">
       <div className="mx-auto max-w-5xl">
-        <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#6d758c]">
+        <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground/60">
           Works with every MCP client
         </p>
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
           {CLIENTS.map(({ name }) => (
             <div
               key={name}
-              className="rounded-full border border-[#40485d]/50 bg-[#0f1930]/40 px-5 py-2 text-sm font-medium text-[#a3aac4] transition-colors duration-200 hover:border-[#a7a5ff]/30 hover:text-white"
+              className="rounded-full border border-border px-5 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
             >
               {name}
             </div>

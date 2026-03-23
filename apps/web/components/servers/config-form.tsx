@@ -1,14 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import type { McpServer, UpdateServerInput } from "@apifold/types";
+import Link from "next/link";
+import type { McpServer, UpdateServerInput, AuthMode } from "@apifold/types";
 import { Button, Input } from "@apifold/ui";
 import { useUpdateServer, useToast } from "@/lib/hooks";
-import { Save } from "lucide-react";
+import { Save, Key, Shield, Globe, Lock, ShieldOff, ExternalLink } from "lucide-react";
 
 interface ConfigFormProps {
   readonly server: McpServer;
 }
+
+const AUTH_MODE_OPTIONS: readonly {
+  readonly value: AuthMode;
+  readonly label: string;
+  readonly description: string;
+  readonly icon: typeof Key;
+}[] = [
+  { value: "none", label: "None", description: "No authentication", icon: ShieldOff },
+  { value: "api_key", label: "API Key", description: "Static API key in header", icon: Key },
+  { value: "bearer", label: "Bearer Token", description: "Bearer token in Authorization header", icon: Shield },
+  { value: "oauth2_authcode", label: "OAuth 2.0 (User)", description: "Authorization code flow with PKCE", icon: Globe },
+  { value: "oauth2_client_creds", label: "OAuth 2.0 (Service)", description: "Client credentials for machine-to-machine", icon: Lock },
+];
 
 export function ConfigForm({ server }: ConfigFormProps) {
   const updateServer = useUpdateServer();
@@ -49,15 +63,14 @@ export function ConfigForm({ server }: ConfigFormProps) {
     );
   };
 
+  const isOAuth = form.authMode === "oauth2_authcode" || form.authMode === "oauth2_client_creds";
+
   return (
-    <div className="rounded-xl bg-card shadow-sm p-6">
-      <h2 className="text-fluid-xl font-semibold font-heading tracking-tight">
+    <div className="rounded-lg border border-border bg-card p-4">
+      <h2 className="text-sm font-semibold tracking-tight">
         Server Configuration
       </h2>
-      <p className="mt-1 text-sm text-muted-foreground leading-normal max-w-prose">
-        Configure how your MCP server connects to the upstream API.
-      </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
         <Input
           label="Server Name"
           value={form.name}
@@ -73,23 +86,59 @@ export function ConfigForm({ server }: ConfigFormProps) {
           }
           helpText="The upstream API endpoint to proxy requests to."
         />
-        <div className="space-y-2">
+
+        <div className="space-y-3">
           <label className="text-sm font-medium">Auth Mode</label>
-          <select
-            value={form.authMode}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                authMode: e.target.value as McpServer["authMode"],
-              })
-            }
-            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="none">None</option>
-            <option value="api_key">API Key</option>
-            <option value="bearer">Bearer Token</option>
-          </select>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {AUTH_MODE_OPTIONS.map((option) => {
+              const Icon = option.icon;
+              const isSelected = form.authMode === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setForm({ ...form, authMode: option.value })}
+                  className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/10 ring-1 ring-primary"
+                      : "border-border hover:border-muted-foreground/30 hover:bg-muted/50"
+                  }`}
+                >
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
+                    isSelected ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                  }`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className={`text-sm font-medium ${isSelected ? "text-primary" : ""}`}>
+                      {option.label}
+                    </div>
+                    <div className="text-xs text-muted-foreground leading-tight mt-0.5">
+                      {option.description}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {isOAuth && (
+            <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm">
+              <Globe className="h-4 w-4 shrink-0 text-primary" />
+              <span className="text-muted-foreground">
+                Manage OAuth credentials in the{" "}
+                <Link
+                  href={`/dashboard/servers/${server.id}/credentials`}
+                  className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                >
+                  Credentials tab
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              </span>
+            </div>
+          )}
         </div>
+
         <Input
           label="Rate Limit (requests/min)"
           type="number"

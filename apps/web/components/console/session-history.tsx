@@ -36,7 +36,7 @@ export function SessionHistory({ entries }: SessionHistoryProps) {
         return (
           <div
             key={entry.id}
-            className="overflow-hidden rounded-xl border transition-all duration-300 ease-out-expo animate-stagger-in"
+            className="overflow-hidden rounded-lg border transition-all duration-150 ease-out animate-stagger-in"
             style={{ "--i": index } as React.CSSProperties}
           >
             <button
@@ -44,11 +44,11 @@ export function SessionHistory({ entries }: SessionHistoryProps) {
               onClick={() =>
                 setExpandedId(isExpanded ? null : entry.id)
               }
-              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm transition-all duration-200 ease-out-expo hover:bg-accent"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm transition-colors duration-150 ease-out hover:bg-muted/30"
             >
               <div
                 className={cn(
-                  "transition-transform duration-300 ease-out-expo",
+                  "transition-transform duration-150 ease-out",
                   isExpanded && "rotate-90",
                 )}
               >
@@ -66,7 +66,7 @@ export function SessionHistory({ entries }: SessionHistoryProps) {
             </button>
             <div
               className={cn(
-                "grid transition-all duration-300 ease-out-expo",
+                "grid transition-all duration-150 ease-out",
                 isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
               )}
             >

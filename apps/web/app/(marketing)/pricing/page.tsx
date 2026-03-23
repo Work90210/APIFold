@@ -19,13 +19,13 @@ export default function PricingPage() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-16 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#a7a5ff]">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Pricing
           </p>
-          <h1 className="mt-3 font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <h1 className="mt-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Simple, transparent pricing
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-[#a3aac4]">
+          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Start for free, scale as you grow. No hidden fees or surprise
             charges.
           </p>
@@ -37,10 +37,10 @@ export default function PricingPage() {
         {/* FAQ */}
         <div className="mx-auto mt-28 max-w-3xl">
           <div className="mb-12 text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#a7a5ff]">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               FAQ
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight text-white">
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground">
               Frequently asked questions
             </h2>
           </div>

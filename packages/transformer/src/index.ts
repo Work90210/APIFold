@@ -1,5 +1,7 @@
 export { parseSpec } from './parse.js';
 export { transformSpec } from './transform.js';
+export { autoConvert } from './convert.js';
+export type { ConvertResult } from './convert.js';
 
 export type {
   ParseInput,

@@ -4,8 +4,8 @@ import { Button } from "@apifold/ui";
 export default function DashboardNotFound() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl bg-card p-8 shadow-sm text-center space-y-4">
-        <h1 className="text-fluid-2xl font-bold font-heading tracking-tight">
+      <div className="w-full max-w-md rounded-lg border border-border p-8 text-center space-y-4">
+        <h1 className="text-xl font-semibold tracking-tight">
           Page not found
         </h1>
         <p className="text-sm text-muted-foreground leading-normal">

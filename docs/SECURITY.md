@@ -45,6 +45,14 @@ If the vulnerability is actively exploited in the wild, we will expedite the fix
 - Plaintext credentials exist only in process memory during upstream API calls
 - Vault key rotation supported via `scripts/rotate-vault-secret.ts`
 
+### OAuth Credential Security
+
+- OAuth refresh tokens and client secrets encrypted at rest using the same AES-256-GCM vault as API keys
+- `SafeCredential` type excludes all encrypted fields (`encryptedKey`, `encryptedRefreshToken`, `encryptedClientSecret`) from API responses
+- `tokenEndpoint` validated as HTTPS with private hostname rejection at the schema level
+- Credential expiry enforced on all decrypt operations (key, refresh token, client secret)
+- Nullable OAuth fields allow secure revocation (set `refreshToken: null` to clear)
+
 ### Input Validation
 
 - All user inputs validated using Zod schema-based validation
@@ -55,9 +63,24 @@ If the vulnerability is actively exploited in the wild, we will expedite the fix
 ### SSRF Protection
 
 - Outbound requests from spec import blocked for private/internal IP ranges
-- DNS resolution validated before connecting
+- DNS resolution validated before connecting, with DNS pinning to prevent rebinding
+- Redirect blocking on all DNS-pinned transports (3xx responses rejected)
+- Response size limits (10MB) on all DNS-pinned transports
 - Port restrictions: only 80, 443, 8080, and 8443 allowed
 - Protocol restrictions: only HTTP and HTTPS
+- OAuth `tokenEndpoint` field validated against private hostname patterns at write time
+
+### CLI Security
+
+The `@apifold/cli` tool runs locally and has a different security model from the hosted platform:
+
+- Server binds to `127.0.0.1` only -- not accessible from the network
+- CORS restricted to same-origin (`origin: false`) -- browser pages cannot make cross-origin requests
+- SSE sessions verified via `X-Session-Id` header to prevent session hijacking
+- YAML files parsed with `JSON_SCHEMA` (js-yaml) to prevent prototype pollution via `!!js/*` tags
+- Upstream proxy validates protocol (HTTP/HTTPS only) with 30-second AbortController timeout
+- Error messages from upstream APIs are not forwarded to MCP clients (prevents secret leakage)
+- No credential encryption -- tokens are passed via CLI flags or env vars and exist only in process memory
 
 ### Rate Limiting
 

@@ -58,10 +58,10 @@ export function SchemaForm({ schema, onSubmit, isLoading }: SchemaFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Form / JSON pill toggle */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium font-heading tracking-tight">
+        <span className="text-sm font-medium tracking-tight">
           Input
         </span>
-        <div className="flex rounded-xl border bg-muted/50 p-0.5">
+        <div className="flex rounded-lg border bg-muted/50 p-0.5">
           <button
             type="button"
             onClick={() => {
@@ -70,7 +70,7 @@ export function SchemaForm({ schema, onSubmit, isLoading }: SchemaFormProps) {
               }
             }}
             className={cn(
-              "rounded-lg px-3 py-1 text-xs font-medium transition-all duration-300 ease-out-expo",
+              "rounded-lg px-3 py-1 text-xs font-medium transition-all duration-150 ease-out",
               !rawMode
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground",
@@ -87,7 +87,7 @@ export function SchemaForm({ schema, onSubmit, isLoading }: SchemaFormProps) {
               }
             }}
             className={cn(
-              "rounded-lg px-3 py-1 text-xs font-medium transition-all duration-300 ease-out-expo",
+              "rounded-lg px-3 py-1 text-xs font-medium transition-all duration-150 ease-out",
               rawMode
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground",
@@ -102,7 +102,7 @@ export function SchemaForm({ schema, onSubmit, isLoading }: SchemaFormProps) {
         <textarea
           value={rawJson}
           onChange={(e) => setRawJson(e.target.value)}
-          className="h-48 w-full rounded-xl border border-input bg-background p-3 font-mono text-sm transition-all duration-300 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-48 w-full rounded-lg border border-input bg-background p-3 font-mono text-sm transition-all duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           placeholder='{"key": "value"}'
         />
       ) : (
@@ -159,7 +159,7 @@ function SchemaField({
             const asNumber = Number(val);
             onChange(schema.enum?.some((v) => typeof v === "number") && !Number.isNaN(asNumber) ? asNumber : val);
           }}
-          className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm transition-all duration-300 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <option value="">Select...</option>
           {schema.enum.map((opt) => (
@@ -185,7 +185,7 @@ function SchemaField({
           id={name}
           checked={Boolean(value)}
           onChange={(e) => onChange(e.target.checked)}
-          className="h-4 w-4 rounded border-input accent-brand-500"
+          className="h-4 w-4 rounded border-input accent-primary"
         />
         <label htmlFor={name} className="text-sm font-medium">
           {label}

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, index, jsonb } from 'drizzle-orm/pg-core';
 import { mcpServers } from './servers';
 import { mcpTools } from './tools';
 
@@ -16,6 +16,11 @@ export const requestLogs = pgTable(
     path: text('path').notNull(),
     statusCode: integer('status_code').notNull(),
     durationMs: integer('duration_ms').notNull(),
+    requestBody: jsonb('request_body'),
+    responseBody: text('response_body'),
+    requestHeaders: jsonb('request_headers'),
+    errorMessage: text('error_message'),
+    toolName: text('tool_name'),
     timestamp: timestamp('timestamp', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({

@@ -5,6 +5,8 @@ import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { Providers } from "./providers";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://apifold.com";
@@ -43,44 +45,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `try{let t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`,
-          }}
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@350;400;500;600;700&family=Plus+Jakarta+Sans:wght@350;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-        {/* Fallback font metrics for Plus Jakarta Sans and Inter */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              @font-face {
-                font-family: "Plus Jakarta Sans Fallback";
-                src: local("Arial");
-                size-adjust: 101.5%;
-                ascent-override: 95%;
-                descent-override: 25%;
-                line-gap-override: 0%;
-              }
-              @font-face {
-                font-family: "Inter Fallback";
-                src: local("Arial");
-                size-adjust: 107%;
-                ascent-override: 90%;
-                descent-override: 22%;
-                line-gap-override: 0%;
-              }
-            `,
           }}
         />
       </head>

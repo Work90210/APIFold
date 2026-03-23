@@ -8,6 +8,23 @@ import { uuidParam } from '../../../../../lib/validation/common.schema';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
+export function GET(_request: NextRequest, context: RouteParams): Promise<NextResponse> {
+  return withErrorHandler(async () => {
+    const userId = await getUserId();
+    const rateLimited = await withRateLimit(userId);
+    if (rateLimited) return rateLimited;
+
+    const { id: serverId } = await context.params;
+    uuidParam.parse(serverId);
+
+    const db = getDb();
+    const credentialRepo = new CredentialRepository(db);
+    const credentials = await credentialRepo.findAll(userId, { serverId });
+
+    return NextResponse.json(createSuccessResponse(credentials));
+  });
+}
+
 export function POST(request: NextRequest, context: RouteParams): Promise<NextResponse> {
   return withErrorHandler(async () => {
     const userId = await getUserId();
@@ -28,6 +45,13 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       plaintextKey: createPlaintextKey(input.plaintextKey),
       authType: input.authType,
       expiresAt: input.expiresAt ?? null,
+      refreshToken: input.refreshToken ? createPlaintextKey(input.refreshToken) : undefined,
+      scopes: input.scopes,
+      tokenEndpoint: input.tokenEndpoint,
+      clientId: input.clientId,
+      clientSecret: input.clientSecret ? createPlaintextKey(input.clientSecret) : undefined,
+      tokenExpiresAt: input.tokenExpiresAt ?? null,
+      provider: input.provider,
     });
 
     return NextResponse.json(createSuccessResponse(credential), { status: 201 });

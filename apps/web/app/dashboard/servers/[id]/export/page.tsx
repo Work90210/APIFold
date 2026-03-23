@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, use } from "react";
-import Link from "next/link";
-import { ArrowLeft, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button, CodeBlock, Skeleton } from "@apifold/ui";
 import { useExport } from "@/lib/hooks";
 import { FormatSelector } from "@/components/export/format-selector";
@@ -34,32 +33,14 @@ export default function ExportPage({
   };
 
   return (
-    <div className="animate-in space-y-8">
-      {/* Back link */}
-      <Link
-        href={`/dashboard/servers/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Server
-      </Link>
-
+    <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-fluid-3xl font-bold font-heading tracking-tight">
-          Export
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground leading-normal max-w-prose">
-          Export your server configuration as JSON or YAML.
-        </p>
-      </div>
-
-      <div className="border-t border-border/40" />
+      <h1 className="text-lg font-semibold tracking-tight">Export</h1>
 
       {/* Format selector */}
       <div className="mx-auto max-w-2xl space-y-6">
-        <div className="rounded-xl bg-card shadow-sm p-6">
-          <h3 className="mb-4 text-sm font-semibold text-muted-foreground">
+        <div className="rounded-lg border border-border p-4">
+          <h3 className="mb-3 text-sm font-semibold text-muted-foreground">
             Output Format
           </h3>
           <div className="flex items-center gap-4">
@@ -76,10 +57,10 @@ export default function ExportPage({
 
         {/* Code preview */}
         {isLoading ? (
-          <Skeleton className="h-96 rounded-xl" />
+          <Skeleton className="h-96 rounded-lg" />
         ) : data ? (
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-xl bg-card shadow-sm">
+            <div className="overflow-hidden rounded-lg border border-border">
               <CodeBlock
                 code={data.content}
                 language={format}

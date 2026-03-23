@@ -20,7 +20,7 @@ function CodeBlock({
 }: CodeBlockProps) {
   return (
     <div
-      className={cn("relative rounded-lg border bg-surface-2", className)}
+      className={cn("relative rounded-lg border border-border bg-muted/30", className)}
       {...props}
     >
       {title && (

@@ -1,6 +1,14 @@
 // Spec
 export type { Spec, CreateSpecInput, UpdateSpecInput, SpecFilters } from './spec.js';
 
+// Profile
+export type {
+  AccessProfile,
+  CreateProfileInput,
+  UpdateProfileInput,
+  ProfileFilters,
+} from './profile.js';
+
 // Server
 export type {
   McpServer,
@@ -28,6 +36,7 @@ export type {
   CredentialFilters,
   CredentialAuthType,
   PlaintextKey,
+  OAuthConfig,
 } from './credential.js';
 export { createPlaintextKey } from './credential.js';
 
@@ -39,6 +48,12 @@ export type { UsageEvent, CreateUsageEventInput } from './usage.js';
 
 // Log
 export type { RequestLog, CreateRequestLogInput, HttpMethod } from './log.js';
+
+// Spec Version
+export type { SpecVersion, CreateSpecVersionInput } from './spec-version.js';
+
+// Spec Release
+export type { SpecRelease, CreateReleaseInput, ReleaseEnvironment } from './spec-release.js';
 
 // API Response
 export type {

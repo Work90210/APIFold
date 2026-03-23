@@ -34,29 +34,29 @@ const FOOTER_LINKS = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#40485d]/50 px-6 py-16">
+    <footer className="border-t border-border px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
           {/* Brand — spans 2 columns */}
           <div className="col-span-2">
             <Link
               href="/"
-              className="flex items-center gap-2 font-heading text-lg font-bold text-white"
+              className="flex items-center gap-2 text-lg font-bold text-foreground"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-[#645efb] to-[#a7a5ff]">
-                <Zap className="h-3.5 w-3.5 text-white" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground">
+                <Zap className="h-3.5 w-3.5 text-background" />
               </div>
               APIFold
             </Link>
-            <p className="mt-3 text-sm leading-relaxed text-[#a3aac4]">
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Open-source API-to-MCP bridge for the AI agent era.
             </p>
-            <p className="mt-2 text-xs text-[#6d758c]">
+            <p className="mt-2 text-xs text-muted-foreground/60">
               No telemetry by default.
             </p>
             <a
               href={GITHUB_REPO}
-              className="mt-4 inline-flex text-[#a3aac4] transition-colors duration-200 hover:text-white"
+              className="mt-4 inline-flex text-muted-foreground transition-colors duration-200 hover:text-foreground"
               aria-label="GitHub"
             >
               <Github className="h-5 w-5" />
@@ -66,7 +66,7 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div key={heading}>
-              <p className="font-heading text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-foreground">
                 {heading}
               </p>
               <ul className="mt-4 space-y-3">
@@ -75,7 +75,7 @@ export function Footer() {
                     {"external" in rest ? (
                       <a
                         href={href}
-                        className="text-sm text-[#a3aac4] transition-colors duration-200 hover:text-white"
+                        className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -84,7 +84,7 @@ export function Footer() {
                     ) : (
                       <Link
                         href={href}
-                        className="text-sm text-[#a3aac4] transition-colors duration-200 hover:text-white"
+                        className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
                       >
                         {label}
                       </Link>
@@ -96,11 +96,11 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[#40485d]/50 pt-8 sm:flex-row">
-          <p className="text-sm text-[#6d758c]">&copy; 2026 APIFold</p>
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
+          <p className="text-sm text-muted-foreground/60">&copy; 2026 APIFold</p>
           <a
             href={GITHUB_REPO}
-            className="text-[#6d758c] transition-colors duration-200 hover:text-white"
+            className="text-muted-foreground/60 transition-colors duration-200 hover:text-foreground"
             aria-label="GitHub"
           >
             <Github className="h-4 w-4" />

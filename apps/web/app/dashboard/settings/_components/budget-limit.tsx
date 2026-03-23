@@ -89,7 +89,7 @@ export function BudgetLimit() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-4">
         <ShieldCheck className="h-4 w-4 text-muted-foreground" />
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -97,7 +97,7 @@ export function BudgetLimit() {
         </h2>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-5">
+      <p className="text-sm text-muted-foreground mb-4">
         Set a monthly overage spending cap. When reached, additional tool
         executions will be blocked until the next billing cycle. Leave empty for
         no limit.

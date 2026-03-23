@@ -12,7 +12,7 @@ interface ResponseViewerProps {
 export function ResponseViewer({ response, isLoading }: ResponseViewerProps) {
   if (isLoading) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl bg-surface-2">
+      <div className="flex h-48 items-center justify-center rounded-lg bg-muted/30">
         <div className="flex flex-col items-center gap-2">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
           <p className="text-sm text-muted-foreground">Executing...</p>
@@ -23,7 +23,7 @@ export function ResponseViewer({ response, isLoading }: ResponseViewerProps) {
 
   if (!response) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-border/40 bg-surface-2">
+      <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border/40">
         <p className="text-sm text-muted-foreground leading-normal">
           Execute a tool to see the response
         </p>
@@ -32,7 +32,7 @@ export function ResponseViewer({ response, isLoading }: ResponseViewerProps) {
   }
 
   return (
-    <div className="rounded-xl bg-card shadow-sm">
+    <div className="rounded-lg border border-border bg-card">
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Badge variant={response.isError ? "error" : "success"}>

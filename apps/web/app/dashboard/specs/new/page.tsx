@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@apifold/ui";
-import { BackLink } from "@/components/shared/back-link";
+
 import { PageHeader } from "@/components/shared/page-header";
 import { useImportSpec, useToast } from "@/lib/hooks";
 import { useUIStore } from "@/lib/stores/ui-store";
@@ -98,9 +98,7 @@ export default function ImportSpecPage() {
   };
 
   return (
-    <div className="animate-in mx-auto max-w-3xl space-y-8">
-      <BackLink href="/dashboard/specs" label="Back to Specs" />
-
+    <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
         title="Import API Spec"
         description="Upload an OpenAPI or Swagger spec to generate MCP tools."
@@ -110,9 +108,9 @@ export default function ImportSpecPage() {
 
       {wizardStep === 0 && (
         <div className="space-y-6">
-          <Card className="rounded-xl">
+          <Card className="rounded-lg border border-border">
             <CardHeader>
-              <CardTitle className="text-fluid-lg font-heading tracking-tight">
+              <CardTitle className="text-lg font-semibold tracking-tight">
                 From URL
               </CardTitle>
             </CardHeader>
@@ -125,9 +123,9 @@ export default function ImportSpecPage() {
             <span className="mx-4 text-sm text-muted-foreground">or</span>
             <div className="border-t border-border/40 flex-grow" />
           </div>
-          <Card className="rounded-xl">
+          <Card className="rounded-lg border border-border">
             <CardHeader>
-              <CardTitle className="text-fluid-lg font-heading tracking-tight">
+              <CardTitle className="text-lg font-semibold tracking-tight">
                 Upload File
               </CardTitle>
             </CardHeader>
@@ -144,6 +142,11 @@ export default function ImportSpecPage() {
             operations={parsedSpec.operations}
             specName={parsedSpec.name}
           />
+          {/* TODO: Add diff preview here when re-importing an existing spec.
+              Show a VersionDiff comparing the current spec's tools against
+              the newly parsed operations so users can review changes before
+              confirming. Requires passing the existing specId into the import
+              flow and fetching the latest version's toolSnapshot for comparison. */}
           <div className="flex gap-3">
             <Button
               variant="outline"
@@ -163,9 +166,9 @@ export default function ImportSpecPage() {
       )}
 
       {wizardStep === 2 && parsedSpec && (
-        <Card className="rounded-xl">
+        <Card className="rounded-lg border border-border">
           <CardHeader>
-            <CardTitle className="text-fluid-lg font-heading tracking-tight">
+            <CardTitle className="text-lg font-semibold tracking-tight">
               Confirm Import
             </CardTitle>
           </CardHeader>
