@@ -14,13 +14,6 @@ export interface SSETransportDeps {
   readonly maxConnectionsPerWorker?: number;
 }
 
-const SLUG_MAX_LENGTH = 64;
-const SLUG_PATTERN = /^[a-z0-9-]+$/;
-
-function isValidSlug(slug: string | undefined): slug is string {
-  return typeof slug === 'string' && slug.length > 0 && slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug);
-}
-
 export function createSSETransportRouter(deps: SSETransportDeps): Router {
   const { logger, sessionManager, protocolHandler, registry } = deps;
   const maxConns = deps.maxConnectionsPerWorker ?? 100;
@@ -41,7 +34,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     }
 
     if (server.transport !== 'sse') {
-      res.status(400).json({ error: 'This server uses streamable-http transport. Use POST /mcp/:slug instead.' });
+      res.status(400).json({ error: 'This server uses streamable-http transport. Use POST /mcp/:identifier instead.' });
       return;
     }
 

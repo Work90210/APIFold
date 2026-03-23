@@ -45,13 +45,6 @@ function toMcpToolDef(tool: ToolDefinition): Record<string, unknown> {
   };
 }
 
-const SLUG_MAX_LENGTH = 64;
-const SLUG_PATTERN = /^[a-z0-9-]+$/;
-
-function isValidSlug(slug: string | undefined): slug is string {
-  return typeof slug === 'string' && slug.length > 0 && slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug);
-}
-
 export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
   const { logger, registry, toolLoader, toolExecutorDeps } = deps;
   const router = express.Router();
@@ -90,7 +83,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
     }
 
     if (server.transport !== 'streamable-http') {
-      res.status(400).json({ error: 'This server uses SSE transport. Use GET /mcp/:slug/sse instead.' });
+      res.status(400).json({ error: 'This server uses SSE transport. Use GET /mcp/:identifier/sse instead.' });
       return;
     }
 
