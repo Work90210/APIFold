@@ -158,13 +158,11 @@ export default function BrowseRegistryPage() {
                   >
                     Docs <ExternalLink className="h-3 w-3" />
                   </a>
-                  <Button
-                    size="sm"
-                    disabled={isDeploying}
-                    onClick={() => handleDeploy(entry)}
-                  >
-                    {isDeploying ? "Deploying..." : "Deploy"}
-                  </Button>
+                  <Link href={`/dashboard/specs/new/registry/${entry.id}`}>
+                    <Button size="sm">
+                      View
+                    </Button>
+                  </Link>
                 </div>
               </div>
             );

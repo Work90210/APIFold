@@ -32,6 +32,9 @@ importers:
       '@apifold/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@apifold/registry':
+        specifier: workspace:^
+        version: link:../../packages/registry
       '@apifold/transformer':
         specifier: workspace:*
         version: link:../../packages/transformer

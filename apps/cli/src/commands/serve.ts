@@ -20,6 +20,7 @@ export const serveCommand: CommandModule = {
       .option('filter-methods', { type: 'array', string: true, describe: 'Only include these HTTP methods' })
       .option('filter-paths', { type: 'array', string: true, describe: 'Only include matching path patterns' })
       .option('include-deprecated', { type: 'boolean', describe: 'Include deprecated operations' })
+      .option('registry', { type: 'string', describe: 'Load spec from registry by ID (e.g. stripe, github)' })
       .option('config', { alias: 'c', type: 'string', describe: 'Path to config file' })
       .option('log-level', { type: 'string', describe: 'Log level' }),
   handler: async (argv) => {
@@ -37,29 +38,51 @@ export const serveCommand: CommandModule = {
       logLevel: argv['logLevel'] as string | undefined,
     });
 
-    if (!config.spec) {
-      process.stderr.write('Error: No specification file provided. Pass a spec path or set it in config.\n');
-      process.exit(1);
-    }
-
-    const specPath = path.resolve(process.cwd(), config.spec);
-    let content: string;
-    try {
-      content = await fs.readFile(specPath, 'utf-8');
-    } catch {
-      process.stderr.write(`Error: Cannot read spec file: ${specPath}\n`);
-      process.exit(1);
-    }
-
+    // Load spec from registry or file
+    const registryId = argv['registry'] as string | undefined;
     let raw: unknown;
-    try {
-      raw = specPath.endsWith('.json')
-        ? JSON.parse(content)
-        : yamlLoad(content, { schema: JSON_SCHEMA });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      process.stderr.write(`Error: Failed to parse spec: ${msg}\n`);
-      process.exit(1);
+
+    if (registryId) {
+      const { getById } = await import('@apifold/registry');
+      const entry = getById(registryId);
+      if (!entry) {
+        process.stderr.write(`Error: Unknown registry spec "${registryId}". Run --help to see available IDs.\n`);
+        process.exit(1);
+      }
+      process.stdout.write(`Loading ${entry.name} from registry...\n`);
+      const specModule = await import(`@apifold/registry/specs/${registryId}/spec.json`, { with: { type: 'json' } });
+      raw = specModule.default ?? specModule;
+      if (!config.baseUrl) {
+        const servers = (raw as Record<string, unknown>)['servers'] as readonly Record<string, unknown>[] | undefined;
+        const baseUrl = servers?.[0]?.['url'] as string | undefined;
+        if (baseUrl) {
+          process.stdout.write(`Using base URL from spec: ${baseUrl}\n`);
+        }
+      }
+    } else {
+      if (!config.spec) {
+        process.stderr.write('Error: No specification file provided. Pass a spec path, --registry ID, or set it in config.\n');
+        process.exit(1);
+      }
+
+      const specPath = path.resolve(process.cwd(), config.spec);
+      let content: string;
+      try {
+        content = await fs.readFile(specPath, 'utf-8');
+      } catch {
+        process.stderr.write(`Error: Cannot read spec file: ${specPath}\n`);
+        process.exit(1);
+      }
+
+      try {
+        raw = specPath.endsWith('.json')
+          ? JSON.parse(content)
+          : yamlLoad(content, { schema: JSON_SCHEMA });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        process.stderr.write(`Error: Failed to parse spec: ${msg}\n`);
+        process.exit(1);
+      }
     }
 
     // Auto-convert Swagger 2.0 → OpenAPI 3.0 if needed

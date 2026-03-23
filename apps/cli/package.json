@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@apifold/logger": "workspace:*",
+    "@apifold/registry": "workspace:^",
     "@apifold/transformer": "workspace:*",
     "@apifold/types": "workspace:*",
     "cors": "^2.8.5",
