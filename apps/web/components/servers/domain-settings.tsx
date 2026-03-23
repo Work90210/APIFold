@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Globe, CheckCircle2, AlertCircle, Trash2, Copy } from "lucide-react";
+import { Globe, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
 import { Button, Input, Badge } from "@apifold/ui";
-import { cn } from "@apifold/ui";
+
 import { api } from "@/lib/api-client";
 
 interface DomainSettingsProps {

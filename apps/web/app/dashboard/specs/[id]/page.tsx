@@ -75,7 +75,7 @@ export default function SpecDetailPage({
           </div>
         ) : servers && servers.length > 0 ? (
           <div className="grid-auto-fill gap-5">
-            {servers.map((server, index) => (
+            {servers.map((server, _index) => (
               <Link
                 key={server.id}
                 href={`/dashboard/servers/${server.id}`}

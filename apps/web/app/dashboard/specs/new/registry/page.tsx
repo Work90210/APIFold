@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, ArrowLeft, Globe, Key, Shield, Lock, Zap, ExternalLink } from "lucide-react";
 import { Input, Button, Badge } from "@apifold/ui";
 import { cn } from "@apifold/ui";
-import { useRegistry, type RegistryEntry, type Category } from "@/lib/hooks/use-registry";
-import { useImportSpec } from "@/lib/hooks";
+import { useRegistry, type Category } from "@/lib/hooks/use-registry";
 
 const CATEGORY_LABELS: Record<string, string> = {
   "payments": "Payments",
@@ -28,29 +25,7 @@ const AUTH_ICONS: Record<string, typeof Key> = {
 };
 
 export default function BrowseRegistryPage() {
-  const router = useRouter();
   const { entries, categories, query, setQuery, categoryFilter, setCategoryFilter } = useRegistry();
-  const importSpec = useImportSpec();
-  const [deploying, setDeploying] = useState<string | null>(null);
-
-  const handleDeploy = async (entry: RegistryEntry) => {
-    setDeploying(entry.id);
-    try {
-      // Fetch the spec from the registry and import it
-      const specModule = await import(`@apifold/registry/specs/${entry.id}/spec.json`);
-      const rawSpec = specModule.default ?? specModule;
-
-      await importSpec.mutateAsync({
-        name: entry.name,
-        version: '1.0.0',
-        rawSpec,
-      });
-
-      router.push('/dashboard/servers');
-    } catch {
-      setDeploying(null);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -117,8 +92,6 @@ export default function BrowseRegistryPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {entries.map((entry) => {
             const AuthIcon = AUTH_ICONS[entry.authType] ?? Key;
-            const isDeploying = deploying === entry.id;
-
             return (
               <div
                 key={entry.id}

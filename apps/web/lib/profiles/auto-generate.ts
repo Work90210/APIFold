@@ -1,4 +1,4 @@
-import type { McpTool } from '@apifold/types';
+
 import type { ProfileRepository } from '../db/repositories/profile.repository';
 
 const READ_METHODS = new Set(['get', 'head', 'options']);

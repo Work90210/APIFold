@@ -2,8 +2,6 @@
 
 import { useState, useId } from "react";
 import {
-  BarChart,
-  Bar,
   AreaChart,
   Area,
   XAxis,

@@ -8,7 +8,7 @@ import { ServerRepository } from '../../../../lib/db/repositories/server.reposit
 import { getProviderPreset } from '../../../../lib/oauth/providers';
 import { generatePkceChallenge, generateState } from '../../../../lib/oauth/pkce';
 import { storeOAuthState } from '../../../../lib/oauth/state-store';
-import { uuidParam } from '../../../../lib/validation/common.schema';
+
 import { encryptCredential } from '../../../../lib/vault/index';
 
 const authorizeSchema = z.object({

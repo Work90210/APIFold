@@ -12,7 +12,7 @@ import {
   RefreshCw,
   Plus,
 } from "lucide-react";
-import { Button, Input, Badge, Skeleton } from "@apifold/ui";
+import { Button, Input, Skeleton } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { api } from "@/lib/api-client";
 import { useServer } from "@/lib/hooks";

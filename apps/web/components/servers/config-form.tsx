@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { McpServer, UpdateServerInput, AuthMode } from "@apifold/types";
-import { Button, Input, Badge } from "@apifold/ui";
+import { Button, Input } from "@apifold/ui";
 import { useUpdateServer, useToast } from "@/lib/hooks";
 import { Save, Key, Shield, Globe, Lock, ShieldOff, ExternalLink } from "lucide-react";
 

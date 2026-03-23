@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Globe, Key, Shield, Lock, Zap, ExternalLink, Rocket } from "lucide-react";
 import { Button, Badge } from "@apifold/ui";
-import { getById, type RegistryEntry } from "@apifold/registry";
+import { getById } from "@apifold/registry";
 import { useImportSpec } from "@/lib/hooks";
 
 const AUTH_INFO: Record<string, { icon: typeof Key; label: string; hint: string }> = {

@@ -6,7 +6,7 @@ import { getUserId, withErrorHandler, withRateLimit, getUserPlan } from '../../.
 import { uuidParam } from '../../../../../lib/validation/common.schema';
 import { usageEvents } from '../../../../../lib/db/schema/usage-events';
 import { mcpTools } from '../../../../../lib/db/schema/tools';
-import { requestLogs } from '../../../../../lib/db/schema/request-logs';
+
 import { sql, eq, and, gte, count, avg, desc } from 'drizzle-orm';
 
 type RouteParams = { params: Promise<{ id: string }> };
