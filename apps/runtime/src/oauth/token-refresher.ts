@@ -123,7 +123,7 @@ async function doRefresh(
   }
 
   if (!response.ok) {
-    const errorBody = await response.text().catch(() => '');
+    const _errorBody = await response.text().catch(() => '');
     logger.warn(
       { credentialId: credential.id, status: response.status },
       'Token refresh failed — credential may need re-authorization',
