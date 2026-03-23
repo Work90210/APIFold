@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { Radio, Shield, ShieldOff, Gauge, Globe, Wrench, Terminal, BarChart3, ChevronRight, ExternalLink, GitBranch, Rocket } from "lucide-react";
+import { Radio, Shield, ShieldOff, Gauge, Globe, Wrench, Terminal, BarChart3, ChevronRight, ExternalLink, GitBranch } from "lucide-react";
 import { Skeleton, StatusDot, Button, CopyButton, Badge } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { useServer, useTools, useSpecVersions, usePromoteVersion } from "@/lib/hooks";

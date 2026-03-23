@@ -235,9 +235,9 @@ export class ProtocolHandler {
 
     // Fire-and-forget — don't block the response
     this.db.query(
-      `INSERT INTO request_logs (server_id, tool_id, user_id, request_id, method, path, status_code, duration_ms)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [serverId, toolId, userId, requestId, method, path, statusCode, durationMs],
+      `INSERT INTO request_logs (server_id, tool_id, user_id, request_id, method, path, status_code, duration_ms, tool_name)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [serverId, toolId, userId, requestId, 'POST', path, statusCode, durationMs, method],
     ).catch((err) => {
       this.logger.warn({ err }, 'Failed to write request log');
     });
