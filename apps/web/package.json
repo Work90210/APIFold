@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@apifold/registry": "workspace:^",
     "@apifold/transformer": "workspace:*",
     "@apifold/types": "workspace:*",
     "@apifold/ui": "workspace:*",

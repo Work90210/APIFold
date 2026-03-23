@@ -163,6 +163,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@apifold/registry':
+        specifier: workspace:^
+        version: link:../../packages/registry
       '@apifold/transformer':
         specifier: workspace:*
         version: link:../../packages/transformer
@@ -339,6 +342,34 @@ importers:
       typescript:
         specifier: ^5.6.0
         version: 5.9.3
+
+  packages/registry:
+    dependencies:
+      '@apifold/transformer':
+        specifier: workspace:*
+        version: link:../transformer
+    devDependencies:
+      '@apifold/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@apifold/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.1
+      tsx:
+        specifier: ^4.19.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@25.5.0)(jsdom@29.0.1)
 
   packages/transformer:
     dependencies:
