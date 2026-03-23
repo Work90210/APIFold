@@ -23,7 +23,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
-    "fumadocs-core": "13.4.10",
+    "fumadocs-core": "16.7.5",
     "fumadocs-mdx": "9.0.4",
     "fumadocs-ui": "13.4.10",
     "geist": "^1.7.0",
