@@ -44,8 +44,9 @@ export default function RegistryDeployPage({
   const handleDeploy = async () => {
     setDeploying(true);
     try {
-      const specModule = await import(`@apifold/registry/specs/${entry.id}/spec.json`);
-      const rawSpec = specModule.default ?? specModule;
+      const res = await fetch(`/api/registry/${entry.id}/spec`);
+      if (!res.ok) throw new Error('Failed to load spec');
+      const rawSpec = await res.json();
 
       await importSpec.mutateAsync({
         name: entry.name,
