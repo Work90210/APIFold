@@ -1,5 +1,12 @@
 name: Deploy
 on:
+  # Auto-deploy to production after CI passes on master
+  workflow_run:
+    workflows: ["CI"]
+    branches: [master]
+    types: [completed]
+
+  # Manual deploy for staging or selective targets
   workflow_dispatch:
     inputs:
       target:
@@ -20,9 +27,34 @@ on:
 
 permissions:
   contents: read
+  deployments: write
 
 jobs:
-  deploy-fly:
+  # Auto-deploy on master push (after CI passes)
+  auto-deploy:
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # v2
+
+      - name: Deploy web
+        run: flyctl deploy --config infra/fly/fly.web.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy runtime
+        run: flyctl deploy --config infra/fly/fly.runtime.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  # Manual deploy (staging or production, selective targets)
+  manual-deploy:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
