@@ -184,5 +184,3 @@ For security issues, please refer to our [security policy](docs/SECURITY.md). Do
 
 - **[`@apifold/transformer`](packages/transformer)** — [MIT License](packages/transformer/LICENSE)
 - **Everything else** — [GNU Affero General Public License v3.0](LICENSE)
-
-Same model used by [Grafana](https://grafana.com), [Plausible](https://plausible.io), and [PostHog](https://posthog.com).
