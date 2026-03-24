@@ -13,7 +13,7 @@ import { mcpServers } from '../db/schema/servers';
 import { specs } from '../db/schema/specs';
 import { mcpTools } from '../db/schema/tools';
 import * as marketplaceCache from '../marketplace/cache';
-import { serverTrackDeploy, serverTrackUninstall } from '../analytics/events';
+import { serverTrackDeploy, serverTrackUninstall } from '../analytics/events.server';
 
 export interface DeployResult {
   readonly serverId: string;

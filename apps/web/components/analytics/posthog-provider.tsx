@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { initPostHog, getPostHog } from '@/lib/analytics/posthog-client';
-import { trackPageView } from '@/lib/analytics/events';
+import { trackPageView } from '@/lib/analytics/events.client';
 
 function PostHogTracker() {
   const pathname = usePathname();

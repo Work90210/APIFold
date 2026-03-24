@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getPostHog } from '@/lib/analytics/posthog-client';
-import { trackCookieConsent } from '@/lib/analytics/events';
+import { trackCookieConsent } from '@/lib/analytics/events.client';
 
 const CONSENT_KEY = 'apifold_cookie_consent';
 
