@@ -76,6 +76,13 @@ export function createApp(deps: AppDeps): Express {
     );
   }
 
+  // Custom domain routing — rewrites /sse → /mcp/:endpointId/sse for custom domain requests
+  app.use(createDomainRouter({
+    logger,
+    registry,
+    platformDomain: process.env['PLATFORM_DOMAIN'] ?? 'apifold.dev',
+  }));
+
   // Transport routers — SSE and Streamable HTTP
   app.use(createSSETransportRouter({
     logger,
