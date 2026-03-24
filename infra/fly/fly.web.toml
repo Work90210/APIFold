@@ -5,6 +5,7 @@ primary_region = "ams"
   dockerfile = "../../apps/web/Dockerfile"
   [build.args]
     NEXT_PUBLIC_APP_URL = "https://apifold.dev"
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuYXBpZm9sZC5kZXYk"
 
 [env]
   NODE_ENV = "production"
