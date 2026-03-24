@@ -1,31 +1,18 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Download, ExternalLink, ChevronRight, Clock } from 'lucide-react';
+import { ArrowRight, ChevronRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { AuthorBadge } from '@/components/marketplace/author-badge';
 import { CategoryIcon } from '@/components/marketplace/category-icon';
 import { DeployButton } from '@/components/marketplace/deploy-button';
 import { MARKETPLACE_CATEGORIES, type CategorySlug } from '@/lib/marketplace/categories';
 import { getReadDb } from '@/lib/db/index';
 import { MarketplaceListingRepository } from '@/lib/db/repositories/marketplace-listing.repository';
 import { renderMarkdown } from '@/lib/marketplace/render-markdown';
-
-const ICON_COLOR: Record<string, string> = {
-  payments: 'text-violet-400',
-  communication: 'text-sky-400',
-  'developer-tools': 'text-emerald-400',
-  productivity: 'text-amber-400',
-  data: 'text-cyan-400',
-  commerce: 'text-orange-400',
-  'ai-ml': 'text-fuchsia-400',
-  infrastructure: 'text-blue-400',
-  crm: 'text-rose-400',
-  monitoring: 'text-lime-400',
-  other: 'text-zinc-400',
-};
+import { ListingTabs } from '@/components/marketplace/listing-tabs';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }
 
 async function getListing(slug: string) {
@@ -51,14 +38,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: listing.shortDescription,
       url: `https://apifold.dev/marketplace/${slug}`,
     },
-    alternates: {
-      canonical: `https://apifold.dev/marketplace/${slug}`,
-    },
+    alternates: { canonical: `https://apifold.dev/marketplace/${slug}` },
   };
 }
 
-export default async function ListingDetailPage({ params }: PageProps) {
+export default async function ListingDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const { tab } = await searchParams;
   const listing = await getListing(slug);
 
   if (!listing) {
@@ -66,164 +52,179 @@ export default async function ListingDetailPage({ params }: PageProps) {
   }
 
   const categoryMeta = MARKETPLACE_CATEGORIES[listing.category as CategorySlug];
-  const iconColor = ICON_COLOR[listing.category] ?? ICON_COLOR['other'];
-
   const descriptionHtml = renderMarkdown(listing.longDescription);
   const setupHtml = listing.setupGuide ? renderMarkdown(listing.setupGuide) : null;
+  const activeTab = tab ?? 'overview';
 
   return (
-    <div className="mx-auto max-w-5xl px-6 pb-16">
-      {/* Breadcrumbs */}
-      <nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Link href="/marketplace" className="hover:text-foreground transition-colors">
-          Marketplace
-        </Link>
-        {categoryMeta && (
-          <>
-            <ChevronRight className="h-3 w-3" />
-            <Link
-              href={`/marketplace?category=${listing.category}`}
-              className="hover:text-foreground transition-colors"
-            >
-              {categoryMeta.name}
-            </Link>
-          </>
-        )}
-        <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground">{listing.name}</span>
-      </nav>
+    <section className="relative border-t border-border px-6 py-16">
+      <div className="relative z-10 mx-auto max-w-5xl">
+        {/* Breadcrumbs */}
+        <nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Link href="/marketplace" className="hover:text-foreground transition-colors">
+            Marketplace
+          </Link>
+          {categoryMeta && (
+            <>
+              <ChevronRight className="h-3 w-3" />
+              <Link
+                href={`/marketplace?category=${listing.category}`}
+                className="hover:text-foreground transition-colors"
+              >
+                {categoryMeta.name}
+              </Link>
+            </>
+          )}
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-foreground">{listing.name}</span>
+        </nav>
 
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-8">
-        <div className="flex items-start gap-4">
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted ${iconColor}`}>
-            {listing.iconUrl ? (
-              <img
-                src={`/api/marketplace/icons/${listing.slug}`}
-                alt=""
-                className="h-12 w-12 rounded-lg object-cover"
-              />
-            ) : (
-              <CategoryIcon category={listing.category} className="h-6 w-6" />
-            )}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">{listing.name}</h1>
-            <p className="mt-1 text-sm text-muted-foreground max-w-lg">
-              {listing.shortDescription}
-            </p>
-            <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-              <AuthorBadge type={listing.authorType as 'official' | 'community' | 'verified'} />
-              <span className="text-border">·</span>
-              <span className="flex items-center gap-1">
-                <Download className="h-3 w-3" />
-                {listing.installCount.toLocaleString()} installs
-              </span>
-              <span className="text-border">·</span>
-              <span>{listing.recommendedAuthMode === 'none' ? 'No auth required' : listing.recommendedAuthMode.replace('_', ' ')}</span>
-              {listing.apiDocsUrl && (
-                <>
-                  <span className="text-border">·</span>
-                  <a
-                    href={listing.apiDocsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-                  >
-                    Docs <ExternalLink className="h-3 w-3" />
-                  </a>
-                </>
+        {/* Header */}
+        <div className="flex items-start justify-between gap-8">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-border">
+              {listing.iconUrl ? (
+                <img
+                  src={`/api/marketplace/icons/${listing.slug}`}
+                  alt=""
+                  className="h-14 w-14 rounded-lg object-cover"
+                />
+              ) : (
+                <CategoryIcon category={listing.category} className="h-7 w-7 text-foreground" />
               )}
             </div>
-          </div>
-        </div>
-
-        <div className="shrink-0 pt-1">
-          <DeployButton slug={listing.slug} size="lg" />
-        </div>
-      </div>
-
-      <div className="h-px bg-border/50 mb-8" />
-
-      {/* Content grid */}
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-        {/* Main content */}
-        <div className="lg:col-span-2">
-          <div
-            className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-lg prose-h1:mb-3 prose-h2:text-base prose-h2:mt-8 prose-h2:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-ul:my-2 prose-ul:pl-4 prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 prose-a:decoration-border hover:prose-a:decoration-foreground prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none"
-            dangerouslySetInnerHTML={{ __html: descriptionHtml }}
-          />
-
-          {/* Tags */}
-          {listing.tags.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-border/40 flex flex-wrap items-center gap-2">
-              {listing.tags.map((tag: string) => (
-                <Link
-                  key={tag}
-                  href={`/marketplace?q=${tag}`}
-                  className="rounded-md border border-border/50 px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
-                >
-                  {tag}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Setup Guide */}
-          {setupHtml && (
             <div>
-              <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
-                Setup Guide
-              </h3>
-              <div
-                className="prose prose-sm prose-invert max-w-none text-muted-foreground prose-ol:my-1 prose-ol:pl-4 prose-li:my-0.5 prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 prose-a:decoration-border hover:prose-a:decoration-foreground prose-p:text-muted-foreground prose-p:text-sm"
-                dangerouslySetInnerHTML={{ __html: setupHtml }}
-              />
+              <h1 className="text-2xl font-extrabold tracking-tighter text-foreground sm:text-3xl">
+                {listing.name}
+              </h1>
+              <p className="mt-1 max-w-lg text-sm leading-relaxed text-muted-foreground">
+                {listing.shortDescription}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  listing.authorType === 'official' ? 'OFFICIAL' : listing.authorType.toUpperCase(),
+                  listing.recommendedAuthMode === 'none' ? 'NO AUTH' : listing.recommendedAuthMode.replace('_', ' ').toUpperCase(),
+                  `v${listing.specVersion}`,
+                  `${listing.installCount} INSTALLS`,
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-3">
+            {listing.apiDocsUrl && (
+              <a
+                href={listing.apiDocsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 items-center gap-2 rounded-md border border-border px-4 text-sm text-muted-foreground transition-colors hover:text-foreground hover:border-foreground"
+              >
+                API Docs <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+            <DeployButton slug={listing.slug} size="lg" />
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="mt-10">
+          <ListingTabs slug={listing.slug} activeTab={activeTab} />
+        </div>
+
+        {/* Tab content */}
+        <div className="mt-8">
+          {activeTab === 'overview' && (
+            <div className="grid gap-10 lg:grid-cols-3">
+              {/* Main content */}
+              <div className="lg:col-span-2">
+                <div
+                  className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-xl prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-ul:my-2 prose-ul:pl-5 prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 prose-a:decoration-border hover:prose-a:decoration-foreground prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-normal prose-code:before:content-none prose-code:after:content-none"
+                  dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+                />
+
+                {listing.tags.length > 0 && (
+                  <div className="mt-8 flex flex-wrap gap-2 border-t border-border pt-6">
+                    {listing.tags.map((tag: string) => (
+                      <Link
+                        key={tag}
+                        href={`/marketplace?q=${tag}`}
+                        className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground hover:border-foreground"
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-8">
+                {setupHtml && (
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Setup Guide
+                    </h3>
+                    <div
+                      className="prose prose-sm prose-invert max-w-none text-muted-foreground prose-ol:my-1 prose-ol:pl-4 prose-li:my-0.5 prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 prose-a:decoration-border hover:prose-a:decoration-foreground prose-p:text-sm"
+                      dangerouslySetInnerHTML={{ __html: setupHtml }}
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Details
+                  </h3>
+                  <dl className="space-y-3 text-sm">
+                    {[
+                      ['Category', categoryMeta?.name ?? listing.category],
+                      ['Auth Mode', listing.recommendedAuthMode],
+                      ['Spec Version', listing.specVersion],
+                      ['Added', new Date(listing.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex items-center justify-between">
+                        <dt className="text-muted-foreground">{label}</dt>
+                        <dd className="font-mono text-xs text-foreground">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Details */}
-          <div>
-            <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
-              Details
-            </h3>
-            <dl className="space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <dt className="text-muted-foreground">Category</dt>
-                <dd className="flex items-center gap-1.5 text-foreground">
-                  <CategoryIcon category={listing.category} className="h-3.5 w-3.5 text-muted-foreground" />
-                  {categoryMeta?.name}
-                </dd>
+          {activeTab === 'spec' && (
+            <div className="rounded-lg border border-border">
+              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  OpenAPI Spec
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {listing.specVersion}
+                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-muted-foreground">Auth</dt>
-                <dd className="text-foreground">
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                    {listing.recommendedAuthMode}
-                  </code>
-                </dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-muted-foreground">Spec</dt>
-                <dd className="text-foreground text-xs tabular-nums">{listing.specVersion}</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-muted-foreground">Added</dt>
-                <dd className="flex items-center gap-1.5 text-foreground text-xs">
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  {new Date(listing.createdAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              <pre className="max-h-[600px] overflow-auto p-4 text-xs leading-relaxed text-muted-foreground">
+                <code>{JSON.stringify(listing.rawSpec, null, 2)}</code>
+              </pre>
+            </div>
+          )}
+
+          {activeTab === 'changelog' && (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                No version history yet. Changelogs will appear here when the publisher releases updates.
+              </p>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
