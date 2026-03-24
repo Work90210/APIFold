@@ -25,9 +25,9 @@ export function ListingCard({ listing }: ListingCardProps) {
       <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg border border-border">
         {listing.iconUrl ? (
           <img
-            src={`/api/marketplace/icons/${listing.slug}`}
+            src={listing.iconUrl}
             alt=""
-            className="h-10 w-10 rounded-lg object-cover"
+            className="h-7 w-7 rounded"
           />
         ) : (
           <CategoryIcon category={listing.category} className="h-5 w-5 text-foreground" />
