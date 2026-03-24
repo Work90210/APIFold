@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider, ToastViewport } from "@apifold/ui";
 import { Toaster } from "@/components/layout/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
-import { CookieConsent } from "@/components/analytics/cookie-consent";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -42,7 +41,6 @@ export function Providers({ children }: { readonly children: ReactNode }) {
         <ToastProvider>
           <PostHogProvider>
             {children}
-            <CookieConsent />
           </PostHogProvider>
           <Toaster />
           <ToastViewport />

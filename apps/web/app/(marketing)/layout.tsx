@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import { Navbar } from "./components/navbar";
 import { Footer } from "./components/footer";
+import { CookieConsent } from "@/components/analytics/cookie-consent";
 
 export default function MarketingLayout({
   children,
@@ -21,6 +22,7 @@ export default function MarketingLayout({
       <Navbar />
       {children}
       <Footer />
+      <CookieConsent />
     </div>
   );
 }
