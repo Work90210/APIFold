@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "getcustomers",
-      "description": "List all customers",
+      "description": "Returns a list of your customers. The customers are returned sorted by creation date, with the most recent customers appearing first.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -64,7 +64,7 @@
     },
     {
       "name": "postcustomers",
-      "description": "Create a customer",
+      "description": "Creates a new customer object.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -145,7 +145,7 @@
     },
     {
       "name": "getcustomerscustomer",
-      "description": "Retrieve a customer",
+      "description": "Retrieves a Customer object.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -171,7 +171,7 @@
     },
     {
       "name": "postcustomerscustomer",
-      "description": "Update a customer",
+      "description": "Updates the specified customer by setting the values of the parameters passed.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -217,7 +217,7 @@
     },
     {
       "name": "deletecustomerscustomer",
-      "description": "Delete a customer",
+      "description": "Permanently deletes a customer.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -243,7 +243,7 @@
     },
     {
       "name": "getcharges",
-      "description": "List all charges",
+      "description": "Returns a list of charges you've previously created.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -278,7 +278,7 @@
     },
     {
       "name": "postcharges",
-      "description": "Create a charge",
+      "description": "Creates a new charge object.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -399,7 +399,7 @@
     },
     {
       "name": "postchargeschargecapture",
-      "description": "Capture a charge",
+      "description": "Capture the payment of an existing, uncaptured charge.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -470,7 +470,7 @@
     },
     {
       "name": "postpaymentintents",
-      "description": "Create a PaymentIntent",
+      "description": "Creates a PaymentIntent object.",
       "inputSchema": {
         "type": "object",
         "properties": {

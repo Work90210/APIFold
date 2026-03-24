@@ -15,6 +15,7 @@ export interface L0ServerMeta {
   readonly rateLimit: number;
   readonly isActive: boolean;
   readonly customDomain: string | null;
+  readonly tokenHash: string | null;
 }
 
 export interface ServerRegistryDeps {

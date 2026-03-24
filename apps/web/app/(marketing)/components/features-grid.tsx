@@ -53,10 +53,30 @@ export function FeaturesGrid() {
               </div>
               <div className="hidden items-center justify-center md:flex">
                 <div
-                  className="h-48 w-full rounded-lg border border-border bg-muted/50"
+                  className="flex h-48 w-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/30"
                   role="img"
                   aria-hidden="true"
-                />
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                    <div className="h-1 w-24 rounded-full bg-emerald-500/40" />
+                    <span className="font-mono text-[10px] text-emerald-500/80">ENCRYPTED</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                    <div className="h-1 w-20 rounded-full bg-emerald-500/40" />
+                    <span className="font-mono text-[10px] text-emerald-500/80">VAULTED</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                    <div className="h-1 w-28 rounded-full bg-emerald-500/40" />
+                    <span className="font-mono text-[10px] text-emerald-500/80">VALIDATED</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
+                    <Shield className="h-3 w-3 text-emerald-500" />
+                    <span className="font-mono text-[10px] font-medium text-emerald-500">ALL CHECKS PASSED</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

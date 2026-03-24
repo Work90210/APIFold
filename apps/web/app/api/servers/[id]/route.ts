@@ -1,11 +1,12 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse, ErrorCodes } from '@apifold/types';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { getUserId, withErrorHandler, withRateLimit, errorResponse } from '../../../../lib/api-helpers';
 import { getDb } from '../../../../lib/db/index';
 import { ServerRepository } from '../../../../lib/db/repositories/server.repository';
-import { getUserId, withErrorHandler, withRateLimit, errorResponse } from '../../../../lib/api-helpers';
-import { updateServerSchema } from '../../../../lib/validation/server.schema';
-import { uuidParam } from '../../../../lib/validation/common.schema';
 import { publishServerEvent } from '../../../../lib/redis';
+import { uuidParam } from '../../../../lib/validation/common.schema';
+import { updateServerSchema } from '../../../../lib/validation/server.schema';
 
 type RouteParams = { params: Promise<{ id: string }> };
 

@@ -1,1 +1,245 @@
-{"openapi":"3.0.3","info":{"title":"Stripe API","version":"2023-10-16"},"servers":[{"url":"https://api.stripe.com/v1"}],"paths":{"/v1/charges":{"get":{"operationId":"listCharges","summary":"List charges","parameters":[{"name":"limit","in":"query","schema":{"type":"integer"}}],"responses":{"200":{"description":"OK"}}},"post":{"operationId":"createCharge","summary":"Create a charge","requestBody":{"content":{"application/json":{"schema":{"type":"object","properties":{"amount":{"type":"integer"},"currency":{"type":"string"}}}}}},"responses":{"200":{"description":"Created"}}}},"/v1/customers":{"get":{"operationId":"listCustomers","summary":"List customers","responses":{"200":{"description":"OK"}}},"post":{"operationId":"createCustomer","summary":"Create a customer","responses":{"200":{"description":"Created"}}}},"/v1/invoices":{"get":{"operationId":"listInvoices","summary":"List invoices","responses":{"200":{"description":"OK"}}}}}}
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Stripe API",
+    "version": "2023-10-16",
+    "description": "Stripe is a payment processing platform. Use this API to create and manage charges, customers, and invoices. Handles billing, payment collection, and financial record-keeping for online businesses."
+  },
+  "servers": [
+    {
+      "url": "https://api.stripe.com/v1"
+    }
+  ],
+  "paths": {
+    "/v1/charges": {
+      "get": {
+        "operationId": "listCharges",
+        "summary": "List charges",
+        "description": "Retrieve a paginated list of charges. Use this to look up payment history, find charges by customer, or audit recent transactions. Returns charge objects with amount (in cents), currency, status (succeeded/pending/failed), customer ID, and payment method details. Results are sorted by creation date, newest first.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of charge objects to return per page (1-100). Defaults to 10. Use this to control response size when paginating through large result sets.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "description": "Filter charges to only those belonging to this Stripe customer ID (e.g. 'cus_abc123'). Use this when you need payment history for a specific customer.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "starting_after",
+            "in": "query",
+            "description": "A cursor for pagination. Provide the ID of the last charge from the previous page to fetch the next page of results.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of charge objects. Each charge includes id, amount (in cents), currency, status, customer, payment_method, created timestamp, and metadata."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createCharge",
+        "summary": "Create a charge",
+        "description": "Create a new charge to bill a customer or a payment source. Use this to process one-time payments. For recurring billing, use invoices instead. Returns the created charge object with its status indicating whether the payment succeeded, is pending, or failed.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "amount",
+                  "currency"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "integer",
+                    "description": "The amount to charge in the smallest currency unit (e.g. cents for USD). For example, $10.00 = 1000. Must be a positive integer."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Three-letter ISO 4217 currency code in lowercase (e.g. 'usd', 'eur', 'gbp'). Determines the currency of the charge."
+                  },
+                  "customer": {
+                    "type": "string",
+                    "description": "The Stripe customer ID to charge (e.g. 'cus_abc123'). If provided, the customer's default payment source is used. Either customer or source is required."
+                  },
+                  "source": {
+                    "type": "string",
+                    "description": "A payment source token (e.g. 'tok_visa') or source ID to charge. Either source or customer is required."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "An arbitrary string to attach to the charge for your internal reference. Not shown to customers."
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "A set of key-value pairs for storing additional structured information on the charge. Useful for linking charges to internal order IDs or tracking data.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created charge object with id, amount, currency, status, and payment details."
+          }
+        }
+      }
+    },
+    "/v1/customers": {
+      "get": {
+        "operationId": "listCustomers",
+        "summary": "List customers",
+        "description": "Retrieve a paginated list of all customers. Use this to browse your customer base, search for customers by email, or export customer data. Returns customer objects with email, name, default payment source, subscription status, and metadata. Results are sorted by creation date, newest first.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of customer objects to return per page (1-100). Defaults to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Filter customers by exact email address match. Use this to find a specific customer when you know their email.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "starting_after",
+            "in": "query",
+            "description": "A cursor for pagination. Provide the ID of the last customer from the previous page to fetch the next page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of customer objects. Each customer includes id, email, name, default_source, subscriptions, created timestamp, and metadata."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createCustomer",
+        "summary": "Create a customer",
+        "description": "Create a new customer record in Stripe. Use this when onboarding a new user who will make payments or subscribe to a plan. The customer object stores payment methods, tracks subscriptions, and can be referenced when creating charges or invoices. Returns the created customer object.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "The customer's email address. Used for sending receipts, invoices, and notifications."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The customer's full name or business name."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "An internal description for this customer, not visible to the customer."
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "A set of key-value pairs for storing additional information about the customer (e.g. internal user ID, account tier).",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created customer object with id, email, name, and metadata."
+          }
+        }
+      }
+    },
+    "/v1/invoices": {
+      "get": {
+        "operationId": "listInvoices",
+        "summary": "List invoices",
+        "description": "Retrieve a paginated list of invoices. Use this to review billing history, check invoice payment statuses, or find outstanding invoices for a customer. Returns invoice objects with amount due, amount paid, status (draft/open/paid/void/uncollectible), line items, customer ID, and due date. Results are sorted by creation date, newest first.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of invoice objects to return per page (1-100). Defaults to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "description": "Filter invoices to those belonging to this Stripe customer ID. Use this to view billing history for a specific customer.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter invoices by status. One of: 'draft', 'open', 'paid', 'void', 'uncollectible'. Use 'open' to find unpaid invoices.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "open",
+                "paid",
+                "void",
+                "uncollectible"
+              ]
+            }
+          },
+          {
+            "name": "starting_after",
+            "in": "query",
+            "description": "A cursor for pagination. Provide the ID of the last invoice from the previous page to fetch the next page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of invoice objects. Each invoice includes id, amount_due, amount_paid, status, customer, lines, due_date, and created timestamp."
+          }
+        }
+      }
+    }
+  }
+}

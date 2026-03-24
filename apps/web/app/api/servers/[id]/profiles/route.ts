@@ -1,9 +1,10 @@
+import { createSuccessResponse, ErrorCodes } from '@apifold/types';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createSuccessResponse, ErrorCodes } from '@apifold/types';
+
+import { getUserId, withErrorHandler, withRateLimit, errorResponse } from '../../../../../lib/api-helpers';
 import { getDb } from '../../../../../lib/db/index';
 import { ProfileRepository } from '../../../../../lib/db/repositories/profile.repository';
-import { getUserId, withErrorHandler, withRateLimit, errorResponse } from '../../../../../lib/api-helpers';
 import { uuidParam } from '../../../../../lib/validation/common.schema';
 
 type RouteParams = { params: Promise<{ id: string }> };

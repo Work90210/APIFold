@@ -1,1 +1,211 @@
-{"openapi":"3.0.3","info":{"title":"GitHub REST API","version":"1.0.0"},"servers":[{"url":"https://api.github.com"}],"paths":{"/repos/{owner}/{repo}":{"get":{"operationId":"getRepo","summary":"Get a repository","parameters":[{"name":"owner","in":"path","required":true,"schema":{"type":"string"}},{"name":"repo","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}}},"/repos/{owner}/{repo}/issues":{"get":{"operationId":"listIssues","summary":"List issues","parameters":[{"name":"owner","in":"path","required":true,"schema":{"type":"string"}},{"name":"repo","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}},"post":{"operationId":"createIssue","summary":"Create an issue","parameters":[{"name":"owner","in":"path","required":true,"schema":{"type":"string"}},{"name":"repo","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"201":{"description":"Created"}}}},"/user":{"get":{"operationId":"getAuthenticatedUser","summary":"Get authenticated user","responses":{"200":{"description":"OK"}}}}}}
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GitHub REST API",
+    "version": "1.0.0",
+    "description": "GitHub is a code hosting and collaboration platform. Use this API to manage repositories, issues, and user profiles. Supports reading repository metadata, creating and listing issues, and retrieving authenticated user details."
+  },
+  "servers": [
+    {
+      "url": "https://api.github.com"
+    }
+  ],
+  "paths": {
+    "/repos/{owner}/{repo}": {
+      "get": {
+        "operationId": "getRepo",
+        "summary": "Get a repository",
+        "description": "Retrieve detailed information about a specific GitHub repository. Use this to look up a repo's description, star count, language, default branch, visibility, or creation date. Returns the full repository object including owner details, clone URLs, open issue count, license, and topics.",
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "required": true,
+            "description": "The GitHub username or organization name that owns the repository (e.g. 'octocat' or 'microsoft').",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "path",
+            "required": true,
+            "description": "The repository name (e.g. 'hello-world'). This is the slug portion of the repo URL, not the full name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The repository object with id, name, full_name, description, html_url, clone_url, stargazers_count, forks_count, open_issues_count, language, default_branch, visibility, license, topics, created_at, and updated_at."
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues": {
+      "get": {
+        "operationId": "listIssues",
+        "summary": "List issues",
+        "description": "Retrieve a paginated list of issues for a repository. Use this to browse open bugs, feature requests, or tasks. Also includes pull requests by default (GitHub treats PRs as issues). Returns issue objects with title, body, state, labels, assignees, milestone, and comment count. Results are sorted by creation date, newest first.",
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "required": true,
+            "description": "The GitHub username or organization name that owns the repository.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "path",
+            "required": true,
+            "description": "The repository name.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Filter issues by state. One of 'open', 'closed', or 'all'. Defaults to 'open'.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed",
+                "all"
+              ],
+              "default": "open"
+            }
+          },
+          {
+            "name": "labels",
+            "in": "query",
+            "description": "Comma-separated list of label names to filter by (e.g. 'bug,high-priority'). Only issues with ALL specified labels are returned.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignee",
+            "in": "query",
+            "description": "Filter by assignee username. Use '*' for issues with any assignee, or 'none' for unassigned issues.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of issues to return per page (1-100). Defaults to 30.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination. Defaults to 1.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of issue objects. Each issue includes id, number, title, body, state, labels, assignees, milestone, comments count, created_at, updated_at, and html_url."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createIssue",
+        "summary": "Create an issue",
+        "description": "Create a new issue in a GitHub repository. Use this to report bugs, request features, or create tasks. The issue will appear in the repository's Issues tab and can be assigned, labeled, and tracked. Returns the created issue object with its number and URL.",
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "required": true,
+            "description": "The GitHub username or organization name that owns the repository.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "path",
+            "required": true,
+            "description": "The repository name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The title of the issue. Should be a concise summary of the problem or request."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "The detailed description of the issue. Supports GitHub-flavored Markdown for formatting, code blocks, and checklists."
+                  },
+                  "labels": {
+                    "type": "array",
+                    "description": "An array of label names to apply to the issue (e.g. ['bug', 'high-priority']). Labels must already exist in the repository.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "assignees": {
+                    "type": "array",
+                    "description": "An array of GitHub usernames to assign to this issue. Assignees must have push access to the repository.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "milestone": {
+                    "type": "integer",
+                    "description": "The milestone number to associate with this issue. Use listMilestones to find valid milestone numbers."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created issue object with id, number, title, body, state, html_url, labels, assignees, and created_at."
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "getAuthenticatedUser",
+        "summary": "Get authenticated user",
+        "description": "Retrieve the profile of the currently authenticated GitHub user. Use this to verify authentication, get the user's username, avatar, bio, or check account details like plan and two-factor status. Returns the full user profile object.",
+        "responses": {
+          "200": {
+            "description": "The authenticated user object with login, id, avatar_url, name, email, bio, public_repos, followers, following, created_at, and plan details."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,10 @@
+import { sql } from 'drizzle-orm';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getDb } from '../../../../../../lib/db/index';
+
 import { getUserId, withErrorHandler, withRateLimit } from '../../../../../../lib/api-helpers';
+import { getDb } from '../../../../../../lib/db/index';
 import { uuidParam } from '../../../../../../lib/validation/common.schema';
-import { sql } from 'drizzle-orm';
 
 type RouteParams = { params: Promise<{ id: string }> };
 

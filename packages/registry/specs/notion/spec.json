@@ -1,1 +1,219 @@
-{"openapi":"3.0.3","info":{"title":"Notion API","version":"2022-06-28"},"servers":[{"url":"https://api.notion.com/v1"}],"paths":{"/pages":{"post":{"operationId":"createPage","summary":"Create a page","responses":{"200":{"description":"OK"}}}},"/databases/{database_id}/query":{"post":{"operationId":"queryDatabase","summary":"Query a database","parameters":[{"name":"database_id","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}}},"/search":{"post":{"operationId":"search","summary":"Search pages and databases","responses":{"200":{"description":"OK"}}}}}}
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Notion API",
+    "version": "2022-06-28",
+    "description": "Notion is a workspace platform for notes, documents, and databases. Use this API to create pages, query structured databases, and search across a Notion workspace. Supports rich content creation, database filtering, and full-text search."
+  },
+  "servers": [
+    {
+      "url": "https://api.notion.com/v1"
+    }
+  ],
+  "paths": {
+    "/pages": {
+      "post": {
+        "operationId": "createPage",
+        "summary": "Create a page",
+        "description": "Create a new page in a Notion workspace. Use this to add a new entry to a database or create a standalone page under a parent page. You must specify a parent (either a database_id or page_id) and provide properties matching the parent database schema. Returns the created page object with its ID and URL.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "properties"
+                ],
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "description": "The parent of the new page. Must contain either 'database_id' (to add a row to a database) or 'page_id' (to create a subpage).",
+                    "properties": {
+                      "database_id": {
+                        "type": "string",
+                        "description": "The ID of the database to add this page to. Use this when creating a new row/entry in a Notion database."
+                      },
+                      "page_id": {
+                        "type": "string",
+                        "description": "The ID of the parent page. Use this when creating a subpage nested under an existing page."
+                      }
+                    }
+                  },
+                  "properties": {
+                    "type": "object",
+                    "description": "Property values for the new page. Keys must match the property names in the parent database schema. For database pages, include at minimum the title property. Values use Notion's property value format (e.g. {\"Name\": {\"title\": [{\"text\": {\"content\": \"My Page\"}}]}}).",
+                    "additionalProperties": true
+                  },
+                  "children": {
+                    "type": "array",
+                    "description": "An array of block objects to add as the page content. Supports paragraphs, headings, lists, code blocks, images, and other Notion block types. Optional — the page can be created empty.",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created page object with id, url, parent, properties, created_time, and last_edited_time."
+          }
+        }
+      }
+    },
+    "/databases/{database_id}/query": {
+      "post": {
+        "operationId": "queryDatabase",
+        "summary": "Query a database",
+        "description": "Query a Notion database with optional filters and sorting. Use this to retrieve entries from a structured database, filter rows by property values (e.g. status, date, tags), or sort results. Returns a paginated list of page objects representing database rows, each with their property values. Supports complex compound filters with AND/OR logic.",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the Notion database to query. You can find this in the database URL or by using the search endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "type": "object",
+                    "description": "A filter object to narrow results. Use property-specific filters like {\"property\": \"Status\", \"select\": {\"equals\": \"Done\"}} or compound filters with 'and'/'or' arrays for complex logic. Omit to return all entries.",
+                    "additionalProperties": true
+                  },
+                  "sorts": {
+                    "type": "array",
+                    "description": "An array of sort objects to order results. Each sort specifies a property name and direction (e.g. {\"property\": \"Created\", \"direction\": \"descending\"}). Applied in order — first sort is primary.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "property": {
+                          "type": "string",
+                          "description": "The name of the database property to sort by."
+                        },
+                        "direction": {
+                          "type": "string",
+                          "description": "Sort direction: 'ascending' or 'descending'.",
+                          "enum": [
+                            "ascending",
+                            "descending"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "start_cursor": {
+                    "type": "string",
+                    "description": "A cursor for pagination. Use the next_cursor value from a previous response to fetch the next page of results."
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return per page (1-100). Defaults to 100.",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A paginated list of page objects from the database. Each page includes id, url, properties (with their values), created_time, and last_edited_time. Response includes has_more and next_cursor for pagination."
+          }
+        }
+      }
+    },
+    "/search": {
+      "post": {
+        "operationId": "search",
+        "summary": "Search pages and databases",
+        "description": "Search across all pages and databases the integration has access to in the Notion workspace. Use this to find content by title, locate a specific database or page when you do not know its ID, or discover what content is available. Returns matching page and database objects ranked by relevance. Note: searches titles only, not page content.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The text to search for in page and database titles. Omit or leave empty to return all accessible pages and databases."
+                  },
+                  "filter": {
+                    "type": "object",
+                    "description": "Restrict results to a specific object type. Use {\"value\": \"page\", \"property\": \"object\"} for pages only, or {\"value\": \"database\", \"property\": \"object\"} for databases only.",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "description": "The object type to filter by: 'page' or 'database'.",
+                        "enum": [
+                          "page",
+                          "database"
+                        ]
+                      },
+                      "property": {
+                        "type": "string",
+                        "description": "Must be 'object' when filtering by type.",
+                        "enum": [
+                          "object"
+                        ]
+                      }
+                    }
+                  },
+                  "sort": {
+                    "type": "object",
+                    "description": "Sort order for search results. Default is relevance-based.",
+                    "properties": {
+                      "direction": {
+                        "type": "string",
+                        "description": "Sort direction: 'ascending' or 'descending'.",
+                        "enum": [
+                          "ascending",
+                          "descending"
+                        ]
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "description": "The timestamp field to sort by. Currently only 'last_edited_time' is supported.",
+                        "enum": [
+                          "last_edited_time"
+                        ]
+                      }
+                    }
+                  },
+                  "start_cursor": {
+                    "type": "string",
+                    "description": "A cursor for pagination. Use next_cursor from a previous response to fetch additional results."
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return (1-100). Defaults to 100.",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A paginated list of page and/or database objects matching the search query. Each result includes id, object type, url, title, and timestamps. Response includes has_more and next_cursor for pagination."
+          }
+        }
+      }
+    }
+  }
+}

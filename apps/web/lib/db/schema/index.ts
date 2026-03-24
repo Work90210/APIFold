@@ -7,3 +7,8 @@ export { requestLogs } from './request-logs';
 export { accessProfiles } from './profiles';
 export { specVersions } from './spec-versions';
 export { specReleases } from './spec-releases';
+export { marketplaceListings } from './marketplace-listings';
+export { marketplaceInstalls } from './marketplace-installs';
+export { marketplaceReports } from './marketplace-reports';
+export { marketplaceAuditLog } from './marketplace-audit-log';
+export { marketplaceVersions } from './marketplace-versions';
