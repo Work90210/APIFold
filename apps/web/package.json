@@ -33,6 +33,8 @@
     "lucide-react": "^0.577.0",
     "next": "^15.5.14",
     "postgres": "^3.4.8",
+    "posthog-js": "^1.363.4",
+    "posthog-node": "^5.28.5",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "recharts": "^3.8.0",
