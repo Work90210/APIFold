@@ -1,5 +1,9 @@
 import postgres from 'postgres';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const REGISTRY_DIR = resolve(__dirname, '../../../packages/registry/specs');
 
 interface SeedListing {
   readonly slug: string;
@@ -10,12 +14,19 @@ interface SeedListing {
   readonly tags: readonly string[];
   readonly iconUrl: string;
   readonly authorType: 'official' | 'community' | 'verified';
-  readonly specVersion: string;
+  readonly registryId: string;
   readonly recommendedBaseUrl: string;
   readonly recommendedAuthMode: 'none' | 'api_key' | 'bearer';
   readonly setupGuide: string;
   readonly apiDocsUrl: string;
   readonly featured: boolean;
+}
+
+function loadSpec(registryId: string): { spec: Record<string, unknown>; version: string } {
+  const raw = readFileSync(resolve(REGISTRY_DIR, registryId, 'spec.json'), 'utf8');
+  const spec = JSON.parse(raw);
+  const version = spec.openapi ?? '3.0.0';
+  return { spec, version };
 }
 
 const SEED_LISTINGS: readonly SeedListing[] = [
@@ -48,8 +59,8 @@ Give your AI agent full control over Stripe's payment infrastructure. This MCP s
     tags: ['payments', 'billing', 'subscriptions', 'invoices'],
     iconUrl: '/marketplace/logos/stripe.svg',
     authorType: 'official',
-    specVersion: '3.1.0',
-    recommendedBaseUrl: 'https://api.stripe.com',
+    registryId: 'stripe',
+    recommendedBaseUrl: 'https://api.stripe.com/v1',
     recommendedAuthMode: 'bearer',
     setupGuide: `1. Go to [Stripe Dashboard → Developers → API Keys](https://dashboard.stripe.com/apikeys)
 2. Copy your **Secret Key** (starts with \`sk_live_\` or \`sk_test_\`)
@@ -87,10 +98,10 @@ Connect your AI agent to GitHub's REST API v3. Full read/write access to reposit
     tags: ['git', 'repositories', 'ci-cd', 'issues', 'pull-requests'],
     iconUrl: '/marketplace/logos/github.svg',
     authorType: 'official',
-    specVersion: '3.1.0',
+    registryId: 'github',
     recommendedBaseUrl: 'https://api.github.com',
     recommendedAuthMode: 'bearer',
-    setupGuide: `1. Go to [GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens](https://github.com/settings/tokens?type=beta)
+    setupGuide: `1. Go to [GitHub Settings → Developer settings → Personal access tokens](https://github.com/settings/tokens?type=beta)
 2. Generate a new token with the repository and organization scopes you need
 3. Paste the token (starts with \`github_pat_\`) as the Bearer token`,
     apiDocsUrl: 'https://docs.github.com/en/rest',
@@ -123,7 +134,7 @@ Give your AI agent structured access to your Notion workspace. Read and write pa
     tags: ['notes', 'databases', 'wiki', 'knowledge-base'],
     iconUrl: '/marketplace/logos/notion.svg',
     authorType: 'official',
-    specVersion: '3.0.0',
+    registryId: 'notion',
     recommendedBaseUrl: 'https://api.notion.com',
     recommendedAuthMode: 'bearer',
     setupGuide: `1. Go to [Notion → My Integrations](https://www.notion.so/my-integrations)
@@ -132,77 +143,6 @@ Give your AI agent structured access to your Notion workspace. Read and write pa
 4. Share your Notion pages/databases with the integration (click ••• → Connections)`,
     apiDocsUrl: 'https://developers.notion.com',
     featured: true,
-  },
-  {
-    slug: 'linear-api',
-    name: 'Linear',
-    shortDescription: 'Create issues, manage projects and cycles, track team workload, and automate workflows in Linear.',
-    longDescription: `# Linear
-
-Connect your AI agent to Linear for issue tracking and project management. Create, update, and query issues, projects, and cycles.
-
-## What your agent can do
-
-- **Issues** — create, update, assign, label, and transition issues through workflow states
-- **Projects** — list projects, track milestones, manage project updates
-- **Cycles** — view current and upcoming cycles, add/remove issues from cycles
-- **Teams** — list teams, view team members and their workload
-- **Labels** — create and manage issue labels
-- **Comments** — add comments and activity to issues
-- **Workflows** — trigger automations and state transitions
-
-## Example prompts
-
-- "Create a high-priority bug in the Backend team: 'API returns 500 on /users endpoint'"
-- "What issues are assigned to me in the current cycle?"
-- "Move issue LIN-423 to 'In Review' and assign it to Sarah"
-- "List all issues labeled 'P0' that are still in Backlog"`,
-    category: 'productivity',
-    tags: ['project-management', 'issues', 'agile', 'tracking'],
-    iconUrl: '/marketplace/logos/linear.svg',
-    authorType: 'official',
-    specVersion: '3.0.0',
-    recommendedBaseUrl: 'https://api.linear.app',
-    recommendedAuthMode: 'bearer',
-    setupGuide: `1. Go to Linear → Settings → API → Personal API keys
-2. Create a new API key
-3. Paste it as the Bearer token`,
-    apiDocsUrl: 'https://developers.linear.app',
-    featured: true,
-  },
-  {
-    slug: 'resend-api',
-    name: 'Resend',
-    shortDescription: 'Send transactional and marketing emails, manage domains, and track delivery status via Resend.',
-    longDescription: `# Resend
-
-Give your AI agent the ability to send emails programmatically. Transactional emails, domain management, and delivery tracking.
-
-## What your agent can do
-
-- **Send emails** — send HTML or plain text emails with attachments, CC, BCC, reply-to
-- **Batch sending** — send up to 100 emails in a single API call
-- **Domains** — add, verify, and manage sending domains
-- **API keys** — create and revoke API keys programmatically
-- **Emails** — retrieve email status, list sent emails
-
-## Example prompts
-
-- "Send a welcome email to kyle@example.com from hello@myapp.com"
-- "Check the delivery status of the last email sent to that address"
-- "List all verified sending domains"`,
-    category: 'communication',
-    tags: ['email', 'transactional', 'smtp'],
-    iconUrl: '/marketplace/logos/resend.svg',
-    authorType: 'official',
-    specVersion: '3.0.0',
-    recommendedBaseUrl: 'https://api.resend.com',
-    recommendedAuthMode: 'bearer',
-    setupGuide: `1. Go to [Resend Dashboard → API Keys](https://resend.com/api-keys)
-2. Create a new API key with the appropriate permissions
-3. Paste it as the Bearer token (starts with \`re_\`)`,
-    apiDocsUrl: 'https://resend.com/docs/api-reference',
-    featured: false,
   },
   {
     slug: 'openai-api',
@@ -232,7 +172,7 @@ Give your AI agent access to OpenAI's full model suite. Generate text, create im
     tags: ['ai', 'llm', 'gpt', 'embeddings', 'image-generation'],
     iconUrl: '/marketplace/logos/openai.svg',
     authorType: 'official',
-    specVersion: '3.0.0',
+    registryId: 'openai',
     recommendedBaseUrl: 'https://api.openai.com',
     recommendedAuthMode: 'bearer',
     setupGuide: `1. Go to [OpenAI Platform → API Keys](https://platform.openai.com/api-keys)
@@ -241,6 +181,40 @@ Give your AI agent access to OpenAI's full model suite. Generate text, create im
 4. Ensure your account has billing enabled and sufficient credits`,
     apiDocsUrl: 'https://platform.openai.com/docs/api-reference',
     featured: true,
+  },
+  {
+    slug: 'hubspot-api',
+    name: 'HubSpot',
+    shortDescription: 'Manage contacts, deals, companies, tickets, and marketing campaigns through the HubSpot CRM API.',
+    longDescription: `# HubSpot
+
+Connect your AI agent to HubSpot CRM. Full access to contacts, deals, companies, and the marketing automation pipeline.
+
+## What your agent can do
+
+- **Contacts** — create, update, search, and merge contact records
+- **Deals** — create deals, move through pipeline stages, update amounts and close dates
+- **Companies** — manage company records, associate with contacts and deals
+- **Tickets** — create support tickets, update status, assign to team members
+- **Engagements** — log calls, emails, meetings, and notes against records
+
+## Example prompts
+
+- "Create a contact for Sarah Chen (sarah@acme.com) at Acme Corp"
+- "Move deal 'Enterprise License' to 'Contract Sent' stage"
+- "List all deals closing this quarter worth over $10,000"`,
+    category: 'crm',
+    tags: ['crm', 'contacts', 'deals', 'marketing'],
+    iconUrl: '/marketplace/logos/hubspot.svg',
+    authorType: 'official',
+    registryId: 'hubspot',
+    recommendedBaseUrl: 'https://api.hubapi.com',
+    recommendedAuthMode: 'bearer',
+    setupGuide: `1. Go to HubSpot → Settings → Integrations → Private Apps
+2. Create a private app with the CRM scopes you need
+3. Copy the access token and paste it as the Bearer token`,
+    apiDocsUrl: 'https://developers.hubspot.com/docs/api/overview',
+    featured: false,
   },
   {
     slug: 'twilio-api',
@@ -267,7 +241,7 @@ Give your AI agent the ability to communicate via SMS, voice, and messaging chan
     tags: ['sms', 'voice', 'messaging', 'phone'],
     iconUrl: '/marketplace/logos/twilio.svg',
     authorType: 'official',
-    specVersion: '3.0.0',
+    registryId: 'twilio',
     recommendedBaseUrl: 'https://api.twilio.com',
     recommendedAuthMode: 'api_key',
     setupGuide: `1. Go to [Twilio Console](https://console.twilio.com)
@@ -277,113 +251,38 @@ Give your AI agent the ability to communicate via SMS, voice, and messaging chan
     featured: false,
   },
   {
-    slug: 'shopify-admin-api',
-    name: 'Shopify',
-    shortDescription: 'Manage products, orders, customers, inventory, and collections through the Shopify Admin API.',
-    longDescription: `# Shopify
+    slug: 'slack-api',
+    name: 'Slack',
+    shortDescription: 'Send messages, manage channels, list users, and interact with Slack workspaces via the Slack Web API.',
+    longDescription: `# Slack
 
-Connect your AI agent to your Shopify store. Full admin access to products, orders, customers, and inventory management.
-
-## What your agent can do
-
-- **Products** — create, update, delete products; manage variants, images, and metafields
-- **Orders** — list, create, fulfill, cancel, and refund orders
-- **Customers** — create, search, and update customer records
-- **Inventory** — track and adjust inventory levels across locations
-- **Collections** — manage manual and automated product collections
-- **Discounts** — create and manage discount codes and automatic discounts
-
-## Example prompts
-
-- "Create a new product 'Summer T-Shirt' with sizes S, M, L at $29.99"
-- "List all unfulfilled orders from this week"
-- "Update inventory for SKU TSHIRT-BLK-M to 150 units at the main warehouse"
-- "How many customers placed their first order this month?"`,
-    category: 'commerce',
-    tags: ['ecommerce', 'orders', 'products', 'inventory'],
-    iconUrl: '/marketplace/logos/shopify.svg',
-    authorType: 'official',
-    specVersion: '3.0.0',
-    recommendedBaseUrl: 'https://your-store.myshopify.com',
-    recommendedAuthMode: 'bearer',
-    setupGuide: `1. Go to Shopify Admin → Settings → Apps and sales channels → Develop apps
-2. Create a new app and configure the Admin API scopes you need
-3. Install the app and copy the **Admin API access token**
-4. Update the base URL to your store: \`https://your-store.myshopify.com\``,
-    apiDocsUrl: 'https://shopify.dev/docs/api/admin-rest',
-    featured: false,
-  },
-  {
-    slug: 'sentry-api',
-    name: 'Sentry',
-    shortDescription: 'Query errors, track performance, manage releases, and resolve issues through the Sentry API.',
-    longDescription: `# Sentry
-
-Give your AI agent access to your application monitoring data. Query errors, track performance, and manage your release pipeline.
+Give your AI agent access to your Slack workspace. Send messages, manage channels, and interact with users programmatically.
 
 ## What your agent can do
 
-- **Issues** — list, resolve, ignore, and assign error issues; bulk triage
-- **Events** — query error events with stack traces and breadcrumbs
-- **Performance** — list slow transactions, query performance metrics
-- **Releases** — create releases, associate commits, track deploy status
-- **Projects** — list projects, update settings, manage alert rules
-- **Teams** — manage team membership and notification rules
+- **Messages** — send, update, and delete messages in any channel
+- **Channels** — create, archive, rename, and list channels
+- **Users** — list workspace members, look up users by email or ID
+- **Reactions** — add and remove emoji reactions on messages
+- **Files** — upload and share files in channels
 
 ## Example prompts
 
-- "What are the top 5 unresolved issues in the production project this week?"
-- "Resolve all issues tagged as 'handled' in the backend project"
-- "Create a release v2.3.1 and associate it with the latest deploy"
-- "Show me the stack trace for the most recent TypeError"`,
-    category: 'monitoring',
-    tags: ['errors', 'performance', 'monitoring', 'observability'],
-    iconUrl: '/marketplace/logos/sentry.svg',
+- "Send a message to #engineering saying 'Deploy v2.3 is live'"
+- "List all members of the #product channel"
+- "Create a new private channel called 'incident-2026-03'"`,
+    category: 'communication',
+    tags: ['chat', 'messaging', 'channels', 'workspace'],
+    iconUrl: '/marketplace/logos/slack.svg',
     authorType: 'official',
-    specVersion: '3.0.0',
-    recommendedBaseUrl: 'https://sentry.io/api/0',
+    registryId: 'slack',
+    recommendedBaseUrl: 'https://slack.com/api',
     recommendedAuthMode: 'bearer',
-    setupGuide: `1. Go to Sentry → Settings → Auth Tokens → [Create New Token](https://sentry.io/settings/auth-tokens/)
-2. Select the required scopes: \`project:read\`, \`event:read\`, \`org:read\`
-3. Paste the token as the Bearer token`,
-    apiDocsUrl: 'https://docs.sentry.io/api/',
-    featured: false,
-  },
-  {
-    slug: 'hubspot-api',
-    name: 'HubSpot',
-    shortDescription: 'Manage contacts, deals, companies, tickets, and marketing campaigns through the HubSpot CRM API.',
-    longDescription: `# HubSpot
-
-Connect your AI agent to HubSpot CRM. Full access to contacts, deals, companies, and the marketing automation pipeline.
-
-## What your agent can do
-
-- **Contacts** — create, update, search, and merge contact records
-- **Deals** — create deals, move through pipeline stages, update amounts and close dates
-- **Companies** — manage company records, associate with contacts and deals
-- **Tickets** — create support tickets, update status, assign to team members
-- **Engagements** — log calls, emails, meetings, and notes against records
-- **Lists** — create and manage contact lists for segmentation
-- **Properties** — create custom properties on any CRM object
-
-## Example prompts
-
-- "Create a contact for Sarah Chen (sarah@acme.com) at Acme Corp"
-- "Move deal 'Enterprise License' to 'Contract Sent' stage"
-- "List all deals closing this quarter worth over $10,000"
-- "How many new contacts were created this week?"`,
-    category: 'crm',
-    tags: ['crm', 'contacts', 'deals', 'marketing'],
-    iconUrl: '/marketplace/logos/hubspot.svg',
-    authorType: 'official',
-    specVersion: '3.0.0',
-    recommendedBaseUrl: 'https://api.hubapi.com',
-    recommendedAuthMode: 'bearer',
-    setupGuide: `1. Go to HubSpot → Settings → Integrations → Private Apps
-2. Create a private app with the CRM scopes you need
-3. Copy the access token and paste it as the Bearer token`,
-    apiDocsUrl: 'https://developers.hubspot.com/docs/api/overview',
+    setupGuide: `1. Go to [Slack API → Your Apps](https://api.slack.com/apps)
+2. Create a new app or select an existing one
+3. Go to OAuth & Permissions, add the scopes you need
+4. Install to your workspace and copy the **Bot User OAuth Token** (starts with \`xoxb-\`)`,
+    apiDocsUrl: 'https://api.slack.com/methods',
     featured: false,
   },
 ];
@@ -404,13 +303,10 @@ async function main() {
   const systemAuthorId = 'system_apifold_official';
 
   for (const listing of SEED_LISTINGS) {
-    const dummySpec = {
-      openapi: listing.specVersion,
-      info: { title: listing.name, version: '1.0.0' },
-      paths: {},
-    };
-
-    const specHash = computeHash(dummySpec);
+    // Load real spec from registry
+    const { spec, version } = loadSpec(listing.registryId);
+    const specHash = computeHash(spec);
+    const pathCount = Object.keys((spec as Record<string, unknown>).paths ?? {}).length;
 
     await sql`
       INSERT INTO marketplace_listings (
@@ -423,7 +319,7 @@ async function main() {
         ${listing.longDescription}, ${listing.category},
         ${listing.tags as unknown as string[]},
         ${listing.iconUrl}, ${systemAuthorId}, ${listing.authorType},
-        ${JSON.stringify(dummySpec)}, ${listing.specVersion},
+        ${JSON.stringify(spec)}, ${version},
         ${listing.recommendedBaseUrl}, ${listing.recommendedAuthMode},
         ${listing.setupGuide}, ${listing.apiDocsUrl},
         'published', ${listing.featured}, ${specHash}
@@ -434,17 +330,20 @@ async function main() {
         long_description = EXCLUDED.long_description,
         icon_url = EXCLUDED.icon_url,
         tags = EXCLUDED.tags,
+        raw_spec = EXCLUDED.raw_spec,
+        spec_version = EXCLUDED.spec_version,
+        spec_hash = EXCLUDED.spec_hash,
         setup_guide = EXCLUDED.setup_guide,
         api_docs_url = EXCLUDED.api_docs_url,
+        recommended_base_url = EXCLUDED.recommended_base_url,
         featured = EXCLUDED.featured,
-        spec_version = EXCLUDED.spec_version,
         status = 'published'
     `;
 
-    console.log(`  Seeded: ${listing.name}`);
+    console.log(`  Seeded: ${listing.name} (${version}, ${pathCount} paths)`);
   }
 
-  console.log(`\nSeeded ${SEED_LISTINGS.length} marketplace listings.`);
+  console.log(`\nSeeded ${SEED_LISTINGS.length} marketplace listings with real specs.`);
   await sql.end();
 }
 
