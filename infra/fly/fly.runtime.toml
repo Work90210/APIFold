@@ -17,13 +17,6 @@ primary_region = "ams"
   auto_stop_machines = true
   min_machines_running = 1
 
-[[services]]
-  internal_port = 3001
-  protocol = "tcp"
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-
 [checks]
   [checks.health]
     type = "http"

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Github, Zap } from "lucide-react";
+import { Github } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 
 const GITHUB_REPO = "https://github.com/Work90210/APIFold";
 
@@ -43,9 +44,7 @@ export function Footer() {
               href="/"
               className="flex items-center gap-2 text-lg font-bold text-foreground"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground">
-                <Zap className="h-3.5 w-3.5 text-background" />
-              </div>
+              <Logo className="h-6 w-6 text-foreground" />
               APIFold
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">

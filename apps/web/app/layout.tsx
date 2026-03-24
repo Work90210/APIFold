@@ -9,7 +9,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Providers } from "./providers";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://apifold.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://apifold.dev";
 
 export const metadata: Metadata = {
   title: {
@@ -34,6 +34,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export const viewport: Viewport = {
@@ -53,7 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{let t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`,
+            __html: `document.documentElement.classList.add('dark')`,
           }}
         />
       </head>

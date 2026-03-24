@@ -3,7 +3,7 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
 COPY apps/runtime/package.json ./apps/runtime/
 COPY packages/types/package.json ./packages/types/
 COPY packages/transformer/package.json ./packages/transformer/
@@ -21,12 +21,21 @@ COPY . .
 RUN pnpm turbo run build --filter=@apifold/runtime
 
 FROM base AS runner
-WORKDIR /app
+WORKDIR /app/apps/runtime
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 runtime
+# Copy built runtime
 COPY --from=builder /app/apps/runtime/dist ./dist
+COPY --from=builder /app/apps/runtime/package.json ./package.json
+# Copy root node_modules (resolves npm packages like postgres, express, etc.)
+COPY --from=builder /app/node_modules ../../node_modules
+# Copy runtime's node_modules (pnpm workspace symlinks)
 COPY --from=builder /app/apps/runtime/node_modules ./node_modules
-COPY --from=builder /app/apps/runtime/package.json ./
+# Copy built workspace packages (logger, transformer, types, vault)
+COPY --from=builder /app/packages/logger ../../packages/logger
+COPY --from=builder /app/packages/transformer ../../packages/transformer
+COPY --from=builder /app/packages/types ../../packages/types
+COPY --from=builder /app/packages/vault ../../packages/vault
 USER runtime
 EXPOSE 3001 9090
 ENV RUNTIME_PORT=3001
