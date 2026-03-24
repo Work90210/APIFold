@@ -1,10 +1,11 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { withErrorHandler } from '../../../lib/api-helpers';
 import { getReadDb } from '../../../lib/db/index';
 import { MarketplaceListingRepository } from '../../../lib/db/repositories/marketplace-listing.repository';
-import { withErrorHandler } from '../../../lib/api-helpers';
-import { browseMarketplaceSchema } from '../../../lib/validation/marketplace.schema';
 import * as marketplaceCache from '../../../lib/marketplace/cache';
+import { browseMarketplaceSchema } from '../../../lib/validation/marketplace.schema';
 
 export function GET(request: NextRequest): Promise<NextResponse> {
   return withErrorHandler(async () => {

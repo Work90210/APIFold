@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useRef } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { initPostHog, getPostHog } from '@/lib/analytics/posthog-client';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef } from 'react';
+
 import { trackPageView } from '@/lib/analytics/events.client';
+import { initPostHog, getPostHog } from '@/lib/analytics/posthog-client';
 
 function PostHogTracker() {
   const pathname = usePathname();

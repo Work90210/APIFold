@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
 import Script from "next/script";
-import { Navbar } from "./components/navbar";
+import type { ReactNode } from "react";
+
 import { Footer } from "./components/footer";
+import { Navbar } from "./components/navbar";
+
 import { CookieConsent } from "@/components/analytics/cookie-consent";
 
 export default function MarketingLayout({

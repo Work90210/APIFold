@@ -1,9 +1,10 @@
-import { Suspense } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ListingCard } from '@/components/marketplace/listing-card';
+import { Suspense } from 'react';
+
 import { FilterSidebar } from '@/components/marketplace/filter-sidebar';
+import { ListingCard } from '@/components/marketplace/listing-card';
 import { SearchBar } from '@/components/marketplace/search-bar';
 import { getReadDb } from '@/lib/db/index';
 import { MarketplaceListingRepository } from '@/lib/db/repositories/marketplace-listing.repository';

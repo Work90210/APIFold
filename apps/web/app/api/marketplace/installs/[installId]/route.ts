@@ -1,5 +1,6 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
+import { NextResponse, type NextRequest } from 'next/server';
+
 import { getUserId, withErrorHandler, withRateLimit } from '../../../../../lib/api-helpers';
 import { uninstallByInstallId } from '../../../../../lib/services/marketplace-service';
 

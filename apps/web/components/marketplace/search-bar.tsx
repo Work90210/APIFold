@@ -1,8 +1,8 @@
 'use client';
 
+import { Search } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import { Search } from 'lucide-react';
 
 export function SearchBar() {
   const router = useRouter();

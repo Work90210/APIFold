@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getPostHog } from '@/lib/analytics/posthog-client';
+
 import { trackCookieConsent } from '@/lib/analytics/events.client';
+import { getPostHog } from '@/lib/analytics/posthog-client';
 
 const CONSENT_KEY = 'apifold_cookie_consent';
 

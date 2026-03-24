@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
+import { NextResponse } from 'next/server';
+
+import { getUserId, withErrorHandler, withRateLimit } from '../../../../lib/api-helpers';
 import { getDb } from '../../../../lib/db/index';
 import { MarketplaceInstallRepository } from '../../../../lib/db/repositories/marketplace-install.repository';
-import { getUserId, withErrorHandler, withRateLimit } from '../../../../lib/api-helpers';
 import * as marketplaceCache from '../../../../lib/marketplace/cache';
 
 export function GET(): Promise<NextResponse> {

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { ToastProvider, ToastViewport } from "@apifold/ui";
 import { ClerkProvider } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ToastProvider, ToastViewport } from "@apifold/ui";
-import { Toaster } from "@/components/layout/toaster";
+import { useState, type ReactNode } from "react";
+
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { Toaster } from "@/components/layout/toaster";
 
 function makeQueryClient() {
   return new QueryClient({

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Version {
   readonly id: string;

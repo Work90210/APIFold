@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
+import { NextResponse } from 'next/server';
+
+import { withErrorHandler } from '../../../../lib/api-helpers';
 import { getReadDb } from '../../../../lib/db/index';
 import { MarketplaceListingRepository } from '../../../../lib/db/repositories/marketplace-listing.repository';
-import { withErrorHandler } from '../../../../lib/api-helpers';
 import * as marketplaceCache from '../../../../lib/marketplace/cache';
 
 export function GET(): Promise<NextResponse> {

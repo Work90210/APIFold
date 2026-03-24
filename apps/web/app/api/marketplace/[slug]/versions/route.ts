@@ -1,9 +1,10 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { withErrorHandler, NotFoundError } from '../../../../../lib/api-helpers';
 import { getReadDb } from '../../../../../lib/db/index';
 import { MarketplaceListingRepository } from '../../../../../lib/db/repositories/marketplace-listing.repository';
 import { MarketplaceVersionRepository } from '../../../../../lib/db/repositories/marketplace-version.repository';
-import { withErrorHandler, NotFoundError } from '../../../../../lib/api-helpers';
 
 export function GET(
   _request: NextRequest,

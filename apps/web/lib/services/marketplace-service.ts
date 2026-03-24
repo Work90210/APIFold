@@ -3,6 +3,7 @@ import { randomBytes, createHash } from 'node:crypto';
 import { transformSpec } from '@apifold/transformer';
 import { eq, and } from 'drizzle-orm';
 
+import { serverTrackDeploy, serverTrackUninstall } from '../analytics/events.server';
 import { ApiError, NotFoundError } from '../api-helpers';
 import type { DrizzleClient } from '../db/index';
 import { getDb } from '../db/index';
@@ -13,7 +14,6 @@ import { mcpServers } from '../db/schema/servers';
 import { specs } from '../db/schema/specs';
 import { mcpTools } from '../db/schema/tools';
 import * as marketplaceCache from '../marketplace/cache';
-import { serverTrackDeploy, serverTrackUninstall } from '../analytics/events.server';
 
 export interface DeployResult {
   readonly serverId: string;

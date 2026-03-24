@@ -11,6 +11,7 @@ import {
   Activity,
   Package,
 } from 'lucide-react';
+
 import type { CategorySlug } from '@/lib/marketplace/categories';
 
 const CATEGORY_ICONS: Record<CategorySlug, React.ComponentType<{ className?: string }>> = {

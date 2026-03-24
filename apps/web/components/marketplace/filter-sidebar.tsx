@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+
 import { CategoryIcon } from './category-icon';
 
 interface CategoryWithCount {

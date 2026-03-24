@@ -1,10 +1,11 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse, createPlaintextKey, ErrorCodes } from '@apifold/types';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { getUserId, withErrorHandler, withRateLimit, errorResponse } from '../../../../../lib/api-helpers';
 import { getDb } from '../../../../../lib/db/index';
 import { CredentialRepository } from '../../../../../lib/db/repositories/credential.repository';
-import { getUserId, withErrorHandler, withRateLimit, errorResponse } from '../../../../../lib/api-helpers';
-import { createCredentialSchema } from '../../../../../lib/validation/credential.schema';
 import { uuidParam } from '../../../../../lib/validation/common.schema';
+import { createCredentialSchema } from '../../../../../lib/validation/credential.schema';
 
 type RouteParams = { params: Promise<{ id: string }> };
 

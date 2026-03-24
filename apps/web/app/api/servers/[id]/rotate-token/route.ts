@@ -1,12 +1,12 @@
 import { createSuccessResponse } from '@apifold/types';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { serverTrackTokenRotation } from '../../../../../lib/analytics/events.server';
 import { getUserId, withErrorHandler, withRateLimit } from '../../../../../lib/api-helpers';
 import { getDb } from '../../../../../lib/db/index';
 import { ServerRepository } from '../../../../../lib/db/repositories/server.repository';
 import { publishServerEvent } from '../../../../../lib/redis';
 import { uuidParam } from '../../../../../lib/validation/common.schema';
-import { serverTrackTokenRotation } from '../../../../../lib/analytics/events.server';
 
 type RouteParams = { params: Promise<{ id: string }> };
 

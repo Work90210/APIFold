@@ -1,17 +1,18 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { ChevronRight, ExternalLink } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
 import { CategoryIcon } from '@/components/marketplace/category-icon';
 import { DeployButton } from '@/components/marketplace/deploy-button';
-import { MARKETPLACE_CATEGORIES, type CategorySlug } from '@/lib/marketplace/categories';
+import { ListingTabs } from '@/components/marketplace/listing-tabs';
+import { MarkdownContent } from '@/components/marketplace/markdown-content';
+import { VersionSelector } from '@/components/marketplace/version-selector';
 import { getReadDb } from '@/lib/db/index';
 import { MarketplaceListingRepository } from '@/lib/db/repositories/marketplace-listing.repository';
 import { MarketplaceVersionRepository } from '@/lib/db/repositories/marketplace-version.repository';
+import { MARKETPLACE_CATEGORIES, type CategorySlug } from '@/lib/marketplace/categories';
 import { renderMarkdown } from '@/lib/marketplace/render-markdown';
-import { MarkdownContent } from '@/components/marketplace/markdown-content';
-import { ListingTabs } from '@/components/marketplace/listing-tabs';
-import { VersionSelector } from '@/components/marketplace/version-selector';
 
 interface PageProps {
   params: Promise<{ slug: string }>;

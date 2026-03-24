@@ -66,7 +66,7 @@ export function trackSearch(params: {
   readonly source: 'marketplace' | 'command_palette';
 }): void {
   // Truncate and sanitize query to prevent PII leakage
-  const safeQuery = params.query.slice(0, 100).replace(/[a-zA-Z0-9._+\-]{20,}@/g, '[REDACTED]@');
+  const safeQuery = params.query.slice(0, 100).replace(/[a-zA-Z0-9._+\x2d]{20,}@/g, '[REDACTED]@');
   getPostHog()?.capture('search', { ...params, query: safeQuery });
 }
 

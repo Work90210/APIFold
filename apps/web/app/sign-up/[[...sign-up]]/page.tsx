@@ -1,5 +1,6 @@
 import { SignUp } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+
 import { Logo } from "@/components/brand/logo";
 
 export default function SignUpPage() {
