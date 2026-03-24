@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ArrowRight, ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronRight, ExternalLink, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { CategoryIcon } from '@/components/marketplace/category-icon';
 import { DeployButton } from '@/components/marketplace/deploy-button';
@@ -8,6 +8,7 @@ import { MARKETPLACE_CATEGORIES, type CategorySlug } from '@/lib/marketplace/cat
 import { getReadDb } from '@/lib/db/index';
 import { MarketplaceListingRepository } from '@/lib/db/repositories/marketplace-listing.repository';
 import { renderMarkdown } from '@/lib/marketplace/render-markdown';
+import { MarkdownContent } from '@/components/marketplace/markdown-content';
 import { ListingTabs } from '@/components/marketplace/listing-tabs';
 
 interface PageProps {
@@ -104,7 +105,6 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
                 {[
                   listing.authorType === 'official' ? 'OFFICIAL' : listing.authorType.toUpperCase(),
                   listing.recommendedAuthMode === 'none' ? 'NO AUTH' : listing.recommendedAuthMode.replace('_', ' ').toUpperCase(),
-                  `v${listing.specVersion}`,
                   `${listing.installCount} INSTALLS`,
                 ].map((tag) => (
                   <span
@@ -133,9 +133,18 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mt-10">
+        {/* Version selector + Tabs */}
+        <div className="mt-10 flex items-center justify-between border-b border-border">
           <ListingTabs slug={listing.slug} activeTab={activeTab} />
+
+          {/* Version selector */}
+          <div className="flex items-center gap-2 pb-1">
+            <div className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs">
+              <span className="text-muted-foreground">Version</span>
+              <span className="font-mono text-foreground">{listing.specVersion}</span>
+              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            </div>
+          </div>
         </div>
 
         {/* Tab content */}
@@ -144,13 +153,10 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
             <div className="grid gap-10 lg:grid-cols-3">
               {/* Main content */}
               <div className="lg:col-span-2">
-                <div
-                  className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-xl prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-ul:my-2 prose-ul:pl-5 prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 prose-a:decoration-border hover:prose-a:decoration-foreground prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-normal prose-code:before:content-none prose-code:after:content-none"
-                  dangerouslySetInnerHTML={{ __html: descriptionHtml }}
-                />
+                <MarkdownContent html={descriptionHtml} />
 
                 {listing.tags.length > 0 && (
-                  <div className="mt-8 flex flex-wrap gap-2 border-t border-border pt-6">
+                  <div className="mt-8 flex flex-wrap gap-2 border-t border-border/50 pt-6">
                     {listing.tags.map((tag: string) => (
                       <Link
                         key={tag}
@@ -171,10 +177,7 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
                     <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                       Setup Guide
                     </h3>
-                    <div
-                      className="prose prose-sm prose-invert max-w-none text-muted-foreground prose-ol:my-1 prose-ol:pl-4 prose-li:my-0.5 prose-a:text-foreground prose-a:underline prose-a:underline-offset-4 prose-a:decoration-border hover:prose-a:decoration-foreground prose-p:text-sm"
-                      dangerouslySetInnerHTML={{ __html: setupHtml }}
-                    />
+                    <MarkdownContent html={setupHtml} />
                   </div>
                 )}
 
@@ -204,22 +207,23 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
             <div className="rounded-lg border border-border">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  OpenAPI Spec
+                  OpenAPI Specification
                 </span>
                 <span className="font-mono text-xs text-muted-foreground">
-                  {listing.specVersion}
+                  v{listing.specVersion}
                 </span>
               </div>
-              <pre className="max-h-[600px] overflow-auto p-4 text-xs leading-relaxed text-muted-foreground">
+              <pre className="max-h-[600px] overflow-auto p-4 text-xs leading-relaxed text-muted-foreground font-mono">
                 <code>{JSON.stringify(listing.rawSpec, null, 2)}</code>
               </pre>
             </div>
           )}
 
           {activeTab === 'changelog' && (
-            <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                No version history yet. Changelogs will appear here when the publisher releases updates.
+            <div className="rounded-lg border border-dashed border-border py-16 text-center">
+              <p className="text-sm font-medium text-foreground">No version history yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Changelogs will appear here when the publisher releases updates.
               </p>
             </div>
           )}

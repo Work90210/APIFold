@@ -13,7 +13,7 @@ const TABS = [
 
 export function ListingTabs({ slug, activeTab }: ListingTabsProps) {
   return (
-    <nav className="flex gap-0 border-b border-border" aria-label="Listing tabs">
+    <nav className="flex gap-0" aria-label="Listing tabs">
       {TABS.map((tab) => {
         const isActive = activeTab === tab.id;
         const href = tab.id === 'overview'
