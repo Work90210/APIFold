@@ -2,7 +2,7 @@ app = "apifold-runtime"
 primary_region = "ams"
 
 [build]
-  dockerfile = "apps/runtime/Dockerfile"
+  dockerfile = "../../apps/runtime/Dockerfile"
 
 [env]
   NODE_ENV = "production"

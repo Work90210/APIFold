@@ -2,7 +2,7 @@ app = "apifold-web"
 primary_region = "ams"
 
 [build]
-  dockerfile = "apps/web/Dockerfile"
+  dockerfile = "../../apps/web/Dockerfile"
 
 [env]
   NODE_ENV = "production"
