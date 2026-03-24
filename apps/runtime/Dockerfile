@@ -9,6 +9,7 @@ COPY packages/types/package.json ./packages/types/
 COPY packages/transformer/package.json ./packages/transformer/
 COPY packages/tsconfig/package.json ./packages/tsconfig/
 COPY packages/logger/package.json ./packages/logger/
+COPY packages/vault/package.json ./packages/vault/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 RUN pnpm install --frozen-lockfile --prod=false
 
