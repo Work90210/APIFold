@@ -54,7 +54,8 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
 
-    const session = sessionManager.create(server.slug, res, req.ip ?? 'unknown');
+    const authenticated = (req as unknown as Record<string, unknown>)['serverTokenVerified'] === true;
+    const session = sessionManager.create(server.slug, res, req.ip ?? 'unknown', authenticated);
     if (!session) {
       // Race: capacity filled between check and create
       res.status(503).json({ error: 'Too many active sessions' });
@@ -87,6 +88,14 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       res.status(404).json({ error: 'Session not found' });
       return;
     }
+
+    // Session was authenticated at SSE connect time — trust it for message POSTs.
+    // This avoids requiring the token on every POST (cleaner for SSE clients).
+    if (!session.authenticated) {
+      res.status(401).json({ error: 'Session is not authenticated' });
+      return;
+    }
+
     if (session.slug !== identifier && session.slug !== (registry.getByEndpointId(identifier)?.slug)) {
       res.status(403).json({ error: 'Session does not belong to this server' });
       return;

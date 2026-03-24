@@ -29,6 +29,7 @@ export const mcpServers = pgTable(
     customDomain: text('custom_domain'),
     domainVerifiedAt: timestamp('domain_verified_at', { withTimezone: true }),
     domainVerificationToken: text('domain_verification_token'),
+    tokenHash: text('token_hash'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },

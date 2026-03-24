@@ -17,8 +17,14 @@ export interface McpServer {
   readonly isActive: boolean;
   readonly customDomain: string | null;
   readonly domainVerifiedAt: Date | null;
+  readonly tokenHash: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+}
+
+export interface ServerTokenResponse {
+  readonly token: string;
+  readonly tokenWarning: 'This token will not be shown again.';
 }
 
 export interface CreateServerInput {
