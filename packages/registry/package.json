@@ -10,7 +10,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./specs/*": "./specs/*"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
