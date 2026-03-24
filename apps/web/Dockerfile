@@ -8,6 +8,9 @@ COPY apps/web/package.json ./apps/web/
 COPY packages/types/package.json ./packages/types/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/transformer/package.json ./packages/transformer/
+COPY packages/vault/package.json ./packages/vault/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/registry/package.json ./packages/registry/
 COPY packages/tsconfig/package.json ./packages/tsconfig/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 RUN pnpm install --frozen-lockfile --prod=false
