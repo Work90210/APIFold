@@ -13,6 +13,7 @@ export interface SSESession {
   readonly createdAt: number;
   lastActivityAt: number;
   readonly res: Response;
+  readonly authenticated: boolean;
 }
 
 export interface SessionManagerDeps {
@@ -62,7 +63,7 @@ export class SessionManager {
     return this.sessions.size < this.maxSessions;
   }
 
-  create(slug: string, res: Response, clientIp: string): SSESession | null {
+  create(slug: string, res: Response, clientIp: string, authenticated: boolean = false): SSESession | null {
     if (!this.hasCapacity()) {
       this.logger.warn({ slug, maxSessions: this.maxSessions }, 'Max sessions reached');
       return null;
@@ -76,6 +77,7 @@ export class SessionManager {
       createdAt: now,
       lastActivityAt: now,
       res,
+      authenticated,
     };
 
     this.sessions.set(session.id, session);

@@ -1,14 +1,17 @@
-import { promises as dns } from 'node:dns';
 import { randomBytes } from 'node:crypto';
+import { promises as dns } from 'node:dns';
+
+import { createSuccessResponse, ErrorCodes } from '@apifold/types';
+import { eq, and } from 'drizzle-orm';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createSuccessResponse, ErrorCodes } from '@apifold/types';
+
+import { getUserId, withErrorHandler, withRateLimit, errorResponse, ApiError } from '../../../../../lib/api-helpers';
 import { getDb } from '../../../../../lib/db/index';
 import { ServerRepository } from '../../../../../lib/db/repositories/server.repository';
-import { getUserId, withErrorHandler, withRateLimit, errorResponse, ApiError } from '../../../../../lib/api-helpers';
-import { uuidParam } from '../../../../../lib/validation/common.schema';
 import { mcpServers } from '../../../../../lib/db/schema/servers';
-import { eq, and } from 'drizzle-orm';
+import { uuidParam } from '../../../../../lib/validation/common.schema';
+
 
 type RouteParams = { params: Promise<{ id: string }> };
 

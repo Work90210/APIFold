@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 import { MobileNav } from "./mobile-nav";
 
 export function Navbar() {
@@ -10,9 +10,7 @@ export function Navbar() {
           href="/"
           className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
-            <Zap className="h-4 w-4 text-background" />
-          </div>
+          <Logo className="h-7 w-7 text-foreground" />
           APIFold
         </Link>
 
@@ -22,6 +20,12 @@ export function Navbar() {
             className="text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
           >
             Features
+          </Link>
+          <Link
+            href="/marketplace"
+            className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          >
+            Marketplace
           </Link>
           <Link
             href="/pricing"

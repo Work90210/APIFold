@@ -247,8 +247,8 @@ function resolveDescription(
   method: string,
   path: string,
 ): string {
-  if (operation.summary) return operation.summary;
   if (operation.description) return operation.description;
+  if (operation.summary) return operation.summary;
   return `${method.toUpperCase()} ${path}`;
 }
 

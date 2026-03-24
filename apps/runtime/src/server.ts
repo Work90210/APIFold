@@ -8,9 +8,9 @@ import type { SessionManager } from './mcp/session-manager.js';
 import type { ToolExecutorDeps } from './mcp/tool-executor.js';
 import { createCorsMiddleware } from './middleware/cors.js';
 import { createErrorHandler } from './middleware/error-handler.js';
-import { createMcpAuth } from './middleware/mcp-auth.js';
 import { createPerServerRateLimiter } from './middleware/rate-limiter.js';
 import { createRequestLogger } from './middleware/request-logger.js';
+import { createServerTokenAuth } from './middleware/server-token-auth.js';
 import { createServiceAuth } from './middleware/service-auth.js';
 import { createHealthRouter } from './observability/health.js';
 import type { Logger } from './observability/logger.js';
@@ -52,8 +52,16 @@ export function createApp(deps: AppDeps): Express {
     res.type('text/plain; version=0.0.4').send(metrics.toPrometheus());
   });
 
-  // Optional API key auth for MCP endpoints (no-op when MCP_API_KEY is not set)
-  app.use('/mcp/:slug', createMcpAuth(config.mcpApiKey));
+  // Custom domain routing MUST run BEFORE token auth so the URL is rewritten
+  // from /sse → /mcp/:endpointId/sse before the auth middleware resolves the server.
+  app.use(createDomainRouter({
+    logger,
+    registry,
+    platformDomain: process.env['PLATFORM_DOMAIN'] ?? 'apifold.dev',
+  }));
+
+  // Per-server access token auth + global API key fallback for MCP endpoints
+  app.use('/mcp/:slug', createServerTokenAuth(config.mcpApiKey, registry));
 
   // Per-server rate limiter (Redis-backed, fail-open)
   if (deps.redis) {

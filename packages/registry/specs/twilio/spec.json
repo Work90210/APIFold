@@ -1,1 +1,196 @@
-{"openapi":"3.0.3","info":{"title":"Twilio REST API","version":"2010-04-01"},"servers":[{"url":"https://api.twilio.com"}],"paths":{"/2010-04-01/Accounts/{AccountSid}/Messages.json":{"get":{"operationId":"listMessages","summary":"List messages","parameters":[{"name":"AccountSid","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}},"post":{"operationId":"sendMessage","summary":"Send an SMS","parameters":[{"name":"AccountSid","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"201":{"description":"Created"}}}},"/2010-04-01/Accounts/{AccountSid}/Calls.json":{"post":{"operationId":"makeCall","summary":"Make a phone call","parameters":[{"name":"AccountSid","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"201":{"description":"Created"}}}}}}
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Twilio REST API",
+    "version": "2010-04-01",
+    "description": "Twilio is a communications platform for sending SMS/MMS messages and making phone calls programmatically. Use this API to send text messages, retrieve message history, and initiate voice calls. Supports domestic and international messaging and calling."
+  },
+  "servers": [
+    {
+      "url": "https://api.twilio.com"
+    }
+  ],
+  "paths": {
+    "/2010-04-01/Accounts/{AccountSid}/Messages.json": {
+      "get": {
+        "operationId": "listMessages",
+        "summary": "List messages",
+        "description": "Retrieve a paginated list of SMS/MMS messages sent and received on your Twilio account. Use this to check message delivery status, review message history, search for messages to/from a specific phone number, or audit messaging activity. Returns message objects with body text, status (queued/sending/sent/delivered/failed), direction, and timestamps. Results are sorted by date sent, newest first.",
+        "parameters": [
+          {
+            "name": "AccountSid",
+            "in": "path",
+            "required": true,
+            "description": "Your Twilio Account SID (e.g. 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'). Found on the Twilio Console dashboard.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "To",
+            "in": "query",
+            "description": "Filter messages sent to this phone number. Use E.164 format (e.g. '+15551234567').",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "From",
+            "in": "query",
+            "description": "Filter messages sent from this phone number. Use E.164 format (e.g. '+15551234567').",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DateSent",
+            "in": "query",
+            "description": "Filter messages by the date they were sent. Use YYYY-MM-DD format. Prefix with '>' or '<' for range queries (e.g. '>2024-01-01').",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "Maximum number of messages to return per page (1-1000). Defaults to 50.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of message objects. Each message includes sid, body, from, to, status (queued/sending/sent/delivered/undelivered/failed), direction (inbound/outbound-api/outbound-call/outbound-reply), date_sent, price, and error_code if applicable."
+          }
+        }
+      },
+      "post": {
+        "operationId": "sendMessage",
+        "summary": "Send an SMS",
+        "description": "Send a new SMS or MMS message. Use this to send text messages to any phone number, send notifications, alerts, or verification codes. Requires a 'To' number, a 'From' number (must be a Twilio number you own or a verified caller ID), and the message body. Returns the created message object with its SID and initial status.",
+        "parameters": [
+          {
+            "name": "AccountSid",
+            "in": "path",
+            "required": true,
+            "description": "Your Twilio Account SID (e.g. 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'). Found on the Twilio Console dashboard.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "To",
+                  "From",
+                  "Body"
+                ],
+                "properties": {
+                  "To": {
+                    "type": "string",
+                    "description": "The destination phone number in E.164 format (e.g. '+15551234567'). This is the number that will receive the message."
+                  },
+                  "From": {
+                    "type": "string",
+                    "description": "The Twilio phone number or messaging service SID to send from, in E.164 format (e.g. '+15559876543'). Must be a Twilio number you own or a verified caller ID."
+                  },
+                  "Body": {
+                    "type": "string",
+                    "description": "The text content of the message. Maximum 1,600 characters. Messages over 160 characters are sent as multi-part SMS."
+                  },
+                  "MediaUrl": {
+                    "type": "array",
+                    "description": "URLs of media files to attach as MMS (e.g. images, GIFs). Up to 10 URLs. Each URL must be publicly accessible. Only supported for MMS-capable numbers.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "StatusCallback": {
+                    "type": "string",
+                    "description": "A URL that Twilio will POST to with status updates as the message progresses (queued, sent, delivered, failed). Use this for delivery tracking webhooks."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created message object with sid, body, from, to, status (initially 'queued'), direction, date_created, and price estimate."
+          }
+        }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Calls.json": {
+      "post": {
+        "operationId": "makeCall",
+        "summary": "Make a phone call",
+        "description": "Initiate an outbound phone call. Use this to make automated voice calls for notifications, reminders, IVR systems, or connecting two parties. You must provide a 'To' number, a 'From' number (must be a Twilio number), and either a 'Url' pointing to TwiML instructions or 'Twiml' inline XML that controls the call flow. Returns the created call object with its SID and initial status.",
+        "parameters": [
+          {
+            "name": "AccountSid",
+            "in": "path",
+            "required": true,
+            "description": "Your Twilio Account SID (e.g. 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'). Found on the Twilio Console dashboard.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "To",
+                  "From"
+                ],
+                "properties": {
+                  "To": {
+                    "type": "string",
+                    "description": "The phone number to call in E.164 format (e.g. '+15551234567')."
+                  },
+                  "From": {
+                    "type": "string",
+                    "description": "The Twilio phone number to call from in E.164 format (e.g. '+15559876543'). Must be a Twilio number you own."
+                  },
+                  "Url": {
+                    "type": "string",
+                    "description": "A URL that returns TwiML instructions for how to handle the call (e.g. play audio, gather input, say text). Twilio will fetch this URL when the call connects. Either 'Url' or 'Twiml' is required."
+                  },
+                  "Twiml": {
+                    "type": "string",
+                    "description": "Inline TwiML XML instructions for the call (e.g. '<Response><Say>Hello!</Say></Response>'). Use this instead of 'Url' for simple call flows. Either 'Url' or 'Twiml' is required."
+                  },
+                  "StatusCallback": {
+                    "type": "string",
+                    "description": "A URL that Twilio will POST to with call status events (initiated, ringing, answered, completed). Use for tracking call progress."
+                  },
+                  "Timeout": {
+                    "type": "integer",
+                    "description": "Number of seconds to wait for the call to be answered before giving up. Defaults to 60. Maximum is 600.",
+                    "default": 60
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created call object with sid, from, to, status (initially 'queued'), direction, start_time, duration, and price estimate."
+          }
+        }
+      }
+    }
+  }
+}

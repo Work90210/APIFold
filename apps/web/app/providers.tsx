@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { ToastProvider, ToastViewport } from "@apifold/ui";
 import { ClerkProvider } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ToastProvider, ToastViewport } from "@apifold/ui";
+import { useState, type ReactNode } from "react";
+
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { Toaster } from "@/components/layout/toaster";
 
 function makeQueryClient() {
@@ -38,7 +40,9 @@ export function Providers({ children }: { readonly children: ReactNode }) {
     >
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          {children}
+          <PostHogProvider>
+            {children}
+          </PostHogProvider>
           <Toaster />
           <ToastViewport />
         </ToastProvider>

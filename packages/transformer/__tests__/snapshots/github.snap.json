@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "repos_get",
-      "description": "Get a repository",
+      "description": "The `parent` and `source` objects are present when the repository is a fork.",
       "inputSchema": {
         "type": "object",
         "properties": {

@@ -1,1 +1,169 @@
-{"openapi":"3.0.3","info":{"title":"HubSpot CRM API","version":"3.0"},"servers":[{"url":"https://api.hubapi.com"}],"paths":{"/crm/v3/objects/contacts":{"get":{"operationId":"listContacts","summary":"List contacts","responses":{"200":{"description":"OK"}}},"post":{"operationId":"createContact","summary":"Create a contact","responses":{"201":{"description":"Created"}}}},"/crm/v3/objects/deals":{"get":{"operationId":"listDeals","summary":"List deals","responses":{"200":{"description":"OK"}}}},"/crm/v3/objects/companies":{"get":{"operationId":"listCompanies","summary":"List companies","responses":{"200":{"description":"OK"}}}}}}
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "HubSpot CRM API",
+    "version": "3.0",
+    "description": "HubSpot is a CRM platform for managing customer relationships, sales pipelines, and company records. Use this API to create and list contacts, browse deals in your sales pipeline, and manage company records. Supports the core CRM objects: contacts, deals, and companies."
+  },
+  "servers": [
+    {
+      "url": "https://api.hubapi.com"
+    }
+  ],
+  "paths": {
+    "/crm/v3/objects/contacts": {
+      "get": {
+        "operationId": "listContacts",
+        "summary": "List contacts",
+        "description": "Retrieve a paginated list of contacts from the HubSpot CRM. Use this to browse your contact database, find contacts by email, or export contact data for analysis. Returns contact objects with default properties (firstname, lastname, email, phone) plus any additionally requested properties. Results are sorted by last modified date.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of contacts to return per page (1-100). Defaults to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "A cursor for pagination. Use the 'paging.next.after' value from a previous response to fetch the next page of contacts.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "properties",
+            "in": "query",
+            "description": "Comma-separated list of contact property names to include in the response (e.g. 'email,firstname,lastname,phone,company'). By default only a subset of properties is returned. Specify additional properties here to include them.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of contact objects. Each contact includes id, properties (key-value pairs like email, firstname, lastname), createdAt, updatedAt, and archived status. Response includes paging.next.after cursor when more results are available."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createContact",
+        "summary": "Create a contact",
+        "description": "Create a new contact in the HubSpot CRM. Use this when adding a new person to your CRM — for example, after a form submission, meeting, or manual entry. Provide contact properties like email, name, and phone number. The email property is used for deduplication. Returns the created contact object with its ID and all properties.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "properties"
+                ],
+                "properties": {
+                  "properties": {
+                    "type": "object",
+                    "description": "A map of property names to values for the new contact. Common properties: 'email' (strongly recommended for deduplication), 'firstname', 'lastname', 'phone', 'company', 'jobtitle', 'lifecyclestage' (e.g. 'lead', 'customer').",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created contact object with id, properties, createdAt, updatedAt, and archived status."
+          }
+        }
+      }
+    },
+    "/crm/v3/objects/deals": {
+      "get": {
+        "operationId": "listDeals",
+        "summary": "List deals",
+        "description": "Retrieve a paginated list of deals from the HubSpot CRM sales pipeline. Use this to review your sales pipeline, check deal stages, forecast revenue, or find deals by close date. Returns deal objects with properties like deal name, amount, stage, close date, and associated contacts/companies.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of deals to return per page (1-100). Defaults to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "A cursor for pagination. Use the 'paging.next.after' value from a previous response to fetch the next page of deals.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "properties",
+            "in": "query",
+            "description": "Comma-separated list of deal property names to include in the response (e.g. 'dealname,amount,dealstage,closedate,pipeline'). Specify additional properties beyond the defaults.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of deal objects. Each deal includes id, properties (dealname, amount, dealstage, closedate, etc.), createdAt, updatedAt, and archived status. Response includes paging.next.after cursor when more results are available."
+          }
+        }
+      }
+    },
+    "/crm/v3/objects/companies": {
+      "get": {
+        "operationId": "listCompanies",
+        "summary": "List companies",
+        "description": "Retrieve a paginated list of companies from the HubSpot CRM. Use this to browse your company records, find companies by domain or industry, or review company data for account management. Returns company objects with properties like name, domain, industry, and employee count.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of companies to return per page (1-100). Defaults to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "A cursor for pagination. Use the 'paging.next.after' value from a previous response to fetch the next page of companies.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "properties",
+            "in": "query",
+            "description": "Comma-separated list of company property names to include in the response (e.g. 'name,domain,industry,numberofemployees,annualrevenue'). Specify additional properties beyond the defaults.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of company objects. Each company includes id, properties (name, domain, industry, etc.), createdAt, updatedAt, and archived status. Response includes paging.next.after cursor when more results are available."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,14 +1,24 @@
-import { eq, and } from 'drizzle-orm';
+import { randomBytes, createHash } from 'node:crypto';
+
 import type {
   McpServer,
   CreateServerInput,
   UpdateServerInput,
   ServerFilters,
 } from '@apifold/types';
+import { eq, and } from 'drizzle-orm';
+
 import { mcpServers } from '../schema/servers';
 import { specs } from '../schema/specs';
+
 import { BaseRepository } from './base.repository';
 import { DEFAULT_QUERY_LIMIT } from './constants';
+
+export function generateServerToken(): { token: string; tokenHash: string } {
+  const token = `af_${randomBytes(32).toString('hex')}`;
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  return { token, tokenHash };
+}
 
 export class ServerRepository extends BaseRepository<
   McpServer,
@@ -61,7 +71,7 @@ export class ServerRepository extends BaseRepository<
     return row ? this.freeze(row) : null;
   }
 
-  async create(userId: string, input: CreateServerInput): Promise<McpServer> {
+  async create(userId: string, input: CreateServerInput): Promise<McpServer & { readonly token: string }> {
     return this.db.transaction(async (tx) => {
       // Verify the spec belongs to the calling user
       const specRows = await tx
@@ -74,8 +84,8 @@ export class ServerRepository extends BaseRepository<
         throw new Error('Spec not found or access denied');
       }
 
-      const { randomBytes } = await import('node:crypto');
       const endpointId = randomBytes(6).toString('hex');
+      const { token, tokenHash } = generateServerToken();
 
       const rows = await tx
         .insert(mcpServers)
@@ -89,11 +99,28 @@ export class ServerRepository extends BaseRepository<
         authMode: input.authMode,
         baseUrl: input.baseUrl,
         rateLimitPerMinute: input.rateLimitPerMinute ?? 100,
+        tokenHash,
       })
       .returning();
 
-      return this.freeze(rows[0]!);
+      return Object.freeze({ ...rows[0]!, token });
     });
+  }
+
+  async rotateToken(userId: string, id: string): Promise<{ readonly server: McpServer; readonly token: string }> {
+    const { token, tokenHash } = generateServerToken();
+
+    const rows = await this.db
+      .update(mcpServers)
+      .set({ tokenHash })
+      .where(and(eq(mcpServers.id, id), eq(mcpServers.userId, userId)))
+      .returning();
+
+    if (rows.length === 0) {
+      throw new Error('Server not found or access denied');
+    }
+
+    return Object.freeze({ server: this.freeze(rows[0]!), token });
   }
 
   async update(userId: string, id: string, input: UpdateServerInput): Promise<McpServer> {

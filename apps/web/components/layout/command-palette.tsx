@@ -10,6 +10,7 @@ import {
   Upload,
   BookOpen,
   Search,
+  Store,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Dialog, DialogContent } from "@apifold/ui";
@@ -27,6 +28,8 @@ const PALETTE_ITEMS: readonly PaletteItem[] = [
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
   { label: "Import Spec", href: "/dashboard/specs/new", icon: Upload },
   { label: "Docs", href: "/docs", icon: BookOpen },
+  { label: "Browse Marketplace", href: "/marketplace", icon: Store },
+  { label: "My Marketplace Installs", href: "/dashboard/marketplace", icon: Store },
 ] as const;
 
 export function CommandPalette() {

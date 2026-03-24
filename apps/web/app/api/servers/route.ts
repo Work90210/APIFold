@@ -1,11 +1,12 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@apifold/types';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { getUserId, getUserPlan, withErrorHandler, withRateLimit, ApiError } from '../../../lib/api-helpers';
+import { checkServerLimit } from '../../../lib/billing/plan-enforcer';
 import { getDb } from '../../../lib/db/index';
 import { ServerRepository } from '../../../lib/db/repositories/server.repository';
-import { getUserId, getUserPlan, withErrorHandler, withRateLimit, ApiError } from '../../../lib/api-helpers';
-import { createServerSchema } from '../../../lib/validation/server.schema';
 import { publishServerEvent } from '../../../lib/redis';
-import { checkServerLimit } from '../../../lib/billing/plan-enforcer';
+import { createServerSchema } from '../../../lib/validation/server.schema';
 
 export function GET(_request: NextRequest): Promise<NextResponse> {
   return withErrorHandler(async () => {
@@ -17,7 +18,12 @@ export function GET(_request: NextRequest): Promise<NextResponse> {
     const serverRepo = new ServerRepository(db);
     const servers = await serverRepo.findAll(userId);
 
-    return NextResponse.json(createSuccessResponse(servers));
+    // Strip tokenHash from response — never expose hash to client
+    const safeServers = servers.map((s) => {
+      const { tokenHash: _omit, ...rest } = s as unknown as Record<string, unknown>;
+      return rest;
+    });
+    return NextResponse.json(createSuccessResponse(safeServers));
   });
 }
 
@@ -42,14 +48,25 @@ export function POST(request: NextRequest): Promise<NextResponse> {
 
     const db = getDb();
     const serverRepo = new ServerRepository(db);
-    const server = await serverRepo.create(userId, input);
+    const result = await serverRepo.create(userId, input);
 
     await publishServerEvent({
       type: 'server:created',
-      serverId: server.id,
-      slug: server.slug,
+      serverId: result.id,
+      slug: result.slug,
     });
 
-    return NextResponse.json(createSuccessResponse(server), { status: 201 });
+    // Return server data + plaintext token (shown once, never stored)
+    // Strip tokenHash from response — only return the plaintext token
+    const { token, ...serverWithHash } = result;
+    const { tokenHash: _omit, ...server } = serverWithHash as Record<string, unknown>;
+    return NextResponse.json(
+      createSuccessResponse({
+        ...server,
+        token,
+        tokenWarning: 'This token will not be shown again.' as const,
+      }),
+      { status: 201 },
+    );
   });
 }
