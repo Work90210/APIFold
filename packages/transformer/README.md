@@ -106,9 +106,22 @@ interface MCPToolDefinition {
     readonly paramMap: Record<string, 'path' | 'query' | 'header'>;
     readonly tags: readonly string[];
     readonly deprecated: boolean;
+    readonly responseSchema?: JSONSchema;     // Success response schema (resolved)
+    readonly responseDescription?: string;   // Description of the 2xx response
+    readonly responseContentType?: string;   // e.g. 'application/json'
   };
 }
 ```
+
+## Description Enrichment
+
+The transformer automatically enriches tool descriptions with a summary of the expected response shape. This helps LLMs understand what a tool returns without needing to inspect the underlying `_meta` schema.
+
+- **Behavior**: Appends ` (returns <summary>)` to the description.
+- **Skip Logic**: If the original description already contains the word "returns" (case-insensitive), enrichment is skipped to avoid redundancy.
+- **Example**:
+  - **Raw**: `Find pet by ID`
+  - **Enriched**: `Find pet by ID (returns Pet object)`
 
 ## Mapping Rules
 
@@ -136,6 +149,12 @@ interface MCPToolDefinition {
 | Binary/multipart body | Operation skipped, warning emitted |
 | Reserved param names | Prefixed with `param_` (e.g., `body` becomes `param_body`) |
 | Long operation names | Truncated at 64 characters |
+
+## Implementation Notes
+
+- **Success Response**: The transformer extracts the schema from the first `2xx` response code found in the operation.
+- **Content Types**: Only `application/json` response bodies are currently processed for schema extraction.
+- **Reference Resolution**: All `$ref` pointers within response schemas are fully resolved, just like request bodies.
 
 ## Supported Versions
 
