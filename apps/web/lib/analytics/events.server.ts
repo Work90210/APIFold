@@ -1,80 +1,53 @@
 import { getServerPostHog } from './posthog-server';
 
-export function serverTrackDeploy(params: {
+async function captureAndFlush(
+  distinctId: string,
+  event: string,
+  properties?: Record<string, unknown>,
+): Promise<void> {
+  const ph = getServerPostHog();
+  if (!ph) return;
+  ph.capture({ distinctId, event, properties });
+  await ph.flush();
+}
+
+export async function serverTrackDeploy(params: {
   readonly userId: string;
   readonly listingSlug: string;
   readonly serverId: string;
   readonly toolCount: number;
-}): void {
-  getServerPostHog()?.capture({
-    distinctId: params.userId,
-    event: 'marketplace_deploy_server',
-    properties: {
-      listing_slug: params.listingSlug,
-      server_id: params.serverId,
-      tool_count: params.toolCount,
-    },
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'marketplace_deploy', {
+    listing_slug: params.listingSlug,
+    server_id: params.serverId,
+    tool_count: params.toolCount,
   });
 }
 
-export function serverTrackUninstall(params: {
+export async function serverTrackUninstall(params: {
   readonly userId: string;
   readonly listingSlug?: string;
   readonly serverId: string;
-}): void {
-  getServerPostHog()?.capture({
-    distinctId: params.userId,
-    event: 'marketplace_uninstall',
-    properties: {
-      listing_slug: params.listingSlug,
-      server_id: params.serverId,
-    },
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'marketplace_uninstall', {
+    listing_slug: params.listingSlug,
+    server_id: params.serverId,
   });
 }
 
-export function serverTrackSignUp(params: {
-  readonly userId: string;
-  readonly email?: string;
-}): void {
+export async function serverTrackSignUp(userId: string): Promise<void> {
   const ph = getServerPostHog();
   if (!ph) return;
-  ph.capture({
-    distinctId: params.userId,
-    event: 'user_signed_up',
-    properties: { email: params.email },
-  });
-  ph.identify({
-    distinctId: params.userId,
-    properties: { email: params.email, plan: 'free' },
-  });
+  ph.identify({ distinctId: userId, properties: { plan: 'free' } });
+  ph.capture({ distinctId: userId, event: 'user_signed_up' });
+  await ph.flush();
 }
 
-export function serverTrackTokenRotation(params: {
+export async function serverTrackTokenRotation(params: {
   readonly userId: string;
   readonly serverId: string;
-}): void {
-  getServerPostHog()?.capture({
-    distinctId: params.userId,
-    event: 'server_token_rotated',
-    properties: { server_id: params.serverId },
-  });
-}
-
-export function serverTrackApiRequest(params: {
-  readonly userId: string;
-  readonly endpoint: string;
-  readonly method: string;
-  readonly statusCode: number;
-  readonly durationMs: number;
-}): void {
-  getServerPostHog()?.capture({
-    distinctId: params.userId,
-    event: 'api_request',
-    properties: {
-      endpoint: params.endpoint,
-      method: params.method,
-      status_code: params.statusCode,
-      duration_ms: params.durationMs,
-    },
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'server_token_rotated', {
+    server_id: params.serverId,
   });
 }

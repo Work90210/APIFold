@@ -65,7 +65,9 @@ export function trackSearch(params: {
   readonly resultCount: number;
   readonly source: 'marketplace' | 'command_palette';
 }): void {
-  getPostHog()?.capture('search', params);
+  // Truncate and sanitize query to prevent PII leakage
+  const safeQuery = params.query.slice(0, 100).replace(/[a-zA-Z0-9._+\-]{20,}@/g, '[REDACTED]@');
+  getPostHog()?.capture('search', { ...params, query: safeQuery });
 }
 
 export function trackError(params: {

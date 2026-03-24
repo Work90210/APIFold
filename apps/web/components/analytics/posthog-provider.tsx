@@ -12,40 +12,21 @@ function PostHogTracker() {
   const { user } = useUser();
   const identified = useRef(false);
 
-  // Initialize PostHog on mount
+  // Initialize PostHog + identify user in a single effect
   useEffect(() => {
     initPostHog();
-  }, []);
-
-  // Track page views on route change
-  useEffect(() => {
-    const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
-    trackPageView(url);
-  }, [pathname, searchParams]);
-
-  // Identify user + set super properties + group analytics
-  useEffect(() => {
     const ph = getPostHog();
     if (!ph) return;
 
     if (user && !identified.current) {
-      // Identify the user
-      ph.identify(user.id, {
-        email: user.primaryEmailAddress?.emailAddress,
-        name: user.fullName,
-        created_at: user.createdAt,
-      });
+      // Identify with opaque user ID only — no PII (email, name) sent to PostHog
+      ph.identify(user.id);
 
-      // Super properties — attached to every event automatically
+      // Super properties — attached to every event
       const plan = (user.publicMetadata?.plan as string) ?? 'free';
-      const isAdmin = user.publicMetadata?.is_admin === true;
-      ph.register({
-        plan,
-        is_admin: isAdmin,
-        user_created_at: user.createdAt,
-      });
+      ph.register({ plan });
 
-      // Group analytics — group by plan tier
+      // Group analytics by plan tier
       ph.group('plan', plan, {
         name: plan.charAt(0).toUpperCase() + plan.slice(1),
       });
@@ -58,6 +39,12 @@ function PostHogTracker() {
       identified.current = false;
     }
   }, [user]);
+
+  // Track page views on route change
+  useEffect(() => {
+    const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+    trackPageView(url);
+  }, [pathname, searchParams]);
 
   return null;
 }
