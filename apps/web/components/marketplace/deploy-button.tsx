@@ -24,6 +24,12 @@ export function DeployButton({ slug, disabled = false, size = 'default' }: Deplo
         method: 'POST',
       });
 
+      // Clerk returns a redirect for unauthenticated users
+      if (res.redirected || res.status === 401 || res.status === 403) {
+        router.push(`/sign-in?redirect_url=/marketplace/${slug}`);
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -33,7 +39,8 @@ export function DeployButton({ slug, disabled = false, size = 'default' }: Deplo
 
       router.push(data.data.redirectUrl);
     } catch {
-      setError('Network error. Please try again.');
+      // Likely a redirect to sign-in that fetch can't follow
+      router.push(`/sign-in?redirect_url=/marketplace/${slug}`);
     } finally {
       setLoading(false);
     }
