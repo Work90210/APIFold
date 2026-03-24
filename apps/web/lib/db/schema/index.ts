@@ -11,3 +11,4 @@ export { marketplaceListings } from './marketplace-listings';
 export { marketplaceInstalls } from './marketplace-installs';
 export { marketplaceReports } from './marketplace-reports';
 export { marketplaceAuditLog } from './marketplace-audit-log';
+export { marketplaceVersions } from './marketplace-versions';

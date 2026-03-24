@@ -62,7 +62,7 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
   const isFiltered = !!(rawParams.q || rawParams.category);
 
   return (
-    <section className="relative border-t border-border px-6 py-28 md:py-36">
+    <section className="relative px-6 py-28 md:py-36">
       <div className="relative z-10 mx-auto max-w-7xl">
         {/* Header */}
         <div className="text-center">
