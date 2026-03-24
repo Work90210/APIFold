@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { trackMarketplaceDeploy } from '@/lib/analytics/events';
 
 interface DeployButtonProps {
   readonly slug: string;
@@ -33,10 +34,13 @@ export function DeployButton({ slug, disabled = false, size = 'default' }: Deplo
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error?.message ?? 'Deploy failed');
+        const msg = data.error?.message ?? 'Deploy failed';
+        setError(msg);
+        trackMarketplaceDeploy({ slug, name: slug, category: '', success: false, error: msg });
         return;
       }
 
+      trackMarketplaceDeploy({ slug, name: slug, category: '', success: true });
       router.push(data.data.redirectUrl);
     } catch {
       // Likely a redirect to sign-in that fetch can't follow

@@ -13,6 +13,7 @@ import { mcpServers } from '../db/schema/servers';
 import { specs } from '../db/schema/specs';
 import { mcpTools } from '../db/schema/tools';
 import * as marketplaceCache from '../marketplace/cache';
+import { serverTrackDeploy, serverTrackUninstall } from '../analytics/events';
 
 export interface DeployResult {
   readonly serverId: string;
@@ -142,6 +143,14 @@ export async function deployListing(
   await marketplaceCache.invalidateListing(slug);
   await marketplaceCache.invalidateUserInstalls(userId);
 
+  // 8. Analytics
+  serverTrackDeploy({
+    userId,
+    listingSlug: slug,
+    serverId: result.serverId,
+    toolCount: result.toolCount,
+  });
+
   // Return the plaintext access token ONCE — it's not stored, only the hash is
   return Object.freeze({
     ...result,
@@ -173,6 +182,7 @@ export async function uninstallByInstallId(
     .where(and(eq(specs.id, install.specId), eq(specs.userId, userId)));
 
   // The DB trigger handles install_count decrement on install row deletion
+  serverTrackUninstall({ userId, serverId: install.serverId });
   await marketplaceCache.invalidateUserInstalls(userId);
 }
 

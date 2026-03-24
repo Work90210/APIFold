@@ -6,6 +6,7 @@ import { getDb } from '../../../../../lib/db/index';
 import { ServerRepository } from '../../../../../lib/db/repositories/server.repository';
 import { publishServerEvent } from '../../../../../lib/redis';
 import { uuidParam } from '../../../../../lib/validation/common.schema';
+import { serverTrackTokenRotation } from '../../../../../lib/analytics/events';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -21,6 +22,8 @@ export function POST(_request: NextRequest, context: RouteParams): Promise<NextR
     const db = getDb();
     const serverRepo = new ServerRepository(db);
     const { server, token } = await serverRepo.rotateToken(userId, id);
+
+    serverTrackTokenRotation({ userId, serverId: id });
 
     // Publish event so runtime instances hot-reload the new token hash
     await publishServerEvent({
