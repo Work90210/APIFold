@@ -65,7 +65,7 @@ jobs:
       - run: pnpm --filter @apifold/cli build
       - name: Compile standalone binary
         run: bun build apps/cli/dist/index.js --compile --target=${{ matrix.target }} --outfile=${{ matrix.artifact }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
