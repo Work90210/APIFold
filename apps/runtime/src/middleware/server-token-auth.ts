@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { scryptSync, timingSafeEqual } from 'node:crypto';
 
 import type { RequestHandler } from 'express';
 
@@ -6,10 +6,13 @@ import type { ServerRegistry } from '../registry/server-registry.js';
 
 const ENDPOINT_ID_PATTERN = /^[a-f0-9]{12}$/;
 
+const GLOBAL_API_KEY_SALT = 'apifold:mcp:global-api-key:v1';
+const SERVER_TOKEN_SALT = 'apifold:mcp:server-token:v1';
+
 /**
  * Per-server access token authentication middleware.
  *
- * Each server has its own `af_`-prefixed bearer token. The SHA-256 hash is
+ * Each server has its own `af_`-prefixed bearer token. A derived hash is
  * stored in the L0 registry. The middleware extracts the token from:
  *   1. `Authorization: Bearer af_xxx` header (preferred)
  *   2. `?token=af_xxx` query parameter (for SSE clients that can't set headers)
@@ -28,7 +31,7 @@ export function createServerTokenAuth(
   registry: ServerRegistry,
 ): RequestHandler {
   const globalKeyHash = globalApiKey
-    ? createHash('sha256').update(globalApiKey).digest()
+    ? scryptSync(globalApiKey, GLOBAL_API_KEY_SALT, 32)
     : null;
 
   return (req, res, next) => {
@@ -66,11 +69,11 @@ export function createServerTokenAuth(
         return;
       }
 
-      const providedHash = createHash('sha256').update(token).digest();
       const storedHash = Buffer.from(server.tokenHash, 'hex');
+      const providedHash = scryptSync(token, SERVER_TOKEN_SALT, storedHash.length);
 
-      // Validate stored hash is well-formed (32 bytes = SHA-256)
-      if (storedHash.length !== 32 || providedHash.length !== storedHash.length || !timingSafeEqual(providedHash, storedHash)) {
+      // Validate stored hash is well-formed and matches
+      if (storedHash.length === 0 || providedHash.length !== storedHash.length || !timingSafeEqual(providedHash, storedHash)) {
         res.status(401).json({ error: 'Invalid access token' });
         return;
       }
@@ -88,7 +91,7 @@ export function createServerTokenAuth(
         return;
       }
 
-      const tokenHash = createHash('sha256').update(token).digest();
+      const tokenHash = scryptSync(token, GLOBAL_API_KEY_SALT, globalKeyHash.length);
       if (!timingSafeEqual(globalKeyHash, tokenHash)) {
         res.status(401).json({ error: 'Invalid API key' });
         return;
