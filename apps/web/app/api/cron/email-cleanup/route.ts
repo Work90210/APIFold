@@ -11,8 +11,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const lockAcquired = await acquireCronLock("email-cleanup", 300);
-  if (!lockAcquired) {
+  const lockToken = await acquireCronLock("email-cleanup", 300);
+  if (!lockToken) {
     return NextResponse.json({ ok: true, skipped: "lock_held" });
   }
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 500 },
     );
   } finally {
-    await releaseCronLock("email-cleanup");
+    await releaseCronLock("email-cleanup", lockToken);
   }
 }
 

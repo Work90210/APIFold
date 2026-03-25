@@ -99,8 +99,8 @@ export function createUnsubscribeHeaders(
   if (!scope) return {};
 
   const url = createUnsubscribeUrl(userId, scope);
+
   return {
     "List-Unsubscribe": `<${url}>`,
-    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
   };
 }

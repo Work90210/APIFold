@@ -6,17 +6,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const lockAcquired = await acquireCronLock("weekly-summary", 600);
-  if (!lockAcquired) {
+  const lockToken = await acquireCronLock("weekly-summary", 600);
+  if (!lockToken) {
     return NextResponse.json({ ok: true, skipped: "lock_held" });
   }
 
   try {
     // TODO: Implement weekly summary generation
-    // 1. Determine period: last Monday to this Monday (UTC)
-    // 2. Query usage aggregates per user
-    // 3. Check preferences (weeklyUsageSummary enabled)
-    // 4. Enqueue weekly summary emails
     return NextResponse.json({ ok: true, summaries: 0 });
   } catch (err) {
     console.error("[cron] weekly-summary failed:", err);
@@ -25,7 +21,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 500 },
     );
   } finally {
-    await releaseCronLock("weekly-summary");
+    await releaseCronLock("weekly-summary", lockToken);
   }
 }
 

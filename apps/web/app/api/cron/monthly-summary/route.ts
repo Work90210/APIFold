@@ -6,17 +6,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const lockAcquired = await acquireCronLock("monthly-summary", 600);
-  if (!lockAcquired) {
+  const lockToken = await acquireCronLock("monthly-summary", 600);
+  if (!lockToken) {
     return NextResponse.json({ ok: true, skipped: "lock_held" });
   }
 
   try {
     // TODO: Implement monthly summary generation
-    // 1. Determine period: 1st to 1st of previous month (UTC)
-    // 2. Query usage aggregates per user
-    // 3. Check preferences (monthlyUsageSummary enabled)
-    // 4. Enqueue monthly summary emails
     return NextResponse.json({ ok: true, summaries: 0 });
   } catch (err) {
     console.error("[cron] monthly-summary failed:", err);
@@ -25,7 +21,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 500 },
     );
   } finally {
-    await releaseCronLock("monthly-summary");
+    await releaseCronLock("monthly-summary", lockToken);
   }
 }
 

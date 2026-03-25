@@ -117,6 +117,7 @@ describe("intent-builder", () => {
         "Kyle",
         "new_login",
         "Chrome on macOS",
+        "evt_sec_123",
       );
 
       expect(intent.type).toBe("new_login_alert");
@@ -131,6 +132,7 @@ describe("intent-builder", () => {
         "Kyle",
         "password_change",
         "Password updated",
+        "evt_sec_456",
       );
 
       expect(intent.type).toBe("password_change_alert");

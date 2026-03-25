@@ -82,9 +82,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const db = getDb();
   await db
-    .update(emailPreferences)
-    .set({ [column]: false, updatedAt: new Date() })
-    .where(eq(emailPreferences.userId, claims.userId));
+    .insert(emailPreferences)
+    .values({
+      userId: claims.userId,
+      [column]: false,
+    })
+    .onConflictDoUpdate({
+      target: emailPreferences.userId,
+      set: { [column]: false, updatedAt: new Date() },
+    });
 
   return NextResponse.json({ ok: true, scope: claims.scope });
 }

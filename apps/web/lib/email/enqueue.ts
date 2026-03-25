@@ -47,7 +47,6 @@ export async function safeEnqueueEmailIntent(
     console.error(
       "[email] Failed to enqueue email intent:",
       intent.type,
-      intent.idempotencyKey,
       err,
     );
   }

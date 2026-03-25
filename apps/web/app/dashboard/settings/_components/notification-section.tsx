@@ -91,7 +91,10 @@ export function NotificationSection() {
 
   useEffect(() => {
     fetch("/api/email/preferences")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load preferences");
+        return res.json();
+      })
       .then((data: Preferences) => {
         setPrefs(data);
         setLoading(false);
@@ -101,19 +104,19 @@ export function NotificationSection() {
 
   const updatePreference = useCallback(
     async (key: keyof Preferences, value: boolean) => {
-      const previous = prefs;
-      const updated = { ...prefs, [key]: value };
-      setPrefs(updated);
+      const previousValue = prefs[key];
+      setPrefs((prev) => ({ ...prev, [key]: value }));
       setSavingKeys((prev) => new Set([...prev, key]));
 
       try {
-        await fetch("/api/email/preferences", {
+        const res = await fetch("/api/email/preferences", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ [key]: value }),
         });
+        if (!res.ok) throw new Error("Save failed");
       } catch {
-        setPrefs(previous);
+        setPrefs((prev) => ({ ...prev, [key]: previousValue }));
       } finally {
         setSavingKeys((prev) => {
           const next = new Set(prev);

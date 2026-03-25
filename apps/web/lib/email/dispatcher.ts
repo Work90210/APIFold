@@ -162,6 +162,7 @@ async function processJob(
     tags: [
       { name: "category", value: job.category },
       { name: "type", value: job.type },
+      { name: "outbox_id", value: job.id },
     ],
   };
 
@@ -228,15 +229,22 @@ export async function dispatchBatch(
     } catch (err) {
       errors += 1;
       console.error("[dispatcher] Unhandled error processing job:", job.id, err);
+      const newAttemptCount = job.attemptCount + 1;
       try {
-        await reschedule(
+        await recordAttempt(
           job.id,
-          new Date(now.getTime() + 60_000),
+          newAttemptCount,
+          { type: job.type },
+          "retryable_failure",
+          null,
           "dispatcher_error",
-          String(err),
-          job.attemptCount + 1,
-          now,
         );
+        const retryAt = nextRetryTime(newAttemptCount, now);
+        if (retryAt) {
+          await reschedule(job.id, retryAt, "dispatcher_error", String(err), newAttemptCount, now);
+        } else {
+          await markFailed(job.id, "dispatcher_error", `Max retries exceeded: ${String(err)}`, now);
+        }
       } catch {
         // Stale job reclaim will recover this on the next dispatch cycle
       }

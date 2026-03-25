@@ -74,14 +74,14 @@ export function buildSubscriptionCancelledIntent(
   email: string,
   firstName: string | null,
   planName: string,
-  customerId: string,
+  subscriptionId: string,
 ): Readonly<EmailIntent> {
   return intent({
     userId,
     toEmail: email,
     category: "billing",
     type: "subscription_cancelled",
-    idempotencyKey: `subscription_cancelled:${customerId}`,
+    idempotencyKey: `subscription_cancelled:${subscriptionId}`,
     templateVersion: "v1",
     payload: Object.freeze({
       firstName,
@@ -284,6 +284,7 @@ export function buildSecurityAlertIntent(
   firstName: string | null,
   alertType: "new_login" | "password_change",
   details: string,
+  eventId: string,
 ): Readonly<EmailIntent> {
   const type = alertType === "new_login" ? "new_login_alert" : "password_change_alert";
   return intent({
@@ -291,7 +292,7 @@ export function buildSecurityAlertIntent(
     toEmail: email,
     category: "security",
     type,
-    idempotencyKey: `security_alert:${userId}:${alertType}:${Date.now()}`,
+    idempotencyKey: `security_alert:${userId}:${alertType}:${eventId}`,
     templateVersion: "v1",
     payload: Object.freeze({
       firstName,

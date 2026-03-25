@@ -328,7 +328,7 @@ async function handleSubscriptionDeleted(
         cancelEmail,
         clerkUser.firstName,
         cancelledPlanObj?.name ?? cancelledPlanId,
-        customerId,
+        subscription.id,
       ),
     );
   }
