@@ -14,6 +14,12 @@ export interface SSETransportDeps {
   readonly maxConnectionsPerWorker?: number;
 }
 
+function sanitizeIdentifier(identifier: string): string {
+  // Normalize identifier for safe reflection in responses (SSE/JSON).
+  // Keep alphanumerics, underscore and dash; replace everything else with '-'.
+  return identifier.trim().replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+
 export function createSSETransportRouter(deps: SSETransportDeps): Router {
   const { logger, sessionManager, protocolHandler, registry } = deps;
   const maxConns = deps.maxConnectionsPerWorker ?? 100;
@@ -67,7 +73,10 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     sessionManager.sendEvent(
       session,
       'endpoint',
-      JSON.stringify({ sessionId: session.id, url: `/mcp/${identifier}/message` }),
+      JSON.stringify({
+        sessionId: session.id,
+        url: `/mcp/${sanitizeIdentifier(identifier)}/message`,
+      }),
     );
 
     logger.info({ sessionId: session.id, endpointId: server.endpointId, slug: server.slug }, 'SSE session established');
