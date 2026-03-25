@@ -224,19 +224,23 @@ async function handleCheckoutCompleted(
     await syncPlanLimitsToRedis(userId, activatedPlan);
   }
 
-  const user = await clerk.users.getUser(userId);
-  const email = user.emailAddresses[0]?.emailAddress;
-  if (email && activatedPlan) {
-    await safeEnqueueEmailIntent(
-      buildSubscriptionConfirmedIntent(
-        userId,
-        email,
-        user.firstName,
-        activatedPlan.name,
-        `€${activatedPlan.priceEurMonth}`,
-        session.id,
-      ),
-    );
+  try {
+    const user = await clerk.users.getUser(userId);
+    const email = user.emailAddresses[0]?.emailAddress;
+    if (email && activatedPlan) {
+      await safeEnqueueEmailIntent(
+        buildSubscriptionConfirmedIntent(
+          userId,
+          email,
+          user.firstName,
+          activatedPlan.name,
+          `€${activatedPlan.priceEurMonth}`,
+          session.id,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for checkout:", err);
   }
 
   return Object.freeze({ handled: true, action: "plan_activated" });
@@ -353,28 +357,32 @@ async function handlePaymentFailed(
     },
   });
 
-  const failUser = await clerk.users.getUser(user.id);
-  const failEmail = failUser.emailAddresses[0]?.emailAddress;
-  if (failEmail) {
-    const amountDue = invoice.amount_due
-      ? `€${(invoice.amount_due / 100).toFixed(2)}`
-      : "your subscription amount";
-    const nextAttempt = invoice.next_payment_attempt
-      ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString(
-          "en-US",
-          { dateStyle: "medium" },
-        )
-      : null;
-    await safeEnqueueEmailIntent(
-      buildPaymentFailedIntent(
-        user.id,
-        failEmail,
-        failUser.firstName,
-        amountDue,
-        invoice.id,
-        nextAttempt,
-      ),
-    );
+  try {
+    const failUser = await clerk.users.getUser(user.id);
+    const failEmail = failUser.emailAddresses[0]?.emailAddress;
+    if (failEmail) {
+      const amountDue = invoice.amount_due
+        ? `€${(invoice.amount_due / 100).toFixed(2)}`
+        : "your subscription amount";
+      const nextAttempt = invoice.next_payment_attempt
+        ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString(
+            "en-US",
+            { dateStyle: "medium" },
+          )
+        : null;
+      await safeEnqueueEmailIntent(
+        buildPaymentFailedIntent(
+          user.id,
+          failEmail,
+          failUser.firstName,
+          amountDue,
+          invoice.id,
+          nextAttempt,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for payment_failed:", err);
   }
 
   return Object.freeze({ handled: true, action: "account_flagged" });
