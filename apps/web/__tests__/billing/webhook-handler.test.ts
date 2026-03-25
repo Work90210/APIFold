@@ -28,14 +28,31 @@ vi.mock("@clerk/nextjs/server", () => {
       },
     ],
   });
+  const getUser = vi.fn().mockResolvedValue({
+    id: "user-1",
+    firstName: "Test",
+    emailAddresses: [{ emailAddress: "test@example.com" }],
+    publicMetadata: { plan: "free" },
+  });
   return {
     clerkClient: vi.fn().mockResolvedValue({
-      users: { updateUserMetadata, getUserList },
+      users: { updateUserMetadata, getUserList, getUser },
     }),
     __mockUpdateUserMetadata: updateUserMetadata,
     __mockGetUserList: getUserList,
   };
 });
+
+vi.mock("@/lib/email/enqueue", () => ({
+  safeEnqueueEmailIntent: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/lib/email/intent-builder", () => ({
+  buildSubscriptionConfirmedIntent: vi.fn().mockReturnValue({ type: "subscription_confirmed" }),
+  buildPlanChangedIntent: vi.fn().mockReturnValue({ type: "plan_changed" }),
+  buildSubscriptionCancelledIntent: vi.fn().mockReturnValue({ type: "subscription_cancelled" }),
+  buildPaymentFailedIntent: vi.fn().mockReturnValue({ type: "payment_failed" }),
+}));
 
 vi.mock("@/lib/billing/plans", () => {
   const freePlan = { id: "free", name: "Free", maxRequestsPerMonth: 1000, overageRate: 0 };

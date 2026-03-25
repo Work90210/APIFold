@@ -7,6 +7,7 @@ import { PlanComparison } from "./_components/plan-comparison";
 import { BillingSection } from "./_components/billing-section";
 import { BudgetLimit } from "./_components/budget-limit";
 import { DangerZone } from "./_components/danger-zone";
+import { NotificationSection } from "./_components/notification-section";
 
 export default function SettingsPage() {
   return (
@@ -65,10 +66,18 @@ export default function SettingsPage() {
         <BillingSection />
       </div>
 
-      {/* Danger Zone — full width */}
+      {/* Email Notifications — full width */}
       <div
         className="animate-stagger-in"
         style={{ "--i": 6 } as React.CSSProperties}
+      >
+        <NotificationSection />
+      </div>
+
+      {/* Danger Zone — full width */}
+      <div
+        className="animate-stagger-in"
+        style={{ "--i": 7 } as React.CSSProperties}
       >
         <DangerZone />
       </div>

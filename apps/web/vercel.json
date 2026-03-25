@@ -1,0 +1,10 @@
+{
+  "crons": [
+    { "path": "/api/cron/email-dispatch", "schedule": "* * * * *" },
+    { "path": "/api/cron/usage-threshold-scan", "schedule": "0 * * * *" },
+    { "path": "/api/cron/renewal-reminders", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/weekly-summary", "schedule": "0 8 * * 1" },
+    { "path": "/api/cron/monthly-summary", "schedule": "0 8 1 * *" },
+    { "path": "/api/cron/email-cleanup", "schedule": "0 3 * * *" }
+  ]
+}
