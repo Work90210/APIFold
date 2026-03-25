@@ -133,6 +133,7 @@ export async function startWorker(): Promise<void> {
     isReady: () => isReady,
     toolLoader,
     toolExecutorDeps,
+    db,
   });
 
   // Start HTTP server

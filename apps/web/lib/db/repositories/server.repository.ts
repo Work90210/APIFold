@@ -1,4 +1,4 @@
-import { randomBytes, createHash } from 'node:crypto';
+import { randomBytes, scryptSync } from 'node:crypto';
 
 import type {
   McpServer,
@@ -14,9 +14,27 @@ import { specs } from '../schema/specs';
 import { BaseRepository } from './base.repository';
 import { DEFAULT_QUERY_LIMIT } from './constants';
 
+const SCRYPT_KEY_LENGTH = 64;
+const SCRYPT_COST = 16384; // N=2^14, recommended minimum for interactive logins
+const SCRYPT_BLOCK_SIZE = 8;
+const SCRYPT_PARALLELIZATION = 1;
+
+/**
+ * Generate a new server token with scrypt-hashed storage.
+ *
+ * Hash format stored in DB: `scrypt:<salt_hex>:<hash_hex>`
+ * This is self-describing — the runtime detects the format by prefix
+ * and falls back to SHA-256 for legacy hashes (plain 64-char hex).
+ */
 export function generateServerToken(): { token: string; tokenHash: string } {
   const token = `af_${randomBytes(32).toString('hex')}`;
-  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const salt = randomBytes(16);
+  const hash = scryptSync(token, salt, SCRYPT_KEY_LENGTH, {
+    N: SCRYPT_COST,
+    r: SCRYPT_BLOCK_SIZE,
+    p: SCRYPT_PARALLELIZATION,
+  });
+  const tokenHash = `scrypt:${salt.toString('hex')}:${hash.toString('hex')}`;
   return { token, tokenHash };
 }
 
