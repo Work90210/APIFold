@@ -6,6 +6,8 @@ primary_region = "ams"
   [build.args]
     NEXT_PUBLIC_APP_URL = "https://apifold.dev"
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuYXBpZm9sZC5kZXYk"
+    NEXT_PUBLIC_POSTHOG_KEY = "phc_fh9thxLJgBGkTWrrZVwLkNAIUXmo4E6xLO2Zkr9XpVH"
+    NEXT_PUBLIC_POSTHOG_HOST = "https://eu.i.posthog.com"
 
 [env]
   NODE_ENV = "production"
