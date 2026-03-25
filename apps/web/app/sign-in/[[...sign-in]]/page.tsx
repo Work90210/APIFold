@@ -27,7 +27,7 @@ export default function SignInPage() {
             identityPreviewEditButton: "text-primary",
           },
         }}
-        afterSignInUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
         signUpUrl="/sign-up"
       />
       <p className="mt-6 text-center text-xs text-muted-foreground">
