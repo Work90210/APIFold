@@ -1,5 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { emailPreferences } from "@/lib/db/schema/email-preferences";
 import {
