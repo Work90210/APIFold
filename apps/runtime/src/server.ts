@@ -10,8 +10,9 @@ import { createCorsMiddleware } from './middleware/cors.js';
 import { createErrorHandler } from './middleware/error-handler.js';
 import { createPerServerRateLimiter } from './middleware/rate-limiter.js';
 import { createRequestLogger } from './middleware/request-logger.js';
-import { createServerTokenAuth } from './middleware/server-token-auth.js';
+import { createServerTokenAuth, type TokenUpgradeCallback } from './middleware/server-token-auth.js';
 import { createServiceAuth } from './middleware/service-auth.js';
+import type { DbClient } from './sync/postgres-loader.js';
 import { createHealthRouter } from './observability/health.js';
 import type { Logger } from './observability/logger.js';
 import { metrics } from './observability/metrics.js';
@@ -31,6 +32,7 @@ export interface AppDeps {
   readonly isReady: () => boolean;
   readonly toolLoader?: ToolLoader;
   readonly toolExecutorDeps?: ToolExecutorDeps;
+  readonly db?: DbClient;
 }
 
 export function createApp(deps: AppDeps): Express {
@@ -61,7 +63,21 @@ export function createApp(deps: AppDeps): Express {
   }));
 
   // Per-server access token auth + global API key fallback for MCP endpoints
-  app.use('/mcp/:slug', createServerTokenAuth(config.mcpApiKey, registry));
+  // Auto-upgrades legacy SHA-256 token hashes to scrypt on successful auth
+  const onTokenUpgrade: TokenUpgradeCallback | undefined = deps.db
+    ? (serverId, newTokenHash) => {
+        deps.db!.query(
+          'UPDATE mcp_servers SET token_hash = $1, updated_at = NOW() WHERE id = $2',
+          [newTokenHash, serverId],
+        ).then(() => {
+          logger.info({ serverId }, 'Auto-upgraded token hash from SHA-256 to scrypt');
+          registry.upsert({ ...registry.getById(serverId)!, tokenHash: newTokenHash });
+        }).catch((err) => {
+          logger.warn({ serverId, err }, 'Failed to auto-upgrade token hash');
+        });
+      }
+    : undefined;
+  app.use('/mcp/:slug', createServerTokenAuth(config.mcpApiKey, registry, onTokenUpgrade));
 
   // Per-server rate limiter (Redis-backed, fail-open)
   if (deps.redis) {

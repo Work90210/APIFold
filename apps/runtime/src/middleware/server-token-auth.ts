@@ -1,16 +1,99 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash, scryptSync, timingSafeEqual, randomBytes } from 'node:crypto';
 
 import type { RequestHandler } from 'express';
 
 import type { ServerRegistry } from '../registry/server-registry.js';
 
 const ENDPOINT_ID_PATTERN = /^[a-f0-9]{12}$/;
+const SCRYPT_PREFIX = 'scrypt:';
+const SCRYPT_KEY_LENGTH = 64;
+const SCRYPT_COST = 16384;
+const SCRYPT_BLOCK_SIZE = 8;
+const SCRYPT_PARALLELIZATION = 1;
+
+/**
+ * Parse a stored token hash and determine its algorithm.
+ *
+ * Two formats are supported:
+ *   - Legacy SHA-256: plain 64-char hex string (32 bytes)
+ *   - Scrypt: `scrypt:<salt_hex>:<hash_hex>`
+ */
+function parseStoredHash(stored: string): {
+  readonly algorithm: 'sha256' | 'scrypt';
+  readonly hash: Buffer;
+  readonly salt?: Buffer;
+} {
+  if (stored.startsWith(SCRYPT_PREFIX)) {
+    const parts = stored.slice(SCRYPT_PREFIX.length).split(':');
+    if (parts.length === 2 && parts[0] && parts[1]) {
+      return {
+        algorithm: 'scrypt',
+        salt: Buffer.from(parts[0], 'hex'),
+        hash: Buffer.from(parts[1], 'hex'),
+      };
+    }
+  }
+  // Legacy: plain hex SHA-256
+  return { algorithm: 'sha256', hash: Buffer.from(stored, 'hex') };
+}
+
+/**
+ * Verify a plaintext token against a stored hash (SHA-256 or scrypt).
+ */
+function verifyToken(token: string, stored: string): boolean {
+  const parsed = parseStoredHash(stored);
+
+  if (parsed.algorithm === 'scrypt' && parsed.salt) {
+    const derived = scryptSync(token, parsed.salt, parsed.hash.length, {
+      N: SCRYPT_COST,
+      r: SCRYPT_BLOCK_SIZE,
+      p: SCRYPT_PARALLELIZATION,
+    });
+    return derived.length === parsed.hash.length && timingSafeEqual(derived, parsed.hash);
+  }
+
+  // Legacy SHA-256
+  const provided = createHash('sha256').update(token).digest();
+  if (parsed.hash.length !== 32 || provided.length !== parsed.hash.length) {
+    return false;
+  }
+  return timingSafeEqual(provided, parsed.hash);
+}
+
+/**
+ * Check if a stored hash is using the legacy SHA-256 format.
+ */
+function isLegacyHash(stored: string): boolean {
+  return !stored.startsWith(SCRYPT_PREFIX);
+}
+
+/**
+ * Upgrade a legacy SHA-256 hash to scrypt. Returns the new hash string
+ * to be persisted, or null if the token was already scrypt.
+ */
+function upgradeToScrypt(token: string): string {
+  const salt = randomBytes(16);
+  const hash = scryptSync(token, salt, SCRYPT_KEY_LENGTH, {
+    N: SCRYPT_COST,
+    r: SCRYPT_BLOCK_SIZE,
+    p: SCRYPT_PARALLELIZATION,
+  });
+  return `scrypt:${salt.toString('hex')}:${hash.toString('hex')}`;
+}
+
+export interface TokenUpgradeCallback {
+  (serverId: string, newTokenHash: string): void;
+}
 
 /**
  * Per-server access token authentication middleware.
  *
- * Each server has its own `af_`-prefixed bearer token. The SHA-256 hash is
- * stored in the L0 registry. The middleware extracts the token from:
+ * Each server has its own `af_`-prefixed bearer token. The hash is
+ * stored in the L0 registry. Supports both legacy SHA-256 hashes and
+ * scrypt hashes (format: `scrypt:<salt>:<hash>`). Legacy hashes are
+ * auto-upgraded to scrypt on successful authentication.
+ *
+ * The middleware extracts the token from:
  *   1. `Authorization: Bearer af_xxx` header (preferred)
  *   2. `?token=af_xxx` query parameter (for SSE clients that can't set headers)
  *
@@ -26,10 +109,20 @@ const ENDPOINT_ID_PATTERN = /^[a-f0-9]{12}$/;
 export function createServerTokenAuth(
   globalApiKey: string | undefined,
   registry: ServerRegistry,
+  onTokenUpgrade?: TokenUpgradeCallback,
 ): RequestHandler {
+  // Hash the global API key with scrypt at startup (one-time cost)
   const globalKeyHash = globalApiKey
-    ? createHash('sha256').update(globalApiKey).digest()
+    ? (() => {
+        const salt = Buffer.from('apifold:global-api-key:v1', 'utf8');
+        return scryptSync(globalApiKey, salt, SCRYPT_KEY_LENGTH, {
+          N: SCRYPT_COST,
+          r: SCRYPT_BLOCK_SIZE,
+          p: SCRYPT_PARALLELIZATION,
+        });
+      })()
     : null;
+  const globalKeySalt = Buffer.from('apifold:global-api-key:v1', 'utf8');
 
   return (req, res, next) => {
     const identifier = req.params['slug'] ?? req.params['identifier'];
@@ -66,13 +159,15 @@ export function createServerTokenAuth(
         return;
       }
 
-      const providedHash = createHash('sha256').update(token).digest();
-      const storedHash = Buffer.from(server.tokenHash, 'hex');
-
-      // Validate stored hash is well-formed (32 bytes = SHA-256)
-      if (storedHash.length !== 32 || providedHash.length !== storedHash.length || !timingSafeEqual(providedHash, storedHash)) {
+      if (!verifyToken(token, server.tokenHash)) {
         res.status(401).json({ error: 'Invalid access token' });
         return;
+      }
+
+      // Auto-upgrade legacy SHA-256 hashes to scrypt on successful auth
+      if (isLegacyHash(server.tokenHash) && onTokenUpgrade) {
+        const upgraded = upgradeToScrypt(token);
+        onTokenUpgrade(server.id, upgraded);
       }
 
       // Mark request as authenticated for session binding in SSE transport
@@ -88,8 +183,12 @@ export function createServerTokenAuth(
         return;
       }
 
-      const tokenHash = createHash('sha256').update(token).digest();
-      if (!timingSafeEqual(globalKeyHash, tokenHash)) {
+      const derived = scryptSync(token, globalKeySalt, globalKeyHash.length, {
+        N: SCRYPT_COST,
+        r: SCRYPT_BLOCK_SIZE,
+        p: SCRYPT_PARALLELIZATION,
+      });
+      if (!timingSafeEqual(globalKeyHash, derived)) {
         res.status(401).json({ error: 'Invalid API key' });
         return;
       }
