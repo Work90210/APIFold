@@ -102,7 +102,13 @@ test.describe("Landing Page Navigation @landing", () => {
 
     for (let i = 0; i < count; i++) {
       const href = await links.nth(i).getAttribute("href");
-      if (!href || href === "#" || href.startsWith("javascript:")) {
+      if (
+        !href ||
+        href === "#" ||
+        href.startsWith("javascript:") ||
+        href.startsWith("data:") ||
+        href.startsWith("vbscript:")
+      ) {
         const text = await links.nth(i).textContent();
         invalidLinks.push(`"${text?.trim()}" -> "${href}"`);
       }
