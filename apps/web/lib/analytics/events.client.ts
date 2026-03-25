@@ -116,13 +116,29 @@ export function trackCheckoutStarted(plan: string): void {
   getPostHog()?.capture('checkout_started', { plan });
 }
 
+// ── Sanitization ────────────────────────────────────────────────────
+
+function sanitizeErrorForAnalytics(error: string): string {
+  return error
+    .replace(/https?:\/\/[^\s"')]+/g, '[URL]')
+    .replace(/\/[\w./-]{10,}/g, '[PATH]')
+    .replace(/[a-zA-Z0-9._+\x2d]{20,}@/g, '[REDACTED]@')
+    .replace(/(?:sk|pk|key|token|secret|password|bearer)\s*[=:]\s*\S+/gi, '[CREDENTIAL]')
+    .slice(0, 150);
+}
+
 // ── Spec lifecycle ──────────────────────────────────────────────────
 
 export function trackSpecValidationError(params: {
-  readonly error: string;
+  readonly errorType: 'parse_error' | 'schema_mismatch' | 'unsupported_version' | 'ref_error' | 'unknown';
   readonly specFormat: 'openapi3.0' | 'openapi3.1' | 'swagger2' | 'unknown';
+  readonly errorPreview?: string;
 }): void {
-  getPostHog()?.capture('spec_validation_error', params);
+  getPostHog()?.capture('spec_validation_error', {
+    error_type: params.errorType,
+    spec_format: params.specFormat,
+    error_preview: params.errorPreview ? sanitizeErrorForAnalytics(params.errorPreview) : undefined,
+  });
 }
 
 export function trackSpecAutoConverted(params: {
@@ -144,9 +160,14 @@ export function trackServerConnected(params: {
 
 export function trackServerConnectionFailed(params: {
   readonly serverId: string;
-  readonly error: string;
+  readonly errorType: 'auth_failed' | 'timeout' | 'network' | 'invalid_config' | 'unknown';
+  readonly errorPreview?: string;
 }): void {
-  getPostHog()?.capture('server_connection_failed', params);
+  getPostHog()?.capture('server_connection_failed', {
+    server_id: params.serverId,
+    error_type: params.errorType,
+    error_preview: params.errorPreview ? sanitizeErrorForAnalytics(params.errorPreview) : undefined,
+  });
 }
 
 export function trackToolCalled(params: {
