@@ -8,6 +8,7 @@ primary_region = "ams"
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuYXBpZm9sZC5kZXYk"
     NEXT_PUBLIC_POSTHOG_KEY = "phc_fh9thxLJgBGkTWrrZVwLkNAIUXmo4E6xLO2Zkr9XpVH"
     NEXT_PUBLIC_POSTHOG_HOST = "https://eu.i.posthog.com"
+    NEXT_PUBLIC_RUNTIME_URL = "https://apifold-runtime.fly.dev"
 
 [env]
   NODE_ENV = "production"
