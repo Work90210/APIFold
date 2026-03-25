@@ -85,7 +85,45 @@ export const FLAGS = {
 // ── Known experiment names ──────────────────────────────────────────
 
 export const EXPERIMENTS = {
+  // Landing page funnel
+  HERO_HEADLINE: 'hero-headline',
+  HERO_CTA_COLOR: 'hero-cta-color',
+  HERO_CTA_TEXT: 'hero-cta-text',
+  SOCIAL_PROOF_POSITION: 'social-proof-position',
+  TERMINAL_DEMO_VS_VIDEO: 'terminal-demo-vs-video',
+  LANDING_PAGE_LENGTH: 'landing-page-length',
+  PRICING_ANCHOR: 'pricing-anchor',
+  PRICING_ANNUAL_TOGGLE: 'pricing-annual-toggle',
+
+  // Signup / onboarding
+  SIGNUP_SOCIAL_VS_EMAIL: 'signup-social-vs-email',
+  ONBOARDING_FLOW: 'onboarding-flow',
+  FIRST_SPEC_PROMPT: 'first-spec-prompt',
+
+  // Dashboard / engagement
+  DASHBOARD_LAYOUT: 'dashboard-layout',
+  EMPTY_STATE_STYLE: 'empty-state-style',
+  SERVER_CARD_INFO: 'server-card-info',
+  NAV_STYLE: 'nav-style',
   MARKETPLACE_LAYOUT: 'marketplace-layout',
   DEPLOY_CTA_COPY: 'deploy-cta-copy',
   PRICING_PAGE: 'pricing-page-v2',
+
+  // Conversion / upgrade
+  UPGRADE_PROMPT_TIMING: 'upgrade-prompt-timing',
+  UPGRADE_MODAL_STYLE: 'upgrade-modal-style',
+  FREE_TRIAL_VS_FREEMIUM: 'free-trial-vs-freemium',
+
+  // Docs / support
+  DOCS_SIDEBAR_STYLE: 'docs-sidebar-style',
+  CODE_SNIPPET_LANGUAGE: 'code-snippet-language',
+
+  // Retention
+  CONNECTION_SNIPPET_FORMAT: 'connection-snippet-format',
+  TOOL_LIST_DISPLAY: 'tool-list-display',
+  ERROR_MESSAGE_STYLE: 'error-message-style',
+
+  // Growth / virality
+  SHARE_PROMPT: 'share-prompt',
+  GITHUB_STAR_PROMPT: 'github-star-prompt',
 } as const;
