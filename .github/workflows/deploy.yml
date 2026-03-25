@@ -35,6 +35,7 @@ jobs:
       github.event.workflow_run.run_attempt == 1 &&
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
         with:

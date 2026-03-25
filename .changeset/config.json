@@ -11,6 +11,7 @@
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
   "ignore": [
+    "@apifold/cli",
     "@apifold/eslint-config",
     "@apifold/tsconfig",
     "@apifold/types",
