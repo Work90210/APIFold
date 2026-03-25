@@ -65,15 +65,22 @@ export function createApp(deps: AppDeps): Express {
   // Per-server access token auth + global API key fallback for MCP endpoints
   // Auto-upgrades legacy SHA-256 token hashes to scrypt on successful auth
   const onTokenUpgrade: TokenUpgradeCallback | undefined = deps.db
-    ? (serverId, newTokenHash) => {
+    ? (serverId, oldTokenHash, newTokenHash) => {
+        // Compare-and-swap: only update if the hash hasn't already been upgraded
+        // by another worker or concurrent request. This prevents the race where
+        // two requests both upgrade with different salts and one overwrites the other.
         deps.db!.query(
-          'UPDATE mcp_servers SET token_hash = $1, updated_at = NOW() WHERE id = $2',
-          [newTokenHash, serverId],
-        ).then(() => {
-          logger.info({ serverId }, 'Auto-upgraded token hash from SHA-256 to scrypt');
-          const existing = registry.getById(serverId);
-          if (existing) {
-            registry.upsert({ ...existing, tokenHash: newTokenHash });
+          'UPDATE mcp_servers SET token_hash = $1, updated_at = NOW() WHERE id = $2 AND token_hash = $3',
+          [newTokenHash, serverId, oldTokenHash],
+        ).then((result) => {
+          // rowCount check: if 0 rows affected, another request already upgraded it
+          const rows = (result as unknown as { rowCount?: number }).rowCount ?? 1;
+          if (rows > 0) {
+            logger.info({ serverId }, 'Auto-upgraded token hash from SHA-256 to scrypt');
+            const existing = registry.getById(serverId);
+            if (existing) {
+              registry.upsert({ ...existing, tokenHash: newTokenHash });
+            }
           }
         }).catch((err) => {
           logger.warn({ serverId, err }, 'Failed to auto-upgrade token hash');

@@ -82,8 +82,11 @@ function upgradeToScrypt(token: string): string {
 }
 
 export interface TokenUpgradeCallback {
-  (serverId: string, newTokenHash: string): void;
+  (serverId: string, oldTokenHash: string, newTokenHash: string): void;
 }
+
+/** Track in-flight upgrades to prevent concurrent re-hashing of the same server. */
+const upgradesInFlight = new Set<string>();
 
 // ── Brute-force protection ──────────────────────────────────────────
 
@@ -270,10 +273,13 @@ export function createServerTokenAuth(
 
       rateLimiter.recordSuccess(clientIp, identifier);
 
-      // Auto-upgrade legacy SHA-256 hashes to scrypt on successful auth
-      if (isLegacyHash(server.tokenHash) && onTokenUpgrade) {
+      // Auto-upgrade legacy SHA-256 hashes to scrypt on successful auth.
+      // Guard against concurrent upgrades: only one in-flight upgrade per server.
+      if (isLegacyHash(server.tokenHash) && onTokenUpgrade && !upgradesInFlight.has(server.id)) {
+        upgradesInFlight.add(server.id);
+        const oldHash = server.tokenHash;
         const upgraded = upgradeToScrypt(token);
-        onTokenUpgrade(server.id, upgraded);
+        onTokenUpgrade(server.id, oldHash, upgraded);
       }
 
       // Mark request as authenticated for session binding in SSE transport
