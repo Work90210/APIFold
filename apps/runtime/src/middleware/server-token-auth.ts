@@ -85,6 +85,96 @@ export interface TokenUpgradeCallback {
   (serverId: string, newTokenHash: string): void;
 }
 
+// ── Brute-force protection ──────────────────────────────────────────
+
+const MAX_FAILURES = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const CLEANUP_INTERVAL_MS = 60 * 1000; // Prune expired entries every 60s
+
+interface FailureRecord {
+  count: number;
+  firstFailureAt: number;
+  lockedUntil: number;
+}
+
+/**
+ * In-memory rate limiter for failed auth attempts.
+ *
+ * Keyed by IP + server slug to prevent cross-server interference.
+ * After MAX_FAILURES consecutive failures within the lockout window,
+ * the IP is locked out for LOCKOUT_DURATION_MS. Successful auth resets the counter.
+ *
+ * In-memory is intentional — this is per-worker state. A distributed
+ * attacker hitting multiple workers gets MAX_FAILURES * workerCount
+ * attempts, but scrypt's 50-100ms cost makes that prohibitively slow anyway.
+ */
+class AuthRateLimiter {
+  private readonly failures = new Map<string, FailureRecord>();
+  private readonly cleanupTimer: ReturnType<typeof setInterval>;
+
+  constructor() {
+    this.cleanupTimer = setInterval(() => this.prune(), CLEANUP_INTERVAL_MS);
+    this.cleanupTimer.unref();
+  }
+
+  private key(ip: string, serverIdentifier: string): string {
+    return `${ip}:${serverIdentifier}`;
+  }
+
+  isLocked(ip: string, serverIdentifier: string): { locked: boolean; retryAfterSecs?: number } {
+    const record = this.failures.get(this.key(ip, serverIdentifier));
+    if (!record) return { locked: false };
+
+    const now = Date.now();
+    if (record.lockedUntil > now) {
+      return { locked: true, retryAfterSecs: Math.ceil((record.lockedUntil - now) / 1000) };
+    }
+
+    // Lockout expired — reset
+    if (record.lockedUntil > 0) {
+      this.failures.delete(this.key(ip, serverIdentifier));
+    }
+    return { locked: false };
+  }
+
+  recordFailure(ip: string, serverIdentifier: string): void {
+    const k = this.key(ip, serverIdentifier);
+    const now = Date.now();
+    const existing = this.failures.get(k);
+
+    if (!existing) {
+      this.failures.set(k, { count: 1, firstFailureAt: now, lockedUntil: 0 });
+      return;
+    }
+
+    existing.count += 1;
+    if (existing.count >= MAX_FAILURES) {
+      existing.lockedUntil = now + LOCKOUT_DURATION_MS;
+    }
+  }
+
+  recordSuccess(ip: string, serverIdentifier: string): void {
+    this.failures.delete(this.key(ip, serverIdentifier));
+  }
+
+  private prune(): void {
+    const now = Date.now();
+    for (const [key, record] of this.failures) {
+      // Remove entries whose lockout has expired or that are older than the lockout window
+      if (record.lockedUntil > 0 && record.lockedUntil <= now) {
+        this.failures.delete(key);
+      } else if (now - record.firstFailureAt > LOCKOUT_DURATION_MS) {
+        this.failures.delete(key);
+      }
+    }
+  }
+
+  destroy(): void {
+    clearInterval(this.cleanupTimer);
+    this.failures.clear();
+  }
+}
+
 /**
  * Per-server access token authentication middleware.
  *
@@ -123,6 +213,7 @@ export function createServerTokenAuth(
       })()
     : null;
   const globalKeySalt = Buffer.from('apifold:global-api-key:v1', 'utf8');
+  const rateLimiter = new AuthRateLimiter();
 
   return (req, res, next) => {
     const identifier = req.params['slug'] ?? req.params['identifier'];
@@ -139,6 +230,18 @@ export function createServerTokenAuth(
     if (!server) {
       // Let transport handler return 404 — don't reveal existence info here
       next();
+      return;
+    }
+
+    const clientIp = req.ip ?? req.socket.remoteAddress ?? 'unknown';
+
+    // Check brute-force lockout before doing any expensive hashing
+    const lockStatus = rateLimiter.isLocked(clientIp, identifier);
+    if (lockStatus.locked) {
+      res.status(429).json({
+        error: 'Too many failed authentication attempts. Try again later.',
+        retryAfterSeconds: lockStatus.retryAfterSecs,
+      });
       return;
     }
 
@@ -160,9 +263,12 @@ export function createServerTokenAuth(
       }
 
       if (!verifyToken(token, server.tokenHash)) {
+        rateLimiter.recordFailure(clientIp, identifier);
         res.status(401).json({ error: 'Invalid access token' });
         return;
       }
+
+      rateLimiter.recordSuccess(clientIp, identifier);
 
       // Auto-upgrade legacy SHA-256 hashes to scrypt on successful auth
       if (isLegacyHash(server.tokenHash) && onTokenUpgrade) {
@@ -189,10 +295,12 @@ export function createServerTokenAuth(
         p: SCRYPT_PARALLELIZATION,
       });
       if (!timingSafeEqual(globalKeyHash, derived)) {
+        rateLimiter.recordFailure(clientIp, identifier);
         res.status(401).json({ error: 'Invalid API key' });
         return;
       }
 
+      rateLimiter.recordSuccess(clientIp, identifier);
       (req as unknown as Record<string, unknown>)['serverTokenVerified'] = true;
       next();
       return;
