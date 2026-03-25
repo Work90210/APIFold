@@ -361,7 +361,7 @@ async function handlePaymentFailed(
     const failUser = await clerk.users.getUser(user.id);
     const failEmail = failUser.emailAddresses[0]?.emailAddress;
     if (failEmail) {
-      const amountDue = invoice.amount_due
+      const amountDue = invoice.amount_due != null
         ? `€${(invoice.amount_due / 100).toFixed(2)}`
         : "your subscription amount";
       const nextAttempt = invoice.next_payment_attempt
