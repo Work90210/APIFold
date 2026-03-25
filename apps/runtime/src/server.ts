@@ -71,7 +71,10 @@ export function createApp(deps: AppDeps): Express {
           [newTokenHash, serverId],
         ).then(() => {
           logger.info({ serverId }, 'Auto-upgraded token hash from SHA-256 to scrypt');
-          registry.upsert({ ...registry.getById(serverId)!, tokenHash: newTokenHash });
+          const existing = registry.getById(serverId);
+          if (existing) {
+            registry.upsert({ ...existing, tokenHash: newTokenHash });
+          }
         }).catch((err) => {
           logger.warn({ serverId, err }, 'Failed to auto-upgrade token hash');
         });
