@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useState } from "react";
+import { Button, Input, Skeleton } from "@apifold/ui";
+import { cn } from "@apifold/ui";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Globe,
@@ -12,8 +13,8 @@ import {
   RefreshCw,
   Plus,
 } from "lucide-react";
-import { Button, Input, Skeleton } from "@apifold/ui";
-import { cn } from "@apifold/ui";
+import { use, useState } from "react";
+
 import { api } from "@/lib/api-client";
 import { useServer } from "@/lib/hooks";
 

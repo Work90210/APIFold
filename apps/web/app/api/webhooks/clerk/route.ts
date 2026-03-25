@@ -1,5 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { Webhook } from 'svix';
+import { safeEnqueueEmailIntent } from '@/lib/email/enqueue';
+import { buildWelcomeIntent, buildAccountDeletedIntent } from '@/lib/email/intent-builder';
+import { getDb } from '@/lib/db';
+import { emailPreferences } from '@/lib/db/schema/email-preferences';
+import { emailOutbox } from '@/lib/db/schema/email-outbox';
+import { emailThresholdState } from '@/lib/db/schema/email-threshold-state';
+import { eq, and } from 'drizzle-orm';
 
 const CLERK_WEBHOOK_SECRET = process.env['CLERK_WEBHOOK_SECRET'];
 
@@ -45,12 +52,53 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Handle events
   switch (event.type) {
-    case 'user.created':
-      // Future: initialize user settings
+    case 'user.created': {
+      const data = event.data as {
+        id?: string;
+        email_addresses?: Array<{ email_address: string }>;
+        first_name?: string | null;
+      };
+      const email = data.email_addresses?.[0]?.email_address;
+      const svixEventId = svixId;
+      if (email) {
+        await safeEnqueueEmailIntent(
+          buildWelcomeIntent(email, data.first_name ?? null, svixEventId),
+        );
+      }
+      if (data.id) {
+        try {
+          const db = getDb();
+          await db.insert(emailPreferences).values({ userId: data.id }).onConflictDoNothing();
+        } catch (err) {
+          console.error('[webhook] Failed to create email preferences:', err);
+        }
+      }
       break;
-    case 'user.deleted':
-      // Future: clean up user data
+    }
+    case 'user.deleted': {
+      const data = event.data as {
+        id?: string;
+        email_addresses?: Array<{ email_address: string }>;
+      };
+      const email = data.email_addresses?.[0]?.email_address;
+      const svixEventId = svixId;
+      if (email) {
+        await safeEnqueueEmailIntent(buildAccountDeletedIntent(email, svixEventId));
+      }
+      if (data.id) {
+        try {
+          const db = getDb();
+          await db.delete(emailPreferences).where(eq(emailPreferences.userId, data.id));
+          await db.delete(emailThresholdState).where(eq(emailThresholdState.userId, data.id));
+          await db.update(emailOutbox).set({ status: 'suppressed' }).where(
+            and(eq(emailOutbox.userId, data.id), eq(emailOutbox.status, 'pending')),
+          );
+        } catch (err) {
+          console.error('[webhook] Failed to clean up email data:', err);
+        }
+      }
       break;
+    }
     default:
       break;
   }

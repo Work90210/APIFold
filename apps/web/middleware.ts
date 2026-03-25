@@ -11,7 +11,7 @@ const isPublicMarketplaceRoute = createRouteMatcher([
 ]);
 
 const isProtectedRoute = createRouteMatcher([
-  '/api/((?!health|webhooks).*)',
+  '/api/((?!health|webhooks|cron|email/unsubscribe).*)',
   '/dashboard(.*)',
 ]);
 
@@ -34,7 +34,7 @@ export default clerkMiddleware(async (auth, req) => {
 export const config = {
   matcher: [
     '/',
-    '/api/((?!health|webhooks).*)',
+    '/api/((?!health|webhooks|cron|email/unsubscribe).*)',
     '/dashboard(.*)',
     '/sign-in(.*)',
     '/sign-up(.*)',

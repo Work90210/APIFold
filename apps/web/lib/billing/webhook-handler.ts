@@ -4,6 +4,13 @@ import { PLANS, getPlanByStripeProductId, getPlanById } from "./plans";
 import { clerkClient } from "@clerk/nextjs/server";
 import { getRedis } from "@/lib/redis";
 import type { Plan } from "./plans";
+import { safeEnqueueEmailIntent } from "@/lib/email/enqueue";
+import {
+  buildSubscriptionConfirmedIntent,
+  buildPlanChangedIntent,
+  buildSubscriptionCancelledIntent,
+  buildPaymentFailedIntent,
+} from "@/lib/email/intent-builder";
 
 export function verifyWebhookSignature(
   body: string,
@@ -217,6 +224,25 @@ async function handleCheckoutCompleted(
     await syncPlanLimitsToRedis(userId, activatedPlan);
   }
 
+  try {
+    const user = await clerk.users.getUser(userId);
+    const email = user.emailAddresses[0]?.emailAddress;
+    if (email && activatedPlan) {
+      await safeEnqueueEmailIntent(
+        buildSubscriptionConfirmedIntent(
+          userId,
+          email,
+          user.firstName,
+          activatedPlan.name,
+          `€${activatedPlan.priceEurMonth}`,
+          session.id,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for checkout:", err);
+  }
+
   return Object.freeze({ handled: true, action: "plan_activated" });
 }
 
@@ -239,7 +265,11 @@ async function handleSubscriptionUpdated(
     return Object.freeze({ handled: false, action: "user_not_found" });
   }
 
+  // Read BEFORE updating — snapshot old plan for email comparison
   const clerk = await clerkClient();
+  const clerkUser = await clerk.users.getUser(user.id);
+  const previousPlanId = (clerkUser.publicMetadata?.plan as string) ?? "free";
+
   await clerk.users.updateUserMetadata(user.id, {
     publicMetadata: {
       plan: plan.id,
@@ -249,6 +279,26 @@ async function handleSubscriptionUpdated(
   });
 
   await syncPlanLimitsToRedis(user.id, plan);
+
+  try {
+    const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
+    if (userEmail && previousPlanId !== plan.id) {
+      const oldPlanObj = getPlanById(previousPlanId);
+      await safeEnqueueEmailIntent(
+        buildPlanChangedIntent(
+          user.id,
+          userEmail,
+          clerkUser.firstName,
+          oldPlanObj?.name ?? previousPlanId,
+          plan.name,
+          subscription.id,
+          `${previousPlanId}:${plan.id}:${Date.now()}`,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for plan_changed:", err);
+  }
 
   return Object.freeze({ handled: true, action: "plan_changed" });
 }
@@ -262,7 +312,12 @@ async function handleSubscriptionDeleted(
     return Object.freeze({ handled: false, action: "user_not_found" });
   }
 
+  // Read BEFORE updating — snapshot old plan for cancellation email
   const clerk = await clerkClient();
+  const clerkUser = await clerk.users.getUser(user.id);
+  const cancelledPlanId = (clerkUser.publicMetadata?.plan as string) ?? "free";
+  const cancelledPlanObj = getPlanById(cancelledPlanId);
+
   await clerk.users.updateUserMetadata(user.id, {
     publicMetadata: {
       plan: "free",
@@ -272,6 +327,23 @@ async function handleSubscriptionDeleted(
   });
 
   await syncPlanLimitsToRedis(user.id, PLANS.free);
+
+  try {
+    const cancelEmail = clerkUser.emailAddresses[0]?.emailAddress;
+    if (cancelEmail) {
+      await safeEnqueueEmailIntent(
+        buildSubscriptionCancelledIntent(
+          user.id,
+          cancelEmail,
+          clerkUser.firstName,
+          cancelledPlanObj?.name ?? cancelledPlanId,
+          subscription.id,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for subscription_deleted:", err);
+  }
 
   return Object.freeze({ handled: true, action: "reverted_to_free" });
 }
@@ -292,6 +364,34 @@ async function handlePaymentFailed(
       paymentFailedInvoiceId: invoice.id,
     },
   });
+
+  try {
+    const failUser = await clerk.users.getUser(user.id);
+    const failEmail = failUser.emailAddresses[0]?.emailAddress;
+    if (failEmail) {
+      const amountDue = invoice.amount_due != null
+        ? `€${(invoice.amount_due / 100).toFixed(2)}`
+        : "your subscription amount";
+      const nextAttempt = invoice.next_payment_attempt
+        ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString(
+            "en-US",
+            { dateStyle: "medium" },
+          )
+        : null;
+      await safeEnqueueEmailIntent(
+        buildPaymentFailedIntent(
+          user.id,
+          failEmail,
+          failUser.firstName,
+          amountDue,
+          invoice.id,
+          nextAttempt,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for payment_failed:", err);
+  }
 
   return Object.freeze({ handled: true, action: "account_flagged" });
 }
