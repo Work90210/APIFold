@@ -1,7 +1,7 @@
 import type { NextRequest} from 'next/server';
 import { NextResponse } from 'next/server';
 
-const POSTHOG_HOST = process.env['POSTHOG_HOST'] ?? process.env['NEXT_PUBLIC_POSTHOG_HOST'] ?? 'https://us.i.posthog.com';
+const POSTHOG_HOST = process.env['POSTHOG_HOST'] ?? process.env['NEXT_PUBLIC_POSTHOG_HOST'] ?? 'https://eu.i.posthog.com';
 const MAX_BODY_BYTES = 512 * 1024;
 
 // Only allow paths the PostHog JS SDK actually uses

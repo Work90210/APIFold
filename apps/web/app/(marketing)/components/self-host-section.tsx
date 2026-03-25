@@ -43,14 +43,14 @@ export function SelfHostSection() {
               </div>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Zero-config managed hosting. Deploy MCP servers without managing
-                infrastructure. Join the waitlist to get early access.
+                infrastructure. Start for free, upgrade as you grow.
               </p>
               <div className="mt-6">
                 <a
-                  href="mailto:hello@apifold.com"
+                  href="/dashboard"
                   className="inline-flex items-center gap-2 rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-all duration-200 hover:bg-foreground/90 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
-                  Join the Waitlist (Coming Soon)
+                  Get Started Free
                   <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>

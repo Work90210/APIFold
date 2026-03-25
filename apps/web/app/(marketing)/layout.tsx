@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Footer } from "./components/footer";
 import { Navbar } from "./components/navbar";
 
-import { CookieConsent } from "@/components/analytics/cookie-consent";
+// CookieConsent moved to root Providers — visible on all pages, not just marketing
 
 export default function MarketingLayout({
   children,
@@ -24,7 +24,6 @@ export default function MarketingLayout({
       <Navbar />
       {children}
       <Footer />
-      <CookieConsent />
     </div>
   );
 }
