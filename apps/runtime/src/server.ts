@@ -40,6 +40,11 @@ export function createApp(deps: AppDeps): Express {
 
   const app = express();
 
+  // Trust the first reverse proxy (nginx) so req.ip returns the real client IP
+  // from X-Forwarded-For / X-Real-IP headers. Without this, all requests behind
+  // nginx appear from the same container IP, breaking rate limiting and IP binding.
+  app.set('trust proxy', 1);
+
   // Core middleware
   app.use(helmet());
   app.use(createCorsMiddleware(config));
