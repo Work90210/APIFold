@@ -1,4 +1,4 @@
-import { and, eq, lte, sql, inArray } from "drizzle-orm";
+import { eq, sql, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { emailOutbox } from "@/lib/db/schema/email-outbox";
 import { emailAttempts } from "@/lib/db/schema/email-attempts";
