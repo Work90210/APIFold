@@ -6,6 +6,7 @@ import type {
 } from "../provider";
 
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+const SEND_TIMEOUT_MS = 10_000;
 
 function classifyResendError(error: {
   statusCode?: number;
@@ -32,7 +33,7 @@ export function createResendProvider(): EmailProvider {
     async send(input: ProviderSendInput): Promise<ProviderSendResult> {
       const resend = getResend();
 
-      const result = await resend.emails.send({
+      const sendPromise = resend.emails.send({
         from: input.from,
         to: input.to,
         subject: input.subject,
@@ -40,6 +41,30 @@ export function createResendProvider(): EmailProvider {
         headers: input.headers,
         tags: input.tags as Array<{ name: string; value: string }>,
       });
+
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`Resend send timed out after ${SEND_TIMEOUT_MS}ms`)),
+          SEND_TIMEOUT_MS,
+        );
+      });
+
+      let result: Awaited<ReturnType<typeof resend.emails.send>>;
+      try {
+        result = await Promise.race([sendPromise, timeoutPromise]);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.includes("timed out")) {
+          return classifyResendError({
+            name: "timeout",
+            message,
+          });
+        }
+        throw err;
+      } finally {
+        clearTimeout(timer);
+      }
 
       if (result.error) {
         return classifyResendError(

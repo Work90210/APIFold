@@ -12,8 +12,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    // TODO: Implement weekly summary generation
-    return NextResponse.json({ ok: true, summaries: 0 });
+    // TODO: Implement weekly summary generation — this handler is a placeholder
+    // that will be wired up once usage aggregation queries are built.
+    return NextResponse.json({
+      ok: true,
+      implemented: false,
+      message: "Not yet implemented",
+    });
   } catch (err) {
     console.error("[cron] weekly-summary failed:", err);
     return NextResponse.json(

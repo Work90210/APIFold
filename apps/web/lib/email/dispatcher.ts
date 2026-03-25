@@ -23,8 +23,10 @@ async function claimPendingJobs(
 ): Promise<ReadonlyArray<OutboxRow>> {
   const db = getDb();
 
-  // Use raw SQL for FOR UPDATE SKIP LOCKED — Drizzle doesn't support it natively
-  const result = await db.execute(sql`
+  // Use raw SQL for FOR UPDATE SKIP LOCKED — Drizzle doesn't support it natively.
+  // Only return IDs from the raw query, then fetch full rows via Drizzle so
+  // column names are correctly mapped to the camelCase schema.
+  const claimed = await db.execute(sql`
     UPDATE email_outbox
     SET status = 'processing', updated_at = ${now.toISOString()}
     WHERE id IN (
@@ -35,10 +37,16 @@ async function claimPendingJobs(
       FOR UPDATE SKIP LOCKED
       LIMIT ${batchSize}
     )
-    RETURNING *
+    RETURNING id
   `);
 
-  return result as unknown as ReadonlyArray<OutboxRow>;
+  const ids = (claimed as unknown as Array<{ id: string }>).map((row) => row.id);
+  if (ids.length === 0) return [];
+
+  return db
+    .select()
+    .from(emailOutbox)
+    .where(inArray(emailOutbox.id, ids));
 }
 
 async function recordAttempt(

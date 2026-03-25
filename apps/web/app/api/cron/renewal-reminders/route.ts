@@ -12,8 +12,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    // TODO: Implement renewal reminder logic
-    return NextResponse.json({ ok: true, reminders: 0 });
+    // TODO: Implement renewal reminder logic — this handler is a placeholder
+    // that will query upcoming renewals and enqueue reminder emails.
+    return NextResponse.json({
+      ok: true,
+      implemented: false,
+      message: "Not yet implemented",
+    });
   } catch (err) {
     console.error("[cron] renewal-reminders failed:", err);
     return NextResponse.json(

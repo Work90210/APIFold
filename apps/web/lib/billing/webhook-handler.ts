@@ -280,20 +280,24 @@ async function handleSubscriptionUpdated(
 
   await syncPlanLimitsToRedis(user.id, plan);
 
-  const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
-  if (userEmail && previousPlanId !== plan.id) {
-    const oldPlanObj = getPlanById(previousPlanId);
-    await safeEnqueueEmailIntent(
-      buildPlanChangedIntent(
-        user.id,
-        userEmail,
-        clerkUser.firstName,
-        oldPlanObj?.name ?? previousPlanId,
-        plan.name,
-        subscription.id,
-        `${subscription.id}:${previousPlanId}:${plan.id}`,
-      ),
-    );
+  try {
+    const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
+    if (userEmail && previousPlanId !== plan.id) {
+      const oldPlanObj = getPlanById(previousPlanId);
+      await safeEnqueueEmailIntent(
+        buildPlanChangedIntent(
+          user.id,
+          userEmail,
+          clerkUser.firstName,
+          oldPlanObj?.name ?? previousPlanId,
+          plan.name,
+          subscription.id,
+          `${previousPlanId}:${plan.id}:${Date.now()}`,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for plan_changed:", err);
   }
 
   return Object.freeze({ handled: true, action: "plan_changed" });
@@ -324,17 +328,21 @@ async function handleSubscriptionDeleted(
 
   await syncPlanLimitsToRedis(user.id, PLANS.free);
 
-  const cancelEmail = clerkUser.emailAddresses[0]?.emailAddress;
-  if (cancelEmail) {
-    await safeEnqueueEmailIntent(
-      buildSubscriptionCancelledIntent(
-        user.id,
-        cancelEmail,
-        clerkUser.firstName,
-        cancelledPlanObj?.name ?? cancelledPlanId,
-        subscription.id,
-      ),
-    );
+  try {
+    const cancelEmail = clerkUser.emailAddresses[0]?.emailAddress;
+    if (cancelEmail) {
+      await safeEnqueueEmailIntent(
+        buildSubscriptionCancelledIntent(
+          user.id,
+          cancelEmail,
+          clerkUser.firstName,
+          cancelledPlanObj?.name ?? cancelledPlanId,
+          subscription.id,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[webhook] Email composition failed for subscription_deleted:", err);
   }
 
   return Object.freeze({ handled: true, action: "reverted_to_free" });
