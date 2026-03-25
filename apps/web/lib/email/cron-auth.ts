@@ -1,4 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { timingSafeEqual } from "crypto";
+
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 export function verifyCronSecret(
   request: NextRequest,
@@ -13,7 +21,7 @@ export function verifyCronSecret(
   }
 
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${secret}`) {
+  if (!authHeader || !safeCompare(authHeader, `Bearer ${secret}`)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
