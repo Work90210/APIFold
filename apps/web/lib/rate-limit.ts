@@ -69,7 +69,7 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
       resetAt: Math.ceil((now + WINDOW_MS) / 1000),
     };
   } catch (err) {
-    console.error('[rate-limit] Redis error, failing closed:', err instanceof Error ? err.message : err);
-    return { allowed: false, remaining: 0, resetAt: Math.ceil((Date.now() + WINDOW_MS) / 1000) };
+    console.error('[rate-limit] Redis error, failing open:', err instanceof Error ? err.message : err);
+    return { allowed: true, remaining: MAX_REQUESTS, resetAt: Math.ceil((Date.now() + WINDOW_MS) / 1000) };
   }
 }
