@@ -194,6 +194,7 @@ ALTER TABLE "credentials" ADD COLUMN "token_expires_at" timestamp with time zone
 ALTER TABLE "credentials" ADD COLUMN "provider" text;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "endpoint_id" text NOT NULL DEFAULT substr(md5(gen_random_uuid()::text), 1, 12);--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "custom_domain" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "idx_servers_custom_domain" ON "mcp_servers" (lower("custom_domain")) WHERE "custom_domain" IS NOT NULL;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "domain_verified_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "domain_verification_token" text;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "token_hash" text;--> statement-breakpoint

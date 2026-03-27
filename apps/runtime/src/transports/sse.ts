@@ -22,9 +22,10 @@ function sanitizeIdentifier(identifier: string): string {
 }
 
 function resolveServer(registry: ServerRegistry, identifier: string) {
-  return /^[a-f0-9]{12}$/.test(identifier)
-    ? registry.getByEndpointId(identifier)
-    : registry.getBySlug(identifier);
+  if (/^[a-f0-9]{12}$/.test(identifier)) {
+    return registry.getByEndpointId(identifier) ?? registry.getBySlug(identifier);
+  }
+  return registry.getBySlug(identifier);
 }
 
 // Matches the API validation: z.string().min(1).max(50).regex(/^[a-z0-9-]+$/)
