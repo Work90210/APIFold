@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import express from 'express';
 import type { Server } from 'http';
+import { EventEmitter } from 'events';
 import { ServerRegistry } from '../../src/registry/server-registry.js';
 import { ToolLoader } from '../../src/registry/tool-loader.js';
 import { CredentialCache } from '../../src/registry/credential-cache.js';
@@ -10,6 +11,17 @@ import { SessionManager } from '../../src/mcp/session-manager.js';
 import { ProtocolHandler } from '../../src/mcp/protocol-handler.js';
 import { createApp } from '../../src/server.js';
 import { createTestLogger } from '../helpers.js';
+
+/** Minimal mock Redis that satisfies the billing usage gate. */
+function createMockRedis() {
+  const emitter = new EventEmitter();
+  return Object.assign(emitter, {
+    get: vi.fn().mockResolvedValue(null),
+    // eval returns [allowed=1, currentUsage=1, limit=1000] — always allow
+    eval: vi.fn().mockResolvedValue([1, 1, 1000]),
+    status: 'ready' as const,
+  });
+}
 
 /**
  * Integration test: Full MCP flow
@@ -24,6 +36,7 @@ describe('MCP Flow Integration', () => {
   let upstreamUrl: string;
 
   const logger = createTestLogger();
+  const TEST_API_KEY = 'test-api-key-that-is-long-enough-for-validation-32chars';
 
   beforeEach(async () => {
     // Start a mock upstream API
@@ -47,12 +60,28 @@ describe('MCP Flow Integration', () => {
     registry.upsert({
       id: 'srv-1',
       slug: 'weather',
+      endpointId: 'abcdef012345',
       userId: 'user-1',
       transport: 'sse',
       authMode: 'none',
       baseUrl: upstreamUrl,
       rateLimit: 100,
       isActive: true,
+      tokenHash: null,
+      customDomain: null,
+    });
+    registry.upsert({
+      id: 'srv-2',
+      slug: 'other-server',
+      endpointId: 'fedcba654321',
+      userId: 'user-1',
+      transport: 'sse',
+      authMode: 'none',
+      baseUrl: upstreamUrl,
+      rateLimit: 100,
+      isActive: true,
+      tokenHash: null,
+      customDomain: null,
     });
 
     const toolLoader = new ToolLoader({
@@ -82,6 +111,8 @@ describe('MCP Flow Integration', () => {
       idleTimeoutMs: 300_000,
     });
 
+    const mockRedis = createMockRedis();
+
     const protocolHandler = new ProtocolHandler({
       logger,
       registry,
@@ -92,7 +123,9 @@ describe('MCP Flow Integration', () => {
         circuitBreaker,
         authInjector: { credentialCache },
         timeoutMs: 5000,
+        allowPrivateUpstreams: true,
       },
+      redis: mockRedis as never,
     });
 
     const app = createApp({
@@ -122,13 +155,22 @@ describe('MCP Flow Integration', () => {
         runtimeShutdownGraceMs: 10_000,
         runtimeHealthPort: 0,
         maxConnectionsPerWorker: 100,
+        mcpApiKey: TEST_API_KEY,
       },
       logger,
       sessionManager,
       protocolHandler,
       registry,
-      redis: null,
+      redis: mockRedis as never,
       isReady: () => true,
+      toolLoader,
+      toolExecutorDeps: {
+        logger,
+        circuitBreaker,
+        authInjector: { credentialCache },
+        timeoutMs: 5000,
+        allowPrivateUpstreams: true,
+      },
     });
 
     server = await new Promise<Server>((resolve) => {
@@ -160,13 +202,17 @@ describe('MCP Flow Integration', () => {
   });
 
   it('returns 404 for unknown server slug', async () => {
-    const res = await fetch(`${baseUrl}/mcp/nonexistent/sse`);
+    const res = await fetch(`${baseUrl}/mcp/nonexistent/sse`, {
+      headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+    });
     expect(res.status).toBe(404);
   });
 
   it('full SSE flow: connect → tools/list → tools/call', async () => {
     // 1. Establish SSE connection
-    const sseRes = await fetch(`${baseUrl}/mcp/weather/sse`);
+    const sseRes = await fetch(`${baseUrl}/mcp/weather/sse`, {
+      headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+    });
     expect(sseRes.status).toBe(200);
     expect(sseRes.headers.get('content-type')).toBe('text/event-stream');
 
@@ -196,7 +242,7 @@ describe('MCP Flow Integration', () => {
     // 2. Send initialize
     const initRes = await fetch(`${baseUrl}/mcp/weather/message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId },
+      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId, Authorization: `Bearer ${TEST_API_KEY}` },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize' }),
     });
     expect(initRes.status).toBe(202);
@@ -204,7 +250,7 @@ describe('MCP Flow Integration', () => {
     // 3. Send tools/list
     const listRes = await fetch(`${baseUrl}/mcp/weather/message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId },
+      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId, Authorization: `Bearer ${TEST_API_KEY}` },
       body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' }),
     });
     expect(listRes.status).toBe(202);
@@ -212,7 +258,7 @@ describe('MCP Flow Integration', () => {
     // 4. Send tools/call
     const callRes = await fetch(`${baseUrl}/mcp/weather/message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId },
+      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId, Authorization: `Bearer ${TEST_API_KEY}` },
       body: JSON.stringify({
         jsonrpc: '2.0',
         id: 3,
@@ -263,7 +309,9 @@ describe('MCP Flow Integration', () => {
 
   it('rejects cross-server session hijacking', async () => {
     // Connect to weather server
-    const sseRes = await fetch(`${baseUrl}/mcp/weather/sse`);
+    const sseRes = await fetch(`${baseUrl}/mcp/weather/sse`, {
+      headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+    });
     const reader = sseRes.body!.getReader();
     const decoder = new TextDecoder();
 
@@ -283,7 +331,7 @@ describe('MCP Flow Integration', () => {
     // Try to use that session on a different slug
     const res = await fetch(`${baseUrl}/mcp/other-server/message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId },
+      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId, Authorization: `Bearer ${TEST_API_KEY}` },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }),
     });
     expect(res.status).toBe(403);
@@ -293,7 +341,9 @@ describe('MCP Flow Integration', () => {
 
   it('rejects invalid JSON-RPC version', async () => {
     // First get a session
-    const sseRes = await fetch(`${baseUrl}/mcp/weather/sse`);
+    const sseRes = await fetch(`${baseUrl}/mcp/weather/sse`, {
+      headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+    });
     const reader = sseRes.body!.getReader();
     const decoder = new TextDecoder();
 
@@ -313,7 +363,7 @@ describe('MCP Flow Integration', () => {
     // Send with wrong jsonrpc version
     const res = await fetch(`${baseUrl}/mcp/weather/message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId },
+      headers: { 'Content-Type': 'application/json', 'X-Session-ID': sessionId, Authorization: `Bearer ${TEST_API_KEY}` },
       body: JSON.stringify({ jsonrpc: '1.0', id: 1, method: 'ping' }),
     });
     expect(res.status).toBe(400);
