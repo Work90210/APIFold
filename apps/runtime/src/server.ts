@@ -35,8 +35,23 @@ export interface AppDeps {
   readonly db?: DbClient;
 }
 
+interface AccessProfileRow {
+  readonly tool_ids: readonly string[] | null;
+}
+
 export function createApp(deps: AppDeps): Express {
   const { config, logger, sessionManager, protocolHandler, registry } = deps;
+
+  const resolveProfileToolIds = deps.db
+    ? async (serverId: string, profileSlug: string): Promise<readonly string[] | undefined> => {
+        const result = await deps.db!.query<AccessProfileRow>(
+          'SELECT tool_ids FROM access_profiles WHERE server_id = $1 AND slug = $2',
+          [serverId, profileSlug],
+        );
+        const row = result.rows[0];
+        return row ? (row.tool_ids ?? []) : undefined;
+      }
+    : undefined;
 
   const app = express();
 
@@ -107,13 +122,6 @@ export function createApp(deps: AppDeps): Express {
     );
   }
 
-  // Custom domain routing — rewrites /sse → /mcp/:endpointId/sse for custom domain requests
-  app.use(createDomainRouter({
-    logger,
-    registry,
-    platformDomain: process.env['PLATFORM_DOMAIN'] ?? 'apifold.dev',
-  }));
-
   // Transport routers — SSE and Streamable HTTP
   app.use(createSSETransportRouter({
     logger,
@@ -121,14 +129,17 @@ export function createApp(deps: AppDeps): Express {
     protocolHandler,
     registry,
     maxConnectionsPerWorker: config.maxConnectionsPerWorker,
+    resolveProfileToolIds,
   }));
 
-  if (deps.toolLoader && deps.toolExecutorDeps) {
+  if (deps.toolLoader && deps.toolExecutorDeps && deps.redis) {
     app.use(createStreamableHTTPRouter({
       logger,
       registry,
       toolLoader: deps.toolLoader,
       toolExecutorDeps: deps.toolExecutorDeps,
+      redis: deps.redis,
+      resolveProfileToolIds,
     }));
   }
 

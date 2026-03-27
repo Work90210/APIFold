@@ -113,11 +113,7 @@ export class ProtocolHandler {
       const toolMap = await this.toolLoader.getTools(server.id);
       let tools = [...toolMap.values()];
 
-      // Profile-based filtering: only show tools allowed by the active profile
-      const allowedToolIds = this.fetchProfileToolIds
-        ? await this.fetchProfileToolIds(server.id)
-        : null;
-
+      const allowedToolIds = await this.resolveAllowedToolIds(server.id, session);
       if (allowedToolIds) {
         const allowedSet = new Set(allowedToolIds);
         tools = tools.filter((t) => allowedSet.has(t.id));
@@ -158,15 +154,12 @@ export class ProtocolHandler {
       return jsonRpcError(req.id, -32002, 'Tool not found');
     }
 
-    // Profile-based enforcement: reject calls to tools outside the active profile
     let allowedToolIds: readonly string[] | null;
     try {
-      allowedToolIds = this.fetchProfileToolIds
-        ? await this.fetchProfileToolIds(server.id)
-        : null;
+      allowedToolIds = await this.resolveAllowedToolIds(server.id, session);
     } catch (err) {
-      this.logger.error({ err, slug: session.slug }, 'Failed to fetch profile tool IDs');
-      return jsonRpcError(req.id, -32603, 'Failed to load profile');
+      this.logger.error({ err, slug: session.slug }, 'Failed to resolve profile');
+      return jsonRpcError(req.id, -32603, 'Failed to resolve profile');
     }
 
     if (allowedToolIds && !allowedToolIds.includes(tool.id)) {
@@ -182,11 +175,11 @@ export class ProtocolHandler {
     );
 
     if (!usageCheck.allowed) {
-      return jsonRpcError(
-        req.id,
-        -32003,
-        `Usage limit reached (${usageCheck.currentUsage}/${usageCheck.limit}). Upgrade your plan.`,
+      this.logger.warn(
+        { userId: server.userId, currentUsage: usageCheck.currentUsage, limit: usageCheck.limit },
+        'Usage limit reached',
       );
+      return jsonRpcError(req.id, -32003, 'Usage limit reached. Upgrade your plan.');
     }
 
     const toolInput = (params['arguments'] ?? {}) as Readonly<Record<string, unknown>>;
@@ -206,7 +199,7 @@ export class ProtocolHandler {
       const durationMs = Math.round(performance.now() - start);
       metrics.observeHistogram('tool_call_duration_ms', durationMs);
 
-      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, toolName, `/${server.slug}/sse`, 200, durationMs);
+      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, tool.name, `/${server.slug}/sse`, 200, durationMs);
 
       return jsonRpcSuccess(req.id, result);
     } catch (err) {
@@ -215,10 +208,25 @@ export class ProtocolHandler {
       metrics.observeHistogram('tool_call_duration_ms', durationMs);
       this.logger.error({ err, tool: toolName, slug: session.slug }, 'Tool execution error');
 
-      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, toolName, `/${server.slug}/sse`, 500, durationMs);
+      this.writeRequestLog(server.id, tool.id, server.userId, context.requestId, tool.name, `/${server.slug}/sse`, 500, durationMs);
 
       return jsonRpcError(req.id, -32603, 'Tool execution failed');
     }
+  }
+
+  private async resolveAllowedToolIds(
+    serverId: string,
+    session: SSESession,
+  ): Promise<readonly string[] | null> {
+    if (session.profileToolIds !== undefined) {
+      return session.profileToolIds;
+    }
+
+    if (!this.fetchProfileToolIds) {
+      return null;
+    }
+
+    return this.fetchProfileToolIds(serverId);
   }
 
   private writeRequestLog(

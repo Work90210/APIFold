@@ -149,6 +149,94 @@ describe('transformSpec', () => {
     expect(tool.inputSchema.properties['body']).toBeDefined();
   });
 
+  it('extracts response schema metadata and enriches description', () => {
+    const result = transformSpec({
+      spec: makeSpec({
+        '/pets': {
+          post: {
+            operationId: 'createPet',
+            summary: 'Create a pet',
+            responses: {
+              '201': {
+                description: 'Created pet',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    });
+
+    const tool = result.tools[0]!;
+    expect(tool._meta.responseSchema).toEqual({
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+      },
+    });
+    expect(tool._meta.responseDescription).toBe('Created pet');
+    expect(tool._meta.responseContentType).toBe('application/json');
+    expect(tool.description).toContain('Returns: { id: string, name: string }');
+  });
+
+  it('uses the lowest 2xx response when 200 and 201 are absent', () => {
+    const result = transformSpec({
+      spec: makeSpec({
+        '/jobs': {
+          get: {
+            operationId: 'listJobs',
+            summary: 'List jobs',
+            responses: {
+              '202': {
+                description: 'Accepted jobs',
+                content: {
+                  'application/json': {
+                    schema: { type: 'array', items: { type: 'string' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    });
+
+    const tool = result.tools[0]!;
+    expect(tool._meta.responseDescription).toBe('Accepted jobs');
+    expect(tool.description).toContain('Returns: string[]');
+  });
+
+  it('does not enrich description when no response schema exists', () => {
+    const result = transformSpec({
+      spec: makeSpec({
+        '/health': {
+          get: {
+            operationId: 'healthCheck',
+            summary: 'Health check',
+            responses: {
+              '200': { description: 'OK' },
+            },
+          },
+        },
+      }),
+    });
+
+    const tool = result.tools[0]!;
+    expect(tool._meta.responseSchema).toBeUndefined();
+    expect(tool.description).toBe('Health check');
+  });
+
   it('generates name from method+path when operationId missing', () => {
     const result = transformSpec({
       spec: makeSpec({

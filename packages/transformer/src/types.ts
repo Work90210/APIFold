@@ -39,6 +39,14 @@ export interface OpenAPIRequestBody {
   readonly $ref?: string;
 }
 
+export interface OpenAPIResponse {
+  readonly description?: string;
+  readonly content?: Readonly<Record<string, { readonly schema?: JSONSchema }>>;
+  readonly $ref?: string;
+}
+
+export type OpenAPIResponses = Readonly<Record<string, OpenAPIResponse>>;
+
 export interface OpenAPIOperation {
   readonly operationId?: string;
   readonly summary?: string;
@@ -47,7 +55,7 @@ export interface OpenAPIOperation {
   readonly deprecated?: boolean;
   readonly parameters?: readonly OpenAPIParameter[];
   readonly requestBody?: OpenAPIRequestBody;
-  readonly responses?: Readonly<Record<string, unknown>>;
+  readonly responses?: OpenAPIResponses;
 }
 
 export interface OpenAPIPathItem {
@@ -108,6 +116,9 @@ export interface MCPToolDefinition {
     readonly paramMap: Readonly<Record<string, 'path' | 'query' | 'header'>>;
     readonly tags: readonly string[];
     readonly deprecated: boolean;
+    readonly responseSchema?: JSONSchema;
+    readonly responseDescription?: string;
+    readonly responseContentType?: string;
   };
 }
 

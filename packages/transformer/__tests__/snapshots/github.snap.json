@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "repos_get",
-      "description": "The `parent` and `source` objects are present when the repository is a fork.",
+      "description": "The `parent` and `source` objects are present when the repository is a fork. Returns: { id: integer, name: string, full_name: string, owner: object, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -30,7 +30,177 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "full_name": {
+              "type": "string"
+            },
+            "owner": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "private": {
+              "type": "boolean"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "fork": {
+              "type": "boolean"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "language": {
+              "type": "string",
+              "nullable": true
+            },
+            "stargazers_count": {
+              "type": "integer"
+            },
+            "watchers_count": {
+              "type": "integer"
+            },
+            "forks_count": {
+              "type": "integer"
+            },
+            "default_branch": {
+              "type": "string"
+            },
+            "archived": {
+              "type": "boolean"
+            },
+            "disabled": {
+              "type": "boolean"
+            },
+            "pushed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "subscribers_count": {
+              "type": "integer"
+            },
+            "network_count": {
+              "type": "integer"
+            },
+            "open_issues_count": {
+              "type": "integer"
+            },
+            "has_issues": {
+              "type": "boolean"
+            },
+            "has_projects": {
+              "type": "boolean"
+            },
+            "has_wiki": {
+              "type": "boolean"
+            },
+            "has_pages": {
+              "type": "boolean"
+            },
+            "has_downloads": {
+              "type": "boolean"
+            },
+            "allow_squash_merge": {
+              "type": "boolean"
+            },
+            "allow_merge_commit": {
+              "type": "boolean"
+            },
+            "allow_rebase_merge": {
+              "type": "boolean"
+            },
+            "delete_branch_on_merge": {
+              "type": "boolean"
+            },
+            "topics": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "visibility": {
+              "type": "string"
+            },
+            "license": {
+              "nullable": true,
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "spdx_id": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "full_name",
+            "owner"
+          ]
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
@@ -66,7 +236,7 @@
     },
     {
       "name": "repos_update",
-      "description": "Update a repository",
+      "description": "Update a repository. Returns: { id: integer, name: string, full_name: string, owner: object, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -138,12 +308,182 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "full_name": {
+              "type": "string"
+            },
+            "owner": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "private": {
+              "type": "boolean"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "fork": {
+              "type": "boolean"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "language": {
+              "type": "string",
+              "nullable": true
+            },
+            "stargazers_count": {
+              "type": "integer"
+            },
+            "watchers_count": {
+              "type": "integer"
+            },
+            "forks_count": {
+              "type": "integer"
+            },
+            "default_branch": {
+              "type": "string"
+            },
+            "archived": {
+              "type": "boolean"
+            },
+            "disabled": {
+              "type": "boolean"
+            },
+            "pushed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "subscribers_count": {
+              "type": "integer"
+            },
+            "network_count": {
+              "type": "integer"
+            },
+            "open_issues_count": {
+              "type": "integer"
+            },
+            "has_issues": {
+              "type": "boolean"
+            },
+            "has_projects": {
+              "type": "boolean"
+            },
+            "has_wiki": {
+              "type": "boolean"
+            },
+            "has_pages": {
+              "type": "boolean"
+            },
+            "has_downloads": {
+              "type": "boolean"
+            },
+            "allow_squash_merge": {
+              "type": "boolean"
+            },
+            "allow_merge_commit": {
+              "type": "boolean"
+            },
+            "allow_rebase_merge": {
+              "type": "boolean"
+            },
+            "delete_branch_on_merge": {
+              "type": "boolean"
+            },
+            "topics": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "visibility": {
+              "type": "string"
+            },
+            "license": {
+              "nullable": true,
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "spdx_id": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "full_name",
+            "owner"
+          ]
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_getcontent",
-      "description": "Get repository content",
+      "description": "Get repository content. Returns: { type: string, name: string, path: string, sha: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -179,12 +519,61 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "type",
+            "name",
+            "path",
+            "sha",
+            "size",
+            "content",
+            "encoding"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "file"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "sha": {
+              "type": "string"
+            },
+            "size": {
+              "type": "integer"
+            },
+            "content": {
+              "type": "string"
+            },
+            "encoding": {
+              "type": "string"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "download_url": {
+              "type": "string",
+              "format": "uri",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_listbranches",
-      "description": "List branches",
+      "description": "List branches. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -225,12 +614,49 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "commit",
+              "protected"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "commit": {
+                "type": "object",
+                "required": [
+                  "sha",
+                  "url"
+                ],
+                "properties": {
+                  "sha": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              },
+              "protected": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_listcommits",
-      "description": "List commits",
+      "description": "List commits. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -291,12 +717,145 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "sha",
+              "commit",
+              "url",
+              "html_url"
+            ],
+            "properties": {
+              "sha": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "commit": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  },
+                  "committer": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              },
+              "author": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "login"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "login": {
+                        "type": "string"
+                      },
+                      "avatar_url": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "html_url": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "site_admin": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              },
+              "committer": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "login"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "login": {
+                        "type": "string"
+                      },
+                      "avatar_url": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "html_url": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "site_admin": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_listreleases",
-      "description": "List releases",
+      "description": "List releases. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -333,12 +892,89 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "tag_name",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "tag_name": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "nullable": true
+              },
+              "body": {
+                "type": "string",
+                "nullable": true
+              },
+              "draft": {
+                "type": "boolean"
+              },
+              "prerelease": {
+                "type": "boolean"
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "author": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_createrelease",
-      "description": "Create a release",
+      "description": "Create a release. Returns: { id: integer, tag_name: string, name: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -397,12 +1033,86 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "tag_name",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "tag_name": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string",
+              "nullable": true
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "draft": {
+              "type": "boolean"
+            },
+            "prerelease": {
+              "type": "boolean"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "author": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "published_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "users_getauthenticated",
-      "description": "Get the authenticated user",
+      "description": "Get the authenticated user. Returns: { id: integer, login: string, avatar_url: string, html_url: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -415,12 +1125,94 @@
         "tags": [
           "users"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "login": {
+              "type": "string"
+            },
+            "avatar_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string",
+              "nullable": true
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "bio": {
+              "type": "string",
+              "nullable": true
+            },
+            "company": {
+              "type": "string",
+              "nullable": true
+            },
+            "blog": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string",
+              "nullable": true
+            },
+            "hireable": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "twitter_username": {
+              "type": "string",
+              "nullable": true
+            },
+            "public_repos": {
+              "type": "integer"
+            },
+            "public_gists": {
+              "type": "integer"
+            },
+            "followers": {
+              "type": "integer"
+            },
+            "following": {
+              "type": "integer"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "login"
+          ]
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "users_getbyusername",
-      "description": "Get a user",
+      "description": "Get a user. Returns: { id: integer, login: string, avatar_url: string, html_url: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -441,12 +1233,94 @@
         "tags": [
           "users"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "login": {
+              "type": "string"
+            },
+            "avatar_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string",
+              "nullable": true
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "bio": {
+              "type": "string",
+              "nullable": true
+            },
+            "company": {
+              "type": "string",
+              "nullable": true
+            },
+            "blog": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string",
+              "nullable": true
+            },
+            "hireable": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "twitter_username": {
+              "type": "string",
+              "nullable": true
+            },
+            "public_repos": {
+              "type": "integer"
+            },
+            "public_gists": {
+              "type": "integer"
+            },
+            "followers": {
+              "type": "integer"
+            },
+            "following": {
+              "type": "integer"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "login"
+          ]
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_listforuser",
-      "description": "List repositories for a user",
+      "description": "List repositories for a user. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -505,12 +1379,121 @@
         "tags": [
           "repos"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "full_name",
+              "owner"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "full_name": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "private": {
+                "type": "boolean"
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "fork": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "language": {
+                "type": "string",
+                "nullable": true
+              },
+              "stargazers_count": {
+                "type": "integer"
+              },
+              "watchers_count": {
+                "type": "integer"
+              },
+              "forks_count": {
+                "type": "integer"
+              },
+              "default_branch": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "pushed_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "issues_listforrepo",
-      "description": "List repository issues",
+      "description": "List repository issues. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -598,12 +1581,188 @@
         "tags": [
           "issues"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "number",
+              "title",
+              "state"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "number": {
+                "type": "integer"
+              },
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string",
+                "nullable": true
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "state_reason": {
+                "type": "string",
+                "enum": [
+                  "completed",
+                  "not_planned",
+                  "reopened"
+                ],
+                "nullable": true
+              },
+              "user": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "default": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "assignees": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "login"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "login": {
+                      "type": "string"
+                    },
+                    "avatar_url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "html_url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "site_admin": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "milestone": {
+                "nullable": true,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "number": {
+                    "type": "integer"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "open",
+                      "closed"
+                    ]
+                  }
+                }
+              },
+              "comments": {
+                "type": "integer"
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closed_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "issues_create",
-      "description": "Create an issue",
+      "description": "Create an issue. Returns: { id: integer, number: integer, title: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -659,12 +1818,185 @@
         "tags": [
           "issues"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "number",
+            "title",
+            "state"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "state_reason": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "not_planned",
+                "reopened"
+              ],
+              "nullable": true
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "default": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "assignees": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "milestone": {
+              "nullable": true,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "number": {
+                  "type": "integer"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "closed"
+                  ]
+                }
+              }
+            },
+            "comments": {
+              "type": "integer"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "issues_get",
-      "description": "Get an issue",
+      "description": "Get an issue. Returns: { id: integer, number: integer, title: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -695,12 +2027,185 @@
         "tags": [
           "issues"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "number",
+            "title",
+            "state"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "state_reason": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "not_planned",
+                "reopened"
+              ],
+              "nullable": true
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "default": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "assignees": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "milestone": {
+              "nullable": true,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "number": {
+                  "type": "integer"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "closed"
+                  ]
+                }
+              }
+            },
+            "comments": {
+              "type": "integer"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "issues_update",
-      "description": "Update an issue",
+      "description": "Update an issue. Returns: { id: integer, number: integer, title: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -773,12 +2278,185 @@
         "tags": [
           "issues"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "number",
+            "title",
+            "state"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "state_reason": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "not_planned",
+                "reopened"
+              ],
+              "nullable": true
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "default": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "assignees": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "milestone": {
+              "nullable": true,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "number": {
+                  "type": "integer"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "closed"
+                  ]
+                }
+              }
+            },
+            "comments": {
+              "type": "integer"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "issues_listcomments",
-      "description": "List issue comments",
+      "description": "List issue comments. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -825,12 +2503,73 @@
         "tags": [
           "issues"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "body"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "body": {
+                "type": "string"
+              },
+              "user": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "issues_createcomment",
-      "description": "Create an issue comment",
+      "description": "Create an issue comment. Returns: { id: integer, body: string, user: object, html_url: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -873,12 +2612,70 @@
         "tags": [
           "issues"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "body"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "body": {
+              "type": "string"
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "pulls_list",
-      "description": "List pull requests",
+      "description": "List pull requests. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -952,12 +2749,143 @@
         "tags": [
           "pulls"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "number",
+              "title",
+              "state",
+              "head",
+              "base"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "number": {
+                "type": "integer"
+              },
+              "title": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string",
+                "nullable": true
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "draft": {
+                "type": "boolean"
+              },
+              "merged": {
+                "type": "boolean"
+              },
+              "mergeable": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "merge_commit_sha": {
+                "type": "string",
+                "nullable": true
+              },
+              "user": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "head": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "ref": {
+                    "type": "string"
+                  },
+                  "sha": {
+                    "type": "string"
+                  }
+                }
+              },
+              "base": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "ref": {
+                    "type": "string"
+                  },
+                  "sha": {
+                    "type": "string"
+                  }
+                }
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closed_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "merged_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "pulls_create",
-      "description": "Create a pull request",
+      "description": "Create a pull request. Returns: { id: integer, number: integer, title: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1012,12 +2940,140 @@
         "tags": [
           "pulls"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "number",
+            "title",
+            "state",
+            "head",
+            "base"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "draft": {
+              "type": "boolean"
+            },
+            "merged": {
+              "type": "boolean"
+            },
+            "mergeable": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "merge_commit_sha": {
+              "type": "string",
+              "nullable": true
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "head": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              }
+            },
+            "base": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              }
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "merged_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "pulls_get",
-      "description": "Get a pull request",
+      "description": "Get a pull request. Returns: { id: integer, number: integer, title: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1048,12 +3104,140 @@
         "tags": [
           "pulls"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "number",
+            "title",
+            "state",
+            "head",
+            "base"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "draft": {
+              "type": "boolean"
+            },
+            "merged": {
+              "type": "boolean"
+            },
+            "mergeable": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "merge_commit_sha": {
+              "type": "string",
+              "nullable": true
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "head": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              }
+            },
+            "base": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              }
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "merged_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "pulls_update",
-      "description": "Update a pull request",
+      "description": "Update a pull request. Returns: { id: integer, number: integer, title: string, body: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1108,12 +3292,140 @@
         "tags": [
           "pulls"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "number",
+            "title",
+            "state",
+            "head",
+            "base"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string",
+              "nullable": true
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "draft": {
+              "type": "boolean"
+            },
+            "merged": {
+              "type": "boolean"
+            },
+            "mergeable": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "merge_commit_sha": {
+              "type": "string",
+              "nullable": true
+            },
+            "user": {
+              "type": "object",
+              "required": [
+                "id",
+                "login"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "login": {
+                  "type": "string"
+                },
+                "avatar_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "html_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "site_admin": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "head": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              }
+            },
+            "base": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              }
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closed_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "merged_at": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "pulls_merge",
-      "description": "Merge a pull request",
+      "description": "Merge a pull request. Returns: { sha: string, merged: boolean, message: string }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1166,12 +3478,33 @@
         "tags": [
           "pulls"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "sha",
+            "merged",
+            "message"
+          ],
+          "properties": {
+            "sha": {
+              "type": "string"
+            },
+            "merged": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "pulls_listreviews",
-      "description": "List reviews for a pull request",
+      "description": "List reviews for a pull request. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1213,12 +3546,80 @@
         "tags": [
           "pulls"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "user",
+              "state"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "user": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "body": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "APPROVED",
+                  "CHANGES_REQUESTED",
+                  "COMMENTED",
+                  "DISMISSED",
+                  "PENDING"
+                ]
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "submitted_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "orgs_get",
-      "description": "Get an organization",
+      "description": "Get an organization. Returns: { id: integer, login: string, name: string, description: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1239,12 +3640,79 @@
         "tags": [
           "orgs"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "login"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "login": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "avatar_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "blog": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "location": {
+              "type": "string",
+              "nullable": true
+            },
+            "public_repos": {
+              "type": "integer"
+            },
+            "public_gists": {
+              "type": "integer"
+            },
+            "followers": {
+              "type": "integer"
+            },
+            "following": {
+              "type": "integer"
+            },
+            "type": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "repos_listfororg",
-      "description": "List organization repositories",
+      "description": "List organization repositories. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1306,12 +3774,121 @@
         "tags": [
           "orgs"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "full_name",
+              "owner"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "full_name": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "login"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "login": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "html_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "private": {
+                "type": "boolean"
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "fork": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "language": {
+                "type": "string",
+                "nullable": true
+              },
+              "stargazers_count": {
+                "type": "integer"
+              },
+              "watchers_count": {
+                "type": "integer"
+              },
+              "forks_count": {
+                "type": "integer"
+              },
+              "default_branch": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "pushed_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "orgs_listmembers",
-      "description": "List organization members",
+      "description": "List organization members. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1362,7 +3939,41 @@
         "tags": [
           "orgs"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "login"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "login": {
+                "type": "string"
+              },
+              "avatar_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "html_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "type": {
+                "type": "string"
+              },
+              "site_admin": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responseDescription": "Response",
+        "responseContentType": "application/json"
       }
     }
   ],
