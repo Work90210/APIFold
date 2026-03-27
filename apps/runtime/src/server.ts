@@ -53,6 +53,17 @@ export function createApp(deps: AppDeps): Express {
       }
     : undefined;
 
+  const resolveDefaultProfileToolIds = deps.db
+    ? async (serverId: string): Promise<readonly string[] | undefined> => {
+        const result = await deps.db!.query<AccessProfileRow>(
+          'SELECT tool_ids FROM access_profiles WHERE server_id = $1 AND is_default = true LIMIT 1',
+          [serverId],
+        );
+        const row = result.rows[0];
+        return row ? (row.tool_ids ?? []) : undefined;
+      }
+    : undefined;
+
   const app = express();
 
   // Trust the first reverse proxy (nginx) so req.ip returns the real client IP
@@ -130,6 +141,7 @@ export function createApp(deps: AppDeps): Express {
     registry,
     maxConnectionsPerWorker: config.maxConnectionsPerWorker,
     resolveProfileToolIds,
+    resolveDefaultProfileToolIds,
   }));
 
   if (deps.toolLoader && deps.toolExecutorDeps && deps.redis) {
@@ -140,6 +152,7 @@ export function createApp(deps: AppDeps): Express {
       toolExecutorDeps: deps.toolExecutorDeps,
       redis: deps.redis,
       resolveProfileToolIds,
+      resolveDefaultProfileToolIds,
     }));
   }
 

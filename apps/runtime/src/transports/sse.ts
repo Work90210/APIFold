@@ -7,6 +7,7 @@ import type { Logger } from '../observability/logger.js';
 import type { ServerRegistry } from '../registry/server-registry.js';
 
 export type ProfileToolResolver = (serverId: string, profileSlug: string) => Promise<readonly string[] | undefined>;
+export type DefaultProfileToolResolver = (serverId: string) => Promise<readonly string[] | undefined>;
 
 export interface SSETransportDeps {
   readonly logger: Logger;
@@ -15,6 +16,7 @@ export interface SSETransportDeps {
   readonly registry: ServerRegistry;
   readonly maxConnectionsPerWorker?: number;
   readonly resolveProfileToolIds?: ProfileToolResolver;
+  readonly resolveDefaultProfileToolIds?: DefaultProfileToolResolver;
 }
 
 function sanitizeIdentifier(identifier: string): string {
@@ -43,7 +45,7 @@ function buildMessageUrl(identifier: string, profileSlug?: string): string {
 }
 
 export function createSSETransportRouter(deps: SSETransportDeps): Router {
-  const { logger, sessionManager, protocolHandler, registry, resolveProfileToolIds } = deps;
+  const { logger, sessionManager, protocolHandler, registry, resolveProfileToolIds, resolveDefaultProfileToolIds } = deps;
   const maxConns = deps.maxConnectionsPerWorker ?? 100;
   const router = express.Router();
 
@@ -102,6 +104,15 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
         logger.error({ err, serverId: server.id, profileSlug }, 'Failed to resolve access profile');
         res.status(500).json({ error: 'Failed to resolve profile' });
         return;
+      }
+    } else if (resolveDefaultProfileToolIds) {
+      try {
+        const defaultToolIds = await resolveDefaultProfileToolIds(server.id);
+        if (defaultToolIds) {
+          profileContext = { slug: '__default__', toolIds: defaultToolIds };
+        }
+      } catch (err) {
+        logger.error({ err, serverId: server.id }, 'Failed to resolve default profile');
       }
     }
 

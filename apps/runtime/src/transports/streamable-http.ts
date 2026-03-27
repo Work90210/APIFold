@@ -15,6 +15,7 @@ import { checkAndIncrementUsage, getPlanLimitsForUser } from '../billing/usage-g
 import { metrics } from '../observability/metrics.js';
 
 export type ProfileToolResolver = (serverId: string, profileSlug: string) => Promise<readonly string[] | undefined>;
+export type DefaultProfileToolResolver = (serverId: string) => Promise<readonly string[] | undefined>;
 
 export interface StreamableHTTPDeps {
   readonly logger: Logger;
@@ -23,6 +24,7 @@ export interface StreamableHTTPDeps {
   readonly toolExecutorDeps: ToolExecutorDeps;
   readonly redis: Redis;
   readonly resolveProfileToolIds?: ProfileToolResolver;
+  readonly resolveDefaultProfileToolIds?: DefaultProfileToolResolver;
 }
 
 interface StreamableSession {
@@ -77,7 +79,7 @@ function toMcpToolDef(tool: ToolDefinition): Record<string, unknown> {
 }
 
 export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
-  const { logger, registry, toolLoader, toolExecutorDeps, resolveProfileToolIds } = deps;
+  const { logger, registry, toolLoader, toolExecutorDeps, resolveProfileToolIds, resolveDefaultProfileToolIds } = deps;
   const router = express.Router();
 
   const sessions = new Map<string, StreamableSession>();
@@ -167,6 +169,14 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
       if (!allowedToolIds) {
         res.status(404).json({ error: 'Profile not found' });
         return;
+      }
+    } else if (resolveDefaultProfileToolIds) {
+      // Unscoped route: apply default profile restrictions if one exists
+      try {
+        allowedToolIds = await resolveDefaultProfileToolIds(server.id);
+      } catch (err) {
+        logger.error({ err, serverId: server.id }, 'Failed to resolve default profile');
+        // Non-fatal: fall through with no restrictions
       }
     }
 
