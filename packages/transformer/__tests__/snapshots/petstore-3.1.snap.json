@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "listpets",
-      "description": "List all pets",
+      "description": "List all pets. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -29,12 +29,53 @@
         "tags": [
           "pets"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string"
+              },
+              "tag": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "species": {
+                "type": "string",
+                "enum": [
+                  "dog",
+                  "cat",
+                  "bird",
+                  "fish",
+                  "reptile"
+                ]
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        "responseDescription": "A paged array of pets",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "createpet",
-      "description": "Create a pet",
+      "description": "Create a pet. Returns: { id: integer, name: string, tag: string, species: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -81,12 +122,50 @@
         "tags": [
           "pets"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tag": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "species": {
+              "type": "string",
+              "enum": [
+                "dog",
+                "cat",
+                "bird",
+                "fish",
+                "reptile"
+              ]
+            },
+            "dateOfBirth": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "responseDescription": "Pet created",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "showpetbyid",
-      "description": "Info for a specific pet",
+      "description": "Info for a specific pet. Returns: { id: integer, name: string, tag: string, species: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -108,12 +187,50 @@
         "tags": [
           "pets"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tag": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "species": {
+              "type": "string",
+              "enum": [
+                "dog",
+                "cat",
+                "bird",
+                "fish",
+                "reptile"
+              ]
+            },
+            "dateOfBirth": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "responseDescription": "Expected response to a valid request",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "updatepet",
-      "description": "Update a pet",
+      "description": "Update a pet. Returns: { id: integer, name: string, tag: string, species: string, ... }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -166,7 +283,45 @@
         "tags": [
           "pets"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tag": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "species": {
+              "type": "string",
+              "enum": [
+                "dog",
+                "cat",
+                "bird",
+                "fish",
+                "reptile"
+              ]
+            },
+            "dateOfBirth": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "responseDescription": "Pet updated",
+        "responseContentType": "application/json"
       }
     },
     {
@@ -197,7 +352,7 @@
     },
     {
       "name": "listpetvaccinations",
-      "description": "List vaccinations for a pet",
+      "description": "List vaccinations for a pet. Returns: object[]",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -218,12 +373,44 @@
         "tags": [
           "vaccinations"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "administeredAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string"
+              },
+              "administeredAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "responseDescription": "List of vaccinations",
+        "responseContentType": "application/json"
       }
     },
     {
       "name": "addpetvaccination",
-      "description": "Record a vaccination for a pet",
+      "description": "Record a vaccination for a pet. Returns: { id: integer, name: string, administeredAt: string, notes: string }",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -267,7 +454,36 @@
         "tags": [
           "vaccinations"
         ],
-        "deprecated": false
+        "deprecated": false,
+        "responseSchema": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "administeredAt"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "name": {
+              "type": "string"
+            },
+            "administeredAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "responseDescription": "Vaccination recorded",
+        "responseContentType": "application/json"
       }
     }
   ],

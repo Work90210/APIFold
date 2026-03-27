@@ -19,7 +19,7 @@ const configSchema = z.object({
   runtimeSecret: z.string().min(32),
 
   // SSE
-  maxSseSessions: z.coerce.number().int().min(1).default(10_000),
+  maxSseSessions: z.coerce.number().int().min(1).default(500),
   sseHeartbeatIntervalMs: z.coerce.number().int().min(1000).default(30_000),
   sseIdleTimeoutMs: z.coerce.number().int().min(10_000).default(300_000),
 

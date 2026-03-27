@@ -69,7 +69,12 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
       resetAt: Math.ceil((now + WINDOW_MS) / 1000),
     };
   } catch (err) {
+    // SECURITY: Fail-open design decision. When Redis is unavailable, we allow requests
+    // through rather than blocking all users. This trades rate-limit enforcement for
+    // availability. If Redis is persistently down, an attacker could bypass rate limits.
+    // Monitoring should alert on repeated occurrences of this warning.
     console.error('[rate-limit] Redis error, failing open:', err instanceof Error ? err.message : err);
+    console.warn('[rate-limit] WARNING: Rate limiting is disabled due to Redis failure. Requests are being allowed without limit.');
     return { allowed: true, remaining: MAX_REQUESTS, resetAt: Math.ceil((Date.now() + WINDOW_MS) / 1000) };
   }
 }

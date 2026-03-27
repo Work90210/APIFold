@@ -19,6 +19,20 @@ export interface UsageGateDeps {
   readonly logger: Logger;
 }
 
+function validatePlanLimits(data: unknown): PlanLimits | null {
+  if (!data || typeof data !== 'object') return null;
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.maxRequestsPerMonth !== 'number' || !Number.isFinite(obj.maxRequestsPerMonth) || obj.maxRequestsPerMonth < 0) return null;
+  if (typeof obj.overageRate !== 'number' || !Number.isFinite(obj.overageRate) || obj.overageRate < 0) return null;
+  if (
+    obj.budgetCapCents !== null &&
+    (typeof obj.budgetCapCents !== 'number' || !Number.isFinite(obj.budgetCapCents) || obj.budgetCapCents < 0)
+  ) {
+    return null;
+  }
+  return data as PlanLimits;
+}
+
 function getUsageKey(userId: string): string {
   const now = new Date();
   const month = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
@@ -131,7 +145,8 @@ export async function getPlanLimitsForUser(
   try {
     const planData = await redis.get(`plan:${userId}`);
     if (planData) {
-      return JSON.parse(planData) as PlanLimits;
+      const parsed = validatePlanLimits(JSON.parse(planData));
+      if (parsed) return parsed;
     }
   } catch {
     // Fall through to defaults

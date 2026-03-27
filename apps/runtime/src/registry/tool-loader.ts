@@ -18,9 +18,18 @@ export interface L1ToolCache {
 
 export type ToolFetcher = (serverId: string) => Promise<readonly ToolDefinition[]>;
 
+/** Default TTL: 10 minutes — tools are re-fetched from DB after this. */
+const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000;
+/** Max cached servers — evicts oldest entries when exceeded. */
+const DEFAULT_MAX_CACHE_SIZE = 2_000;
+/** Sweep interval for expired entries. */
+const CLEANUP_INTERVAL_MS = 60_000;
+
 export interface ToolLoaderDeps {
   readonly logger: Logger;
   readonly fetchTools: ToolFetcher;
+  readonly cacheTtlMs?: number;
+  readonly maxCacheSize?: number;
 }
 
 export class ToolLoader {
@@ -28,18 +37,31 @@ export class ToolLoader {
   private readonly pending = new Map<string, Promise<L1ToolCache>>();
   private readonly logger: Logger;
   private readonly fetchTools: ToolFetcher;
+  private readonly cacheTtlMs: number;
+  private readonly maxCacheSize: number;
+  private readonly cleanupTimer: ReturnType<typeof setInterval>;
 
   constructor(deps: ToolLoaderDeps) {
     this.logger = deps.logger;
     this.fetchTools = deps.fetchTools;
+    this.cacheTtlMs = deps.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
+    this.maxCacheSize = deps.maxCacheSize ?? DEFAULT_MAX_CACHE_SIZE;
+
+    this.cleanupTimer = setInterval(() => this.sweep(), CLEANUP_INTERVAL_MS);
+    this.cleanupTimer.unref();
   }
 
-  /** Get tools for a server, loading from DB on cache miss. */
+  /** Get tools for a server, loading from DB on cache miss or expiry. */
   async getTools(serverId: string): Promise<ReadonlyMap<string, ToolDefinition>> {
     const cached = this.cache.get(serverId);
-    if (cached) {
+    if (cached && !this.isExpired(cached)) {
       metrics.incrementCounter('registry_lookup_total', { tier: 'L1', hit: 'true' });
       return cached.tools;
+    }
+
+    // Expired — remove stale entry
+    if (cached) {
+      this.cache.delete(serverId);
     }
 
     metrics.incrementCounter('registry_lookup_total', { tier: 'L1', hit: 'false' });
@@ -73,6 +95,14 @@ export class ToolLoader {
     this.cache.clear();
   }
 
+  dispose(): void {
+    clearInterval(this.cleanupTimer);
+  }
+
+  private isExpired(entry: L1ToolCache): boolean {
+    return Date.now() - entry.loadedAt > this.cacheTtlMs;
+  }
+
   private async load(serverId: string): Promise<L1ToolCache> {
     this.logger.debug({ serverId }, 'L1 loading tools from DB');
     const toolDefs = await this.fetchTools(serverId);
@@ -88,10 +118,33 @@ export class ToolLoader {
       loadedAt: Date.now(),
     });
 
+    // Enforce max size — evict oldest entry if at capacity
+    if (this.cache.size >= this.maxCacheSize) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.cache.delete(oldestKey);
+        this.logger.debug({ evictedServerId: oldestKey }, 'L1 cache at capacity, evicted oldest entry');
+      }
+    }
+
     this.cache.set(serverId, entry);
     this.logger.info({ serverId, toolCount: toolDefs.length }, 'L1 tools loaded');
     metrics.incrementCounter('registry_load_total', { tier: 'L1' });
 
     return entry;
+  }
+
+  /** Periodically remove expired entries so they don't sit in memory. */
+  private sweep(): void {
+    let swept = 0;
+    for (const [serverId, entry] of this.cache) {
+      if (this.isExpired(entry)) {
+        this.cache.delete(serverId);
+        swept++;
+      }
+    }
+    if (swept > 0) {
+      this.logger.debug({ swept, remaining: this.cache.size }, 'L1 expired entries swept');
+    }
   }
 }

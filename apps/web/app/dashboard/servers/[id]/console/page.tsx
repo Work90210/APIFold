@@ -264,7 +264,18 @@ export default function ConsolePage({
                   </div>
                 ) : response ? (
                   <pre className="p-4 font-mono text-sm leading-relaxed">
-                    {JSON.stringify(response.content, null, 2)}
+                    {(() => {
+                      const MAX_RESPONSE_SIZE = 50_000;
+                      let raw: string;
+                      try {
+                        raw = JSON.stringify(response.content, null, 2) ?? '';
+                      } catch {
+                        raw = String(response.content);
+                      }
+                      return raw.length > MAX_RESPONSE_SIZE
+                        ? `${raw.slice(0, MAX_RESPONSE_SIZE)}\n\n... (truncated — ${raw.length.toLocaleString()} chars total)`
+                        : raw;
+                    })()}
                   </pre>
                 ) : null}
               </div>

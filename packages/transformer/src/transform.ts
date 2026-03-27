@@ -174,7 +174,9 @@ function operationToTool(
   name: string,
   pathLevelParams: readonly OpenAPIParameter[],
 ): MCPToolDefinition {
-  const description = resolveDescription(operation, method, path);
+  const baseDescription = resolveDescription(operation, method, path);
+  const responseResult = extractResponseSchema(operation);
+  const description = enrichDescription(baseDescription, responseResult?.schema);
   const properties = Object.create(null) as Record<string, JSONSchema>;
   const required: string[] = [];
   const paramMap = Object.create(null) as Record<string, 'path' | 'query' | 'header'>;
@@ -238,6 +240,9 @@ function operationToTool(
       paramMap,
       tags: operation.tags ?? [],
       deprecated: operation.deprecated ?? false,
+      responseSchema: responseResult?.schema,
+      responseDescription: responseResult?.description,
+      responseContentType: responseResult?.contentType,
     },
   };
 }
@@ -274,6 +279,129 @@ function extractRequestBody(
   }
 
   return null;
+}
+
+function findJsonContent(
+  content: Readonly<Record<string, { readonly schema?: JSONSchema }>>,
+): { readonly schema: JSONSchema; readonly mediaType: string } | null {
+  // Exact match first
+  const exact = content['application/json'];
+  if (exact?.schema) return { schema: exact.schema, mediaType: 'application/json' };
+
+  // Scan for application/json with params (e.g., charset) or +json vendor types
+  for (const [mediaType, entry] of Object.entries(content)) {
+    if (!entry?.schema) continue;
+    const lower = mediaType.toLowerCase();
+    if (lower.startsWith('application/json') || lower.endsWith('+json')) {
+      return { schema: entry.schema, mediaType };
+    }
+  }
+
+  return null;
+}
+
+function extractResponseSchema(
+  operation: OpenAPIOperation,
+): { readonly schema: JSONSchema; readonly description: string; readonly contentType: string } | null {
+  const responses = operation.responses;
+  if (!responses) return null;
+
+  const specificStatuses = Object.keys(responses)
+    .filter((status) => /^2\d\d$/.test(status))
+    .sort((a, b) => Number(a) - Number(b));
+
+  // Prefer 200, then 201, then remaining specific 2xx, then wildcard 2XX
+  const orderedStatuses = [
+    ...(['200', '201'].filter((s) => s in responses)),
+    ...specificStatuses.filter((s) => s !== '200' && s !== '201'),
+    ...('2XX' in responses ? ['2XX'] : []),
+  ];
+
+  for (const status of orderedStatuses) {
+    const response = responses[status];
+    if (!response?.content) continue;
+    const jsonEntry = findJsonContent(response.content);
+    if (!jsonEntry) continue;
+    return {
+      schema: flattenSchema(jsonEntry.schema),
+      description: response.description ?? '',
+      contentType: jsonEntry.mediaType,
+    };
+  }
+
+  return null;
+}
+
+function enrichDescription(description: string, responseSchema?: JSONSchema): string {
+  if (!responseSchema) return description;
+
+  const summary = summarizeResponseSchema(responseSchema);
+  if (!summary) return description;
+
+  const separator = /[.!?]\s*$/.test(description) ? ' ' : '. ';
+  const prefix = `${description}${separator}Returns: `;
+  const maxSummaryLength = 200 - prefix.length;
+  if (maxSummaryLength <= 0) return description;
+
+  return `${prefix}${truncateStr(summary, maxSummaryLength)}`;
+}
+
+function summarizeResponseSchema(schema: JSONSchema): string | null {
+  if (schema.type === 'object' || ('properties' in schema && schema.properties && typeof schema.properties === 'object')) {
+    const properties = schema.properties;
+    if (!properties || typeof properties !== 'object') return 'object';
+
+    const entries = Object.entries(properties as Record<string, unknown>);
+    if (entries.length === 0) return 'object';
+
+    const preview = entries
+      .slice(0, 4)
+      .map(([key, value]) => `${key}: ${schemaTypeLabel(value as JSONSchema)}`)
+      .join(', ');
+    const suffix = entries.length > 4 ? ', ...' : '';
+    return `{ ${preview}${suffix} }`;
+  }
+
+  if (schema.type === 'array' || ('items' in schema && schema.items)) {
+    return `${schemaTypeLabel((schema.items as JSONSchema | undefined) ?? {})}[]`;
+  }
+
+  if ('oneOf' in schema && Array.isArray(schema.oneOf)) {
+    const labels = (schema.oneOf as JSONSchema[]).slice(0, 3).map(schemaTypeLabel);
+    const suffix = (schema.oneOf as JSONSchema[]).length > 3 ? ' | ...' : '';
+    return labels.join(' | ') + suffix;
+  }
+
+  if ('anyOf' in schema && Array.isArray(schema.anyOf)) {
+    const labels = (schema.anyOf as JSONSchema[]).slice(0, 3).map(schemaTypeLabel);
+    const suffix = (schema.anyOf as JSONSchema[]).length > 3 ? ' | ...' : '';
+    return labels.join(' | ') + suffix;
+  }
+
+  return schemaTypeLabel(schema);
+}
+
+function schemaTypeLabel(schema: JSONSchema): string {
+  const type = schema.type;
+  if (typeof type === 'string') return type;
+  if (Array.isArray(type)) {
+    const nonNull = type.filter((item): item is string => typeof item === 'string' && item !== 'null');
+    if (nonNull.length > 0) return nonNull[0]!;
+    const first = type.find((item): item is string => typeof item === 'string');
+    if (first) return first;
+  }
+  if ('properties' in schema && schema.properties && typeof schema.properties === 'object') return 'object';
+  if ('items' in schema && schema.items) return 'array';
+  if ('oneOf' in schema && Array.isArray(schema.oneOf)) return 'union';
+  if ('anyOf' in schema && Array.isArray(schema.anyOf)) return 'union';
+  if ('enum' in schema && Array.isArray(schema.enum)) return 'enum';
+  return 'unknown';
+}
+
+function truncateStr(value: string, maxLength: number): string {
+  if (value.length <= maxLength) return value;
+  if (maxLength < 3) return value.slice(0, maxLength);
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
 function hasBinaryRequestBody(operation: OpenAPIOperation): boolean {

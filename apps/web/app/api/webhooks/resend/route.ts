@@ -38,7 +38,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const contentLength = request.headers.get('content-length');
+  if (contentLength && parseInt(contentLength, 10) > 1_048_576) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+  }
+
   const body = await request.text();
+
+  if (Buffer.byteLength(body, 'utf8') > 1_048_576) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+  }
 
   const wh = new Webhook(RESEND_WEBHOOK_SECRET);
   let event: ResendWebhookEvent;

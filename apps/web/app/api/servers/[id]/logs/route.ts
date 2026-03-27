@@ -17,9 +17,13 @@ export function GET(request: NextRequest, context: RouteParams): Promise<NextRes
     const { id: serverId } = await context.params;
     uuidParam.parse(serverId);
 
+    const url = new URL(request.url);
+    const rawLimit = parseInt(url.searchParams.get('limit') ?? '50', 10);
+    const limit = Math.max(1, Math.min(Number.isFinite(rawLimit) ? rawLimit : 50, 200));
+
     const db = getDb();
     const logRepo = new LogRepository(db);
-    const logs = await logRepo.findAll(userId, { serverId });
+    const logs = await logRepo.findAll(userId, { serverId, limit });
 
     // The useLogs hook expects { logs, cursor, hasMore } for infinite query pagination.
     // The repository currently returns all logs in one page (no cursor-based pagination),

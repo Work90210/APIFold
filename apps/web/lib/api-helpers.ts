@@ -65,7 +65,7 @@ export async function getUserPlan(userId: string): Promise<Plan> {
     const planId = (user.publicMetadata?.plan as string) || 'free';
     return PLANS[planId as PlanId] ?? PLANS.free;
   } catch (err) {
-    console.error('[getUserPlan] Failed to fetch user plan from Clerk:', err);
+    console.error('[getUserPlan] Clerk unavailable, defaulting to free tier:', err instanceof Error ? err.message : 'unknown');
     return PLANS.free;
   }
 }

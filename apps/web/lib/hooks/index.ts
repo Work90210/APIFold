@@ -16,3 +16,5 @@ export { useExport } from "./use-export";
 export { useToast } from "./use-toast";
 export { useRuntimeHealth } from "./use-runtime-health";
 export { useSpecVersions, useCreateVersion, usePromoteVersion } from "./use-spec-versions";
+export { useProfiles, useCreateProfile, useUpdateProfile, useDeleteProfile } from "./use-profiles";
+export type { AccessProfile } from "./use-profiles";

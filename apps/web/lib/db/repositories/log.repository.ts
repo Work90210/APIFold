@@ -14,7 +14,17 @@ export interface LogFilters {
 
 type NoOp = Record<string, never>;
 
-const REDACTED_HEADERS = new Set(['authorization', 'cookie', 'x-api-key']);
+const REDACTED_HEADERS = new Set([
+  'authorization',
+  'cookie',
+  'x-api-key',
+  'x-auth-token',
+  'x-access-token',
+  'proxy-authorization',
+  'x-amz-security-token',
+  'x-session-token',
+  'x-secret-key',
+]);
 const REDACTED_VALUE = '***';
 
 export class LogRepository extends BaseRepository<

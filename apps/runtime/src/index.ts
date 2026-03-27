@@ -141,6 +141,14 @@ export async function startWorker(): Promise<void> {
     logger.info({ port: config.port }, 'HTTP server listening');
   });
 
+  // Tune socket timeouts for high-concurrency SSE workloads.
+  // keepAliveTimeout must exceed any upstream load-balancer timeout (Fly.io proxy = 60s)
+  // so the LB doesn't send requests to a connection the server already closed.
+  httpServer.keepAliveTimeout = 65_000;
+  httpServer.headersTimeout = 70_000; // must be > keepAliveTimeout
+  httpServer.requestTimeout = 30_000; // only applies until request is fully received — active SSE streams are unaffected
+  httpServer.maxConnections = Infinity; // unlimited — we enforce limits at the session layer
+
   // Load initial data from Postgres
   const pgLoaderDeps = { db, logger, registry };
   await loadAllServers(pgLoaderDeps);
@@ -197,6 +205,10 @@ export async function startWorker(): Promise<void> {
 
       await closeRedis();
 
+      // Stop cleanup timers and free cached data
+      circuitBreaker.dispose();
+      toolLoader.dispose();
+      credentialCache.dispose();
       credentialCache.evictAll();
       await sql.end();
       clearKeyCache();

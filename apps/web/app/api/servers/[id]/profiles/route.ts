@@ -83,7 +83,7 @@ export function PUT(request: NextRequest, context: RouteParams): Promise<NextRes
 
     const db = getDb();
     const profileRepo = new ProfileRepository(db);
-    const profile = await profileRepo.update(userId, profileId, input);
+    const profile = await profileRepo.update(userId, profileId, input, serverId);
 
     return NextResponse.json(createSuccessResponse(profile));
   });
@@ -107,7 +107,7 @@ export function DELETE(request: NextRequest, context: RouteParams): Promise<Next
 
     const db = getDb();
     const profileRepo = new ProfileRepository(db);
-    await profileRepo.delete(userId, profileId);
+    await profileRepo.delete(userId, profileId, serverId);
 
     return NextResponse.json(createSuccessResponse({ deleted: true }));
   });

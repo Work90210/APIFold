@@ -70,11 +70,10 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       }
     }
 
-    // Execute the upstream call
-    // Note: URL is constructed from DB-stored baseUrl (admin-configured, not user input)
-    // so we use native fetch instead of safeFetch to avoid Node 25 agent compatibility issues
+    const { safeFetch } = await import('../../../../../lib/ssrf-guard');
+
     const start = performance.now();
-    const response = await fetch(url, {
+    const response = await safeFetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(input.arguments),

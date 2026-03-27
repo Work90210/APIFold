@@ -6,14 +6,31 @@ import type { Logger } from '../observability/logger.js';
 import { metrics } from '../observability/metrics.js';
 import type { ConnectionMonitor } from '../resilience/connection-monitor.js';
 
+/**
+ * Maximum bytes a single SSE response is allowed to buffer before we consider
+ * the client "slow" and terminate the connection. Node.js internally buffers
+ * writes when the kernel TCP send buffer is full — if we don't cap this, a
+ * slow client can silently eat megabytes of heap per connection.
+ *
+ * 256 KB is generous for SSE (heartbeats are ~14 bytes each).
+ */
+const MAX_BUFFERED_BYTES = 256 * 1024;
+
 export interface SSESession {
   readonly id: string;
   readonly slug: string;
   readonly clientIp: string;
+  readonly profileSlug?: string;
+  readonly profileToolIds?: readonly string[];
   readonly createdAt: number;
   lastActivityAt: number;
   readonly res: Response;
   readonly authenticated: boolean;
+}
+
+export interface SessionProfileContext {
+  readonly slug?: string;
+  readonly toolIds: readonly string[];
 }
 
 export interface SessionManagerDeps {
@@ -63,7 +80,7 @@ export class SessionManager {
     return this.sessions.size < this.maxSessions;
   }
 
-  create(slug: string, res: Response, clientIp: string, authenticated: boolean = false): SSESession | null {
+  create(slug: string, res: Response, clientIp: string, authenticated: boolean = false, profile?: SessionProfileContext): SSESession | null {
     if (!this.hasCapacity()) {
       this.logger.warn({ slug, maxSessions: this.maxSessions }, 'Max sessions reached');
       return null;
@@ -74,6 +91,8 @@ export class SessionManager {
       id: randomUUID(),
       slug,
       clientIp,
+      profileSlug: profile?.slug,
+      profileToolIds: profile?.toolIds,
       createdAt: now,
       lastActivityAt: now,
       res,
@@ -130,11 +149,24 @@ export class SessionManager {
   }
 
   sendEvent(session: SSESession, event: string, data: string): void {
-    if (!session.res.writableEnded) {
-      const safeEvent = event.replace(/[\r\n]/g, '');
-      const safeData = data.replace(/\r\n|\r|\n/g, '\ndata: ');
-      session.res.write(`event: ${safeEvent}\ndata: ${safeData}\n\n`);
+    if (session.res.writableEnded) return;
+
+    // Check backpressure: if Node.js has buffered too much unsent data for this
+    // client, the client is too slow — terminate instead of letting heap grow.
+    const buffered = session.res.writableLength;
+    if (buffered > MAX_BUFFERED_BYTES) {
+      this.logger.warn(
+        { sessionId: session.id, slug: session.slug, bufferedBytes: buffered },
+        'SSE client too slow, closing connection due to backpressure',
+      );
+      metrics.incrementCounter('sse_backpressure_kills');
+      session.res.end();
+      return;
     }
+
+    const safeEvent = event.replace(/[\r\n]/g, '');
+    const safeData = data.replace(/\r\n|\r|\n/g, '\ndata: ');
+    session.res.write(`event: ${safeEvent}\ndata: ${safeData}\n\n`);
   }
 
   get size(): number {
@@ -155,10 +187,21 @@ export class SessionManager {
   }
 
   private heartbeat(): void {
-    for (const session of this.sessions.values()) {
-      if (!session.res.writableEnded) {
-        session.res.write(':heartbeat\n\n');
+    for (const [sessionId, session] of this.sessions) {
+      if (session.res.writableEnded) continue;
+
+      // Skip heartbeat for slow clients — let the next cleanup or sendEvent handle eviction
+      if (session.res.writableLength > MAX_BUFFERED_BYTES) {
+        this.logger.warn(
+          { sessionId, slug: session.slug, bufferedBytes: session.res.writableLength },
+          'Skipping heartbeat for slow client, closing connection',
+        );
+        metrics.incrementCounter('sse_backpressure_kills');
+        this.close(sessionId, 'slow_client');
+        continue;
       }
+
+      session.res.write(':heartbeat\n\n');
     }
   }
 

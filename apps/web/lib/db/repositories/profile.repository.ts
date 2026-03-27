@@ -90,7 +90,7 @@ export class ProfileRepository extends BaseRepository<
     });
   }
 
-  async update(userId: string, id: string, input: UpdateProfileInput): Promise<AccessProfile> {
+  async update(userId: string, id: string, input: UpdateProfileInput, serverId?: string): Promise<AccessProfile> {
     const updateValues: Record<string, unknown> = {};
 
     if (input.name !== undefined) updateValues['name'] = input.name;
@@ -101,10 +101,15 @@ export class ProfileRepository extends BaseRepository<
       throw new Error('No profile fields provided for update');
     }
 
+    const conditions = [eq(accessProfiles.id, id), eq(accessProfiles.userId, userId)];
+    if (serverId) {
+      conditions.push(eq(accessProfiles.serverId, serverId));
+    }
+
     const rows = await this.db
       .update(accessProfiles)
       .set(updateValues)
-      .where(and(eq(accessProfiles.id, id), eq(accessProfiles.userId, userId)))
+      .where(and(...conditions))
       .returning();
 
     if (rows.length === 0) {
@@ -114,16 +119,19 @@ export class ProfileRepository extends BaseRepository<
     return this.freeze(rows[0]! as AccessProfile);
   }
 
-  async delete(userId: string, id: string): Promise<void> {
+  async delete(userId: string, id: string, serverId?: string): Promise<void> {
+    const conditions = [
+      eq(accessProfiles.id, id),
+      eq(accessProfiles.userId, userId),
+      eq(accessProfiles.isDefault, false),
+    ];
+    if (serverId) {
+      conditions.push(eq(accessProfiles.serverId, serverId));
+    }
+
     const result = await this.db
       .delete(accessProfiles)
-      .where(
-        and(
-          eq(accessProfiles.id, id),
-          eq(accessProfiles.userId, userId),
-          eq(accessProfiles.isDefault, false), // Cannot delete default profiles
-        ),
-      )
+      .where(and(...conditions))
       .returning({ id: accessProfiles.id });
 
     if (result.length === 0) {

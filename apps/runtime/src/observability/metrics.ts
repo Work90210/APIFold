@@ -15,6 +15,12 @@ interface HistogramEntry {
 
 const DEFAULT_BUCKETS = Object.freeze([5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]);
 
+/**
+ * Maximum number of unique label combinations allowed per metric name.
+ * Once hit, new label combos are silently dropped to prevent cardinality explosion.
+ */
+const MAX_CARDINALITY_PER_METRIC = 500;
+
 class MetricsRegistry {
   private readonly counters = new Map<string, CounterEntry[]>();
   private readonly histograms = new Map<string, HistogramEntry[]>();
@@ -42,6 +48,10 @@ class MetricsRegistry {
     if (existing) {
       existing.value += amount;
     } else {
+      if (entries.length >= MAX_CARDINALITY_PER_METRIC) {
+        this.gauges.set('metrics_cardinality_capped', (this.gauges.get('metrics_cardinality_capped') ?? 0) + 1);
+        return;
+      }
       entries.push({ labels, value: amount });
       this.counters.set(name, entries);
     }
@@ -63,6 +73,10 @@ class MetricsRegistry {
         }
       }
     } else {
+      if (entries.length >= MAX_CARDINALITY_PER_METRIC) {
+        this.gauges.set('metrics_cardinality_capped', (this.gauges.get('metrics_cardinality_capped') ?? 0) + 1);
+        return;
+      }
       const bucketCounts = DEFAULT_BUCKETS.map((b) => (value <= b ? 1 : 0));
       entries.push({
         labels,

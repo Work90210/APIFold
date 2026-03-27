@@ -1,3 +1,5 @@
+import { promises as dns } from 'node:dns';
+
 import type { Logger } from '../observability/logger.js';
 import { metrics } from '../observability/metrics.js';
 import type { L0ServerMeta } from '../registry/server-registry.js';
@@ -24,6 +26,8 @@ export interface ToolExecutorDeps {
   readonly circuitBreaker: CircuitBreaker;
   readonly authInjector: AuthInjectorDeps;
   readonly timeoutMs: number;
+  /** Allow requests to private/loopback IPs. Only for tests — never enable in production. */
+  readonly allowPrivateUpstreams?: boolean;
 }
 
 export async function executeTool(
@@ -41,6 +45,14 @@ export async function executeTool(
   }
 
   const url = buildUpstreamUrl(server.baseUrl, tool.name);
+
+  if (!deps.allowPrivateUpstreams) {
+    try {
+      await validateUpstreamUrl(url);
+    } catch (err) {
+      return errorResult('SSRF_BLOCKED', err instanceof Error ? err.message : 'Upstream URL targets a restricted address');
+    }
+  }
 
   let headers: Readonly<Record<string, string>>;
   try {
@@ -125,6 +137,38 @@ const MAX_RESPONSE_BYTES = 10 * 1024 * 1024; // 10 MB
 function buildUpstreamUrl(baseUrl: string, toolName: string): string {
   const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   return `${base}/tools/${encodeURIComponent(toolName)}`;
+}
+
+const PRIVATE_IP_PATTERNS = [
+  /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./, /^169\.254\./,
+  /^0\./, /^::1$/, /^fd/, /^fe80:/,
+];
+
+async function validateUpstreamUrl(url: string): Promise<void> {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error('Only HTTP(S) protocols allowed');
+  }
+  const hostname = parsed.hostname;
+  if (hostname === 'localhost' || hostname === '::1') {
+    throw new Error('Upstream targets restricted address');
+  }
+  // Check hostname string first
+  if (PRIVATE_IP_PATTERNS.some(p => p.test(hostname))) {
+    throw new Error('Upstream targets restricted address');
+  }
+  // DNS resolution check
+  try {
+    const addresses: string[] = [];
+    try { addresses.push(...await dns.resolve4(hostname)); } catch { /* no A records */ }
+    try { addresses.push(...await dns.resolve6(hostname)); } catch { /* no AAAA records */ }
+    if (addresses.length > 0 && addresses.every(addr => PRIVATE_IP_PATTERNS.some(p => p.test(addr)))) {
+      throw new Error('Upstream resolves to restricted address');
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('restricted')) throw err;
+    // DNS resolution failure is not an SSRF block — allow the request through
+  }
 }
 
 async function readResponseWithLimit(response: Response, maxBytes: number): Promise<string> {

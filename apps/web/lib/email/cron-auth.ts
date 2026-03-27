@@ -1,11 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { timingSafeEqual } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 
 function safeCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  if (bufA.length !== bufB.length) return false;
-  return timingSafeEqual(bufA, bufB);
+  const hashA = createHash("sha256").update(a).digest();
+  const hashB = createHash("sha256").update(b).digest();
+  return timingSafeEqual(hashA, hashB);
 }
 
 export function verifyCronSecret(

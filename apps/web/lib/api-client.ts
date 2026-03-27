@@ -127,7 +127,10 @@ class ApiClient {
     const res = await fetch(`${this.baseUrl}${path}`, {
       method,
       credentials: "include",
-      headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      headers: {
+        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        "X-Requested-With": "XMLHttpRequest",
+      },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
