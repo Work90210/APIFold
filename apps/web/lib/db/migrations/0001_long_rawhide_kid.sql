@@ -192,7 +192,7 @@ ALTER TABLE "credentials" ADD COLUMN "client_id" text;--> statement-breakpoint
 ALTER TABLE "credentials" ADD COLUMN "encrypted_client_secret" text;--> statement-breakpoint
 ALTER TABLE "credentials" ADD COLUMN "token_expires_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "credentials" ADD COLUMN "provider" text;--> statement-breakpoint
-ALTER TABLE "mcp_servers" ADD COLUMN "endpoint_id" text NOT NULL DEFAULT gen_random_uuid()::text;--> statement-breakpoint
+ALTER TABLE "mcp_servers" ADD COLUMN "endpoint_id" text NOT NULL DEFAULT substr(md5(gen_random_uuid()::text), 1, 12);--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "custom_domain" text;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "domain_verified_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "domain_verification_token" text;--> statement-breakpoint
@@ -214,6 +214,8 @@ ALTER TABLE "marketplace_versions" ADD CONSTRAINT "marketplace_versions_listing_
 ALTER TABLE "spec_releases" ADD CONSTRAINT "spec_releases_server_id_mcp_servers_id_fk" FOREIGN KEY ("server_id") REFERENCES "public"."mcp_servers"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "spec_releases" ADD CONSTRAINT "spec_releases_version_id_spec_versions_id_fk" FOREIGN KEY ("version_id") REFERENCES "public"."spec_versions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "spec_versions" ADD CONSTRAINT "spec_versions_spec_id_specs_id_fk" FOREIGN KEY ("spec_id") REFERENCES "public"."specs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "specs" ADD CONSTRAINT "specs_current_version_id_spec_versions_id_fk" FOREIGN KEY ("current_version_id") REFERENCES "public"."spec_versions"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "idx_specs_current_version_id" ON "specs" USING btree ("current_version_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "idx_profiles_server_slug" ON "access_profiles" USING btree ("server_id","slug");--> statement-breakpoint
 CREATE INDEX "idx_profiles_server_id" ON "access_profiles" USING btree ("server_id");--> statement-breakpoint
 CREATE INDEX "idx_profiles_user_id" ON "access_profiles" USING btree ("user_id");--> statement-breakpoint

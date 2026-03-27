@@ -281,31 +281,51 @@ function extractRequestBody(
   return null;
 }
 
+function findJsonContent(
+  content: Readonly<Record<string, { readonly schema?: JSONSchema }>>,
+): { readonly schema: JSONSchema; readonly mediaType: string } | null {
+  // Exact match first
+  const exact = content['application/json'];
+  if (exact?.schema) return { schema: exact.schema, mediaType: 'application/json' };
+
+  // Scan for application/json with params (e.g., charset) or +json vendor types
+  for (const [mediaType, entry] of Object.entries(content)) {
+    if (!entry?.schema) continue;
+    const lower = mediaType.toLowerCase();
+    if (lower.startsWith('application/json') || lower.endsWith('+json')) {
+      return { schema: entry.schema, mediaType };
+    }
+  }
+
+  return null;
+}
+
 function extractResponseSchema(
   operation: OpenAPIOperation,
 ): { readonly schema: JSONSchema; readonly description: string; readonly contentType: string } | null {
   const responses = operation.responses;
   if (!responses) return null;
 
-  const candidateStatuses = Object.keys(responses)
+  const specificStatuses = Object.keys(responses)
     .filter((status) => /^2\d\d$/.test(status))
     .sort((a, b) => Number(a) - Number(b));
 
-  // Prefer 200, then 201, then scan remaining by ascending code
+  // Prefer 200, then 201, then remaining specific 2xx, then wildcard 2XX
   const orderedStatuses = [
     ...(['200', '201'].filter((s) => s in responses)),
-    ...candidateStatuses.filter((s) => s !== '200' && s !== '201'),
+    ...specificStatuses.filter((s) => s !== '200' && s !== '201'),
+    ...('2XX' in responses ? ['2XX'] : []),
   ];
 
   for (const status of orderedStatuses) {
     const response = responses[status];
-    if (!response) continue;
-    const jsonContent = response.content?.['application/json'];
-    if (!jsonContent?.schema) continue;
+    if (!response?.content) continue;
+    const jsonEntry = findJsonContent(response.content);
+    if (!jsonEntry) continue;
     return {
-      schema: flattenSchema(jsonContent.schema),
+      schema: flattenSchema(jsonEntry.schema),
       description: response.description ?? '',
-      contentType: 'application/json',
+      contentType: jsonEntry.mediaType,
     };
   }
 
