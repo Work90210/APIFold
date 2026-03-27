@@ -26,14 +26,6 @@ function getStartDate(range: string): Date {
   }
 }
 
-function getBucketInterval(range: string): string {
-  switch (range) {
-    case '24h': return '1 hour';
-    case '7d': return '1 day';
-    case '30d': return '1 day';
-    default: return '1 day';
-  }
-}
 
 export function GET(request: NextRequest, context: RouteParams): Promise<NextResponse> {
   return withErrorHandler(async () => {
@@ -47,7 +39,6 @@ export function GET(request: NextRequest, context: RouteParams): Promise<NextRes
     const url = new URL(request.url);
     const { range } = timeRangeSchema.parse({ range: url.searchParams.get('range') ?? '7d' });
     const startDate = getStartDate(range);
-    const bucketInterval = getBucketInterval(range);
 
     const db = getDb();
 

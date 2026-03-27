@@ -7,6 +7,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import Script from "next/script";
 import { Providers } from "./providers";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://apifold.dev";
@@ -55,7 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <head>
-        <script src="/theme-init.js" />
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
       </head>
       <body className="antialiased safe-area-padding">
         <a href="#main-content" className="skip-link">
