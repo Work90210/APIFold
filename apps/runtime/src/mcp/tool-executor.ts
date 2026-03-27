@@ -1,3 +1,5 @@
+import { promises as dns } from 'node:dns';
+
 import type { Logger } from '../observability/logger.js';
 import { metrics } from '../observability/metrics.js';
 import type { L0ServerMeta } from '../registry/server-registry.js';
@@ -44,8 +46,12 @@ export async function executeTool(
 
   const url = buildUpstreamUrl(server.baseUrl, tool.name);
 
-  if (!deps.allowPrivateUpstreams && !validateUpstreamUrl(url)) {
-    return errorResult('SSRF_BLOCKED', 'Upstream URL targets a restricted address');
+  if (!deps.allowPrivateUpstreams) {
+    try {
+      await validateUpstreamUrl(url);
+    } catch (err) {
+      return errorResult('SSRF_BLOCKED', err instanceof Error ? err.message : 'Upstream URL targets a restricted address');
+    }
   }
 
   let headers: Readonly<Record<string, string>>;
@@ -134,40 +140,35 @@ function buildUpstreamUrl(baseUrl: string, toolName: string): string {
 }
 
 const PRIVATE_IP_PATTERNS = [
-  /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,       // 127.0.0.0/8
-  /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,         // 10.0.0.0/8
-  /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/, // 172.16.0.0/12
-  /^192\.168\.\d{1,3}\.\d{1,3}$/,            // 192.168.0.0/16
-  /^169\.254\.\d{1,3}\.\d{1,3}$/,            // 169.254.0.0/16
+  /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./, /^169\.254\./,
+  /^0\./, /^::1$/, /^fd/, /^fe80:/,
 ];
 
-const BLOCKED_HOSTNAMES = new Set(['localhost', '[::1]']);
-
-function validateUpstreamUrl(url: string): boolean {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return false;
-  }
-
+async function validateUpstreamUrl(url: string): Promise<void> {
+  const parsed = new URL(url);
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    return false;
+    throw new Error('Only HTTP(S) protocols allowed');
   }
-
   const hostname = parsed.hostname;
-
-  if (BLOCKED_HOSTNAMES.has(hostname) || hostname === '::1') {
-    return false;
+  if (hostname === 'localhost' || hostname === '::1') {
+    throw new Error('Upstream targets restricted address');
   }
-
-  for (const pattern of PRIVATE_IP_PATTERNS) {
-    if (pattern.test(hostname)) {
-      return false;
+  // Check hostname string first
+  if (PRIVATE_IP_PATTERNS.some(p => p.test(hostname))) {
+    throw new Error('Upstream targets restricted address');
+  }
+  // DNS resolution check
+  try {
+    const addresses: string[] = [];
+    try { addresses.push(...await dns.resolve4(hostname)); } catch { /* no A records */ }
+    try { addresses.push(...await dns.resolve6(hostname)); } catch { /* no AAAA records */ }
+    if (addresses.length > 0 && addresses.every(addr => PRIVATE_IP_PATTERNS.some(p => p.test(addr)))) {
+      throw new Error('Upstream resolves to restricted address');
     }
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('restricted')) throw err;
+    // DNS resolution failure is not an SSRF block — allow the request through
   }
-
-  return true;
 }
 
 async function readResponseWithLimit(response: Response, maxBytes: number): Promise<string> {

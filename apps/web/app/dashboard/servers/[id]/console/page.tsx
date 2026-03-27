@@ -266,10 +266,15 @@ export default function ConsolePage({
                   <pre className="p-4 font-mono text-sm leading-relaxed">
                     {(() => {
                       const MAX_RESPONSE_SIZE = 50_000;
-                      const json = JSON.stringify(response.content, null, 2);
-                      return json.length > MAX_RESPONSE_SIZE
-                        ? `${json.slice(0, MAX_RESPONSE_SIZE)}\n\n... (truncated — ${json.length.toLocaleString()} chars total)`
-                        : json;
+                      let raw: string;
+                      try {
+                        raw = JSON.stringify(response.content, null, 2) ?? '';
+                      } catch {
+                        raw = String(response.content);
+                      }
+                      return raw.length > MAX_RESPONSE_SIZE
+                        ? `${raw.slice(0, MAX_RESPONSE_SIZE)}\n\n... (truncated — ${raw.length.toLocaleString()} chars total)`
+                        : raw;
                     })()}
                   </pre>
                 ) : null}

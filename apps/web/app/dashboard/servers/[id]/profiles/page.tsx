@@ -160,7 +160,8 @@ export default function ProfilesPage({
 
   const handleSubmit = useCallback(async () => {
     try {
-      const toolIds = [...form.selectedToolIds];
+      const activeToolIdSet = new Set(activeTools.map(t => t.id));
+      const toolIds = [...form.selectedToolIds].filter(id => activeToolIdSet.has(id));
       if (editingId) {
         await updateProfile.mutateAsync({
           serverId: id,
@@ -186,7 +187,7 @@ export default function ProfilesPage({
     } catch {
       // Errors surfaced by React Query — mutation stays in error state
     }
-  }, [form, editingId, id, createProfile, updateProfile, closeForm]);
+  }, [form, editingId, id, activeTools, createProfile, updateProfile, closeForm]);
 
   const handleDelete = useCallback(
     async (profileId: string) => {
@@ -481,6 +482,7 @@ export default function ProfilesPage({
                     <button
                       type="button"
                       onClick={() => copyEndpoint(profile.slug)}
+                      aria-label="Copy endpoint URL"
                       className="text-muted-foreground hover:text-foreground transition-colors duration-150"
                     >
                       {copiedSlug === profile.slug ? (
@@ -497,6 +499,7 @@ export default function ProfilesPage({
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
+                    aria-label={`Edit ${profile.name}`}
                     onClick={() => openEdit(profile)}
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -505,6 +508,7 @@ export default function ProfilesPage({
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400"
+                    aria-label={`Delete ${profile.name}`}
                     onClick={() => handleDelete(profile.id)}
                     disabled={profile.isDefault || deleteProfile.isPending}
                   >

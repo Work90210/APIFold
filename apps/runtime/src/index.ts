@@ -147,7 +147,7 @@ export async function startWorker(): Promise<void> {
   httpServer.keepAliveTimeout = 65_000;
   httpServer.headersTimeout = 70_000; // must be > keepAliveTimeout
   httpServer.requestTimeout = 30_000; // only applies until request is fully received — active SSE streams are unaffected
-  httpServer.maxConnections = 0; // unlimited — we enforce limits at the session layer
+  httpServer.maxConnections = Infinity; // unlimited — we enforce limits at the session layer
 
   // Load initial data from Postgres
   const pgLoaderDeps = { db, logger, registry };

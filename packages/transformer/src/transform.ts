@@ -291,21 +291,25 @@ function extractResponseSchema(
     .filter((status) => /^2\d\d$/.test(status))
     .sort((a, b) => Number(a) - Number(b));
 
-  const preferredStatus = ['200', '201'].find((s) => s in responses);
-  const selectedStatus = preferredStatus ?? candidateStatuses[0];
-  if (!selectedStatus) return null;
+  // Prefer 200, then 201, then scan remaining by ascending code
+  const orderedStatuses = [
+    ...(['200', '201'].filter((s) => s in responses)),
+    ...candidateStatuses.filter((s) => s !== '200' && s !== '201'),
+  ];
 
-  const response = responses[selectedStatus];
-  if (!response) return null;
+  for (const status of orderedStatuses) {
+    const response = responses[status];
+    if (!response) continue;
+    const jsonContent = response.content?.['application/json'];
+    if (!jsonContent?.schema) continue;
+    return {
+      schema: flattenSchema(jsonContent.schema),
+      description: response.description ?? '',
+      contentType: 'application/json',
+    };
+  }
 
-  const jsonContent = response.content?.['application/json'];
-  if (!jsonContent?.schema) return null;
-
-  return {
-    schema: flattenSchema(jsonContent.schema),
-    description: response.description ?? '',
-    contentType: 'application/json',
-  };
+  return null;
 }
 
 function enrichDescription(description: string, responseSchema?: JSONSchema): string {

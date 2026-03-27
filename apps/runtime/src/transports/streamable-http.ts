@@ -51,7 +51,7 @@ function resolveServer(registry: ServerRegistry, identifier: string) {
     : registry.getBySlug(identifier);
 }
 
-const PROFILE_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,48}[a-z0-9]$/;
+const PROFILE_SLUG_PATTERN = /^[a-z0-9]([a-z0-9-]{0,48}[a-z0-9])?$/;
 
 function isValidProfileSlug(slug: string): boolean {
   return slug.length >= 1 && slug.length <= 50 && PROFILE_SLUG_PATTERN.test(slug);

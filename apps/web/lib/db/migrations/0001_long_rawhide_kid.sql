@@ -192,7 +192,7 @@ ALTER TABLE "credentials" ADD COLUMN "client_id" text;--> statement-breakpoint
 ALTER TABLE "credentials" ADD COLUMN "encrypted_client_secret" text;--> statement-breakpoint
 ALTER TABLE "credentials" ADD COLUMN "token_expires_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "credentials" ADD COLUMN "provider" text;--> statement-breakpoint
-ALTER TABLE "mcp_servers" ADD COLUMN "endpoint_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "mcp_servers" ADD COLUMN "endpoint_id" text NOT NULL DEFAULT gen_random_uuid()::text;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "custom_domain" text;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "domain_verified_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "mcp_servers" ADD COLUMN "domain_verification_token" text;--> statement-breakpoint

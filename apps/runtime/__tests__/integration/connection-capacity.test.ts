@@ -96,6 +96,7 @@ describe('Connection Capacity', () => {
       registry,
       toolLoader,
       sessionManager,
+      redis: { get: vi.fn().mockResolvedValue(null), eval: vi.fn().mockResolvedValue([1, 0, 0]) } as never,
       toolExecutorDeps: {
         logger,
         circuitBreaker,

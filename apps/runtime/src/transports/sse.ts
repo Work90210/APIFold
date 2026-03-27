@@ -27,7 +27,7 @@ function resolveServer(registry: ServerRegistry, identifier: string) {
     : registry.getBySlug(identifier);
 }
 
-const PROFILE_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,48}[a-z0-9]$/;
+const PROFILE_SLUG_PATTERN = /^[a-z0-9]([a-z0-9-]{0,48}[a-z0-9])?$/;
 
 function isValidProfileSlug(slug: string): boolean {
   return slug.length >= 1 && slug.length <= 50 && PROFILE_SLUG_PATTERN.test(slug);
@@ -164,7 +164,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
     }
 
     const server = resolveServer(registry, identifier);
-    if (!server || session.slug !== server.slug) {
+    if (!server || !server.isActive || session.slug !== server.slug) {
       res.status(403).json({ error: 'Session does not belong to this server' });
       return;
     }

@@ -18,7 +18,8 @@ export function GET(request: NextRequest, context: RouteParams): Promise<NextRes
     uuidParam.parse(serverId);
 
     const url = new URL(request.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10) || 50, 200);
+    const rawLimit = parseInt(url.searchParams.get('limit') ?? '50', 10);
+    const limit = Math.max(1, Math.min(Number.isFinite(rawLimit) ? rawLimit : 50, 200));
 
     const db = getDb();
     const logRepo = new LogRepository(db);

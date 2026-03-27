@@ -22,11 +22,11 @@ export interface UsageGateDeps {
 function validatePlanLimits(data: unknown): PlanLimits | null {
   if (!data || typeof data !== 'object') return null;
   const obj = data as Record<string, unknown>;
-  if (typeof obj.maxRequestsPerMonth !== 'number' || obj.maxRequestsPerMonth < 0) return null;
-  if (typeof obj.overageRate !== 'number' || obj.overageRate < 0) return null;
+  if (typeof obj.maxRequestsPerMonth !== 'number' || !Number.isFinite(obj.maxRequestsPerMonth) || obj.maxRequestsPerMonth < 0) return null;
+  if (typeof obj.overageRate !== 'number' || !Number.isFinite(obj.overageRate) || obj.overageRate < 0) return null;
   if (
     obj.budgetCapCents !== null &&
-    (typeof obj.budgetCapCents !== 'number' || obj.budgetCapCents < 0)
+    (typeof obj.budgetCapCents !== 'number' || !Number.isFinite(obj.budgetCapCents) || obj.budgetCapCents < 0)
   ) {
     return null;
   }
