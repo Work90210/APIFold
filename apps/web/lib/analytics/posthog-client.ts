@@ -14,22 +14,19 @@ export function initPostHog(): void {
 
     person_profiles: 'identified_only',
 
-    // GDPR: opt out by default — only capture after explicit cookie consent
-    opt_out_capturing_by_default: true,
+    // Anonymous analytics (pageviews, feature usage) are captured by default.
+    // Session recording and heatmaps require explicit cookie consent.
+    opt_out_capturing_by_default: false,
 
-    // Page tracking — manual via provider
     capture_pageview: false,
     capture_pageleave: true,
 
-    // Autocapture for heatmaps — with safe masking defaults
     autocapture: true,
     mask_all_text: true,
     mask_all_element_attributes: false,
 
-    // Heatmaps
-    enable_heatmaps: true,
+    enable_heatmaps: false,
 
-    // Session recording — disabled until cookie consent
     disable_session_recording: true,
     session_recording: {
       maskAllInputs: true,
@@ -39,14 +36,11 @@ export function initPostHog(): void {
       recordBody: false,
     },
 
-    // Error tracking
     capture_exceptions: true,
 
-    // Privacy
     persistence: 'localStorage+cookie',
     respect_dnt: true,
 
-    // Performance
     request_batching: true,
 
     loaded: (ph) => {

@@ -36,13 +36,15 @@ function applyConsent(consent: ConsentState): void {
   const ph = getPostHog();
   if (!ph) return;
 
-  if (consent.analytics) {
-    ph.opt_in_capturing();
+  if (consent.analytics && consent.sessionRecording) {
+    ph.startSessionRecording();
+  }
 
-    if (consent.sessionRecording) {
-      ph.startSessionRecording();
-    }
-  } else {
+  if (consent.analytics && consent.heatmaps) {
+    ph.set_config({ enable_heatmaps: true });
+  }
+
+  if (!consent.analytics) {
     ph.opt_out_capturing();
   }
 }
@@ -78,8 +80,8 @@ export function CookieConsent() {
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background">
       <div className="mx-auto flex max-w-7xl flex-col items-start gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-muted-foreground">
-          We use cookies to understand how you use APIFold and improve your experience.
-          No data is sold or shared with advertisers.
+          We use anonymous analytics to improve APIFold. Accept all to also enable
+          session recordings and heatmaps for a better experience.
         </p>
         <div className="flex shrink-0 items-center gap-3">
           <button
