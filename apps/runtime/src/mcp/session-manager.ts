@@ -29,7 +29,7 @@ export interface SSESession {
 }
 
 export interface SessionProfileContext {
-  readonly slug: string;
+  readonly slug?: string;
   readonly toolIds: readonly string[];
 }
 

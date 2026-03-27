@@ -86,7 +86,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       return;
     }
 
-    let profileContext: { readonly slug: string; readonly toolIds: readonly string[] } | undefined;
+    let profileContext: { readonly slug?: string; readonly toolIds: readonly string[] } | undefined;
     if (profileSlug) {
       if (!resolveProfileToolIds) {
         res.status(500).json({ error: 'Profile resolution unavailable' });
@@ -109,10 +109,12 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       try {
         const defaultToolIds = await resolveDefaultProfileToolIds(server.id);
         if (defaultToolIds) {
-          profileContext = { slug: '__default__', toolIds: defaultToolIds };
+          profileContext = { toolIds: defaultToolIds };
         }
       } catch (err) {
         logger.error({ err, serverId: server.id }, 'Failed to resolve default profile');
+        res.status(503).json({ error: 'Failed to resolve access profile' });
+        return;
       }
     }
 

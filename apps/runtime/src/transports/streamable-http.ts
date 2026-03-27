@@ -171,12 +171,12 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
         return;
       }
     } else if (resolveDefaultProfileToolIds) {
-      // Unscoped route: apply default profile restrictions if one exists
       try {
         allowedToolIds = await resolveDefaultProfileToolIds(server.id);
       } catch (err) {
         logger.error({ err, serverId: server.id }, 'Failed to resolve default profile');
-        // Non-fatal: fall through with no restrictions
+        res.status(503).json({ error: 'Failed to resolve access profile' });
+        return;
       }
     }
 
