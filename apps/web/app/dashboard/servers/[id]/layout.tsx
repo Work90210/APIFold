@@ -14,6 +14,7 @@ import {
   Globe,
   Download,
   BarChart3,
+  Webhook,
   Settings,
   ChevronLeft,
 } from "lucide-react";
@@ -38,6 +39,7 @@ function buildItems(serverId: string): readonly SidebarItem[] {
     { title: "Analytics", href: `${base}/analytics`, icon: BarChart3 },
     { title: "Credentials", href: `${base}/credentials`, icon: Key },
     { title: "Profiles", href: `${base}/profiles`, icon: Shield },
+    { title: "Webhooks", href: `${base}/webhooks`, icon: Webhook },
     { title: "Domain", href: `${base}/domain`, icon: Globe },
     { title: "Export", href: `${base}/export`, icon: Download },
     { title: "Settings", href: `${base}/settings`, icon: Settings },

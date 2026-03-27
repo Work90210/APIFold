@@ -18,3 +18,7 @@ export { useRuntimeHealth } from "./use-runtime-health";
 export { useSpecVersions, useCreateVersion, usePromoteVersion } from "./use-spec-versions";
 export { useProfiles, useCreateProfile, useUpdateProfile, useDeleteProfile } from "./use-profiles";
 export type { AccessProfile } from "./use-profiles";
+export { useWebhookEvents } from "./use-webhook-events";
+export type { WebhookEvent } from "./use-webhook-events";
+export { useComposites, useComposite, useCreateComposite, useUpdateComposite, useDeleteComposite } from "./use-composites";
+export { useWorkspaces, useWorkspace, useCreateWorkspace, useUpdateWorkspace, useInviteMember, useRemoveMember } from "./use-workspaces";

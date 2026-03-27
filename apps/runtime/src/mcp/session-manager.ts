@@ -169,6 +169,14 @@ export class SessionManager {
     session.res.write(`event: ${safeEvent}\ndata: ${safeData}\n\n`);
   }
 
+  forEachSession(slug: string, callback: (session: SSESession) => void): void {
+    for (const session of this.sessions.values()) {
+      if (session.slug === slug) {
+        callback(session);
+      }
+    }
+  }
+
   get size(): number {
     return this.sessions.size;
   }

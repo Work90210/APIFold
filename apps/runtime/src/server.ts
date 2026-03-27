@@ -21,6 +21,8 @@ import type { ToolLoader } from './registry/tool-loader.js';
 import { createDomainRouter } from './transports/domain-router.js';
 import { createSSETransportRouter } from './transports/sse.js';
 import { createStreamableHTTPRouter } from './transports/streamable-http.js';
+import { createWebhookRouter } from './webhooks/receiver.js';
+import { WebhookNotifier } from './webhooks/notifier.js';
 
 export interface AppDeps {
   readonly config: RuntimeConfig;
@@ -74,7 +76,14 @@ export function createApp(deps: AppDeps): Express {
   // Core middleware
   app.use(helmet());
   app.use(createCorsMiddleware(config));
-  app.use(express.json({ limit: '100kb' }));
+  // Capture raw body bytes for webhook signature validation. Providers sign
+  // the exact wire bytes — re-serializing via JSON.stringify changes key order.
+  app.use(express.json({
+    limit: '256kb',
+    verify: (req, _res, buf) => {
+      (req as unknown as { rawBody?: Buffer }).rawBody = buf;
+    },
+  }));
   app.use(createRequestLogger(logger));
 
   // Health (no auth required)
@@ -153,6 +162,35 @@ export function createApp(deps: AppDeps): Express {
       redis: deps.redis,
       resolveProfileToolIds,
       resolveDefaultProfileToolIds,
+    }));
+  }
+
+  // TODO: Mount composite router when composite registry bootstrap is wired.
+  // SECURITY: When mounting createCompositeRouter, MUST register a dedicated
+  // auth middleware on '/mcp/composite/:identifier' — the existing '/mcp/:slug'
+  // auth middleware does NOT cover composite routes. Also register rate limiting
+  // on the same path prefix.
+
+  // Webhook receiver — accepts incoming webhook events
+  // Rate-limited to prevent storage exhaustion (webhooks are unauthenticated by design)
+  if (deps.redis) {
+    app.use(
+      '/webhooks/:slug',
+      createPerServerRateLimiter({
+        redis: deps.redis,
+        logger,
+        windowMs: 60_000,
+        defaultMax: 120,
+      }),
+    );
+
+    const notifier = new WebhookNotifier({ logger, sessionManager });
+    app.use(createWebhookRouter({
+      logger,
+      registry,
+      redis: deps.redis,
+      db: deps.db,
+      notifier,
     }));
   }
 

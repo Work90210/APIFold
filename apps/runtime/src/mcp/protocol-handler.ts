@@ -80,6 +80,10 @@ export class ProtocolHandler {
         return this.handleToolsList(session, req);
       case 'tools/call':
         return this.handleToolsCall(session, req);
+      case 'resources/list':
+        return this.handleResourcesList(session, req);
+      case 'resources/read':
+        return this.handleResourcesRead(session, req);
       case 'ping':
         return jsonRpcSuccess(req.id, { pong: true });
       default:
@@ -92,6 +96,7 @@ export class ProtocolHandler {
       protocolVersion: '2024-11-05',
       capabilities: {
         tools: { listChanged: true },
+        resources: { subscribe: true, listChanged: true },
       },
       serverInfo: {
         name: 'apifold-runtime',
@@ -214,6 +219,84 @@ export class ProtocolHandler {
     }
   }
 
+  private async handleResourcesList(
+    session: SSESession,
+    req: JsonRpcRequest,
+  ): Promise<JsonRpcResponse> {
+    const server = this.registry.getBySlug(session.slug);
+    if (!server) {
+      return jsonRpcError(req.id, -32001, 'Server not found');
+    }
+
+    try {
+      const pattern = `webhook:latest:${server.id}:*`;
+      const keys = await scanKeys(this.redis, pattern);
+      const prefix = `webhook:latest:${server.id}:`;
+
+      const resources = keys
+        .map((key) => key.slice(prefix.length))
+        .filter((name) => name.length > 0 && /^[a-zA-Z0-9_.:-]+$/.test(name))
+        .map((eventName) => ({
+          uri: `webhook://${server.slug}/${eventName}`,
+          name: eventName,
+          description: `Latest ${eventName} webhook event`,
+          mimeType: 'application/json',
+        }));
+
+      return jsonRpcSuccess(req.id, { resources });
+    } catch (err) {
+      this.logger.error({ err, slug: session.slug }, 'Failed to list resources');
+      return jsonRpcError(req.id, -32603, 'Failed to list resources');
+    }
+  }
+
+  private async handleResourcesRead(
+    session: SSESession,
+    req: JsonRpcRequest,
+  ): Promise<JsonRpcResponse> {
+    const server = this.registry.getBySlug(session.slug);
+    if (!server) {
+      return jsonRpcError(req.id, -32001, 'Server not found');
+    }
+
+    const params = req.params ?? {};
+    const uri = params['uri'];
+    if (typeof uri !== 'string') {
+      return jsonRpcError(req.id, -32602, 'Missing resource URI');
+    }
+
+    // Parse webhook:// URI → extract event name
+    const match = uri.match(/^webhook:\/\/[^/]+\/(.+)$/);
+    if (!match) {
+      return jsonRpcError(req.id, -32602, 'Invalid resource URI');
+    }
+    const eventName = match[1]!;
+
+    if (!/^[a-zA-Z0-9_.:-]+$/.test(eventName) || eventName.length > 200) {
+      return jsonRpcError(req.id, -32602, 'Invalid event name in resource URI');
+    }
+
+    try {
+      const redisKey = `webhook:latest:${server.id}:${eventName}`;
+      const data = await this.redis.get(redisKey);
+
+      if (!data) {
+        return jsonRpcError(req.id, -32002, 'Resource not found');
+      }
+
+      return jsonRpcSuccess(req.id, {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: data,
+        }],
+      });
+    } catch (err) {
+      this.logger.error({ err, slug: session.slug, uri }, 'Failed to read resource');
+      return jsonRpcError(req.id, -32603, 'Failed to read resource');
+    }
+  }
+
   private async resolveAllowedToolIds(
     serverId: string,
     session: SSESession,
@@ -266,4 +349,15 @@ function jsonRpcSuccess(id: string | number, result: unknown): JsonRpcResponse {
 
 function jsonRpcError(id: string | number, code: number, message: string): JsonRpcResponse {
   return Object.freeze({ jsonrpc: '2.0' as const, id, error: Object.freeze({ code, message }) });
+}
+
+async function scanKeys(redis: Redis, pattern: string): Promise<string[]> {
+  const keys: string[] = [];
+  let cursor = '0';
+  do {
+    const [nextCursor, batch] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+    keys.push(...batch);
+    cursor = nextCursor;
+  } while (cursor !== '0');
+  return keys;
 }

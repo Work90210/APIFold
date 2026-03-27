@@ -99,6 +99,18 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
   }, SESSION_CLEANUP_INTERVAL_MS);
   cleanupTimer.unref();
 
+  function supportsStreaming(req: Request): boolean {
+    const accept = req.headers['accept'] ?? '';
+    return accept.includes('text/event-stream');
+  }
+
+  function writeSSE(res: Response, event: string, data: unknown): void {
+    const safeEvent = event.replace(/[\r\n]/g, '');
+    const json = JSON.stringify(data);
+    const safeData = json.replace(/\r\n|\r|\n/g, '\ndata: ');
+    res.write(`event: ${safeEvent}\ndata: ${safeData}\n\n`);
+  }
+
   const handleRequest = async (req: Request, res: Response, profileSlug?: string) => {
     if (profileSlug && !isValidProfileSlug(profileSlug)) {
       res.status(400).json({ error: 'Invalid profile slug' });
@@ -205,6 +217,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
             protocolVersion: '2024-11-05',
             capabilities: {
               tools: { listChanged: true },
+              resources: { subscribe: true, listChanged: true },
             },
             serverInfo: {
               name: 'apifold-runtime',
@@ -264,6 +277,41 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
           metrics.incrementCounter('total_tool_calls');
           const start = performance.now();
 
+          const streaming = supportsStreaming(req);
+
+          if (streaming) {
+            // Stream the response as SSE for long-running tool calls
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+            if (sessionId) {
+              res.setHeader('Mcp-Session-Id', sessionId);
+            }
+            res.flushHeaders();
+
+            writeSSE(res, 'progress', { jsonrpc: '2.0', id: message.id, progress: 'executing' });
+
+            try {
+              const result: MCPToolResult = await executeTool(
+                toolExecutorDeps,
+                server,
+                tool,
+                toolInput,
+                context,
+              );
+              metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
+              writeSSE(res, 'message', jsonRpcSuccess(message.id, result));
+            } catch (err) {
+              metrics.incrementCounter('tool_call_errors');
+              metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
+              logger.error({ err, tool: toolName, slug: server.slug }, 'Tool execution error (streaming)');
+              writeSSE(res, 'message', jsonRpcError(message.id, -32603, 'Tool execution failed'));
+            }
+
+            res.end();
+            return;
+          }
+
           try {
             const result: MCPToolResult = await executeTool(
               toolExecutorDeps,
@@ -279,6 +327,73 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
             metrics.observeHistogram('tool_call_duration_ms', Math.round(performance.now() - start));
             logger.error({ err, tool: toolName, slug: server.slug }, 'Tool execution error');
             response = jsonRpcError(message.id, -32603, 'Tool execution failed');
+          }
+          break;
+        }
+
+        case 'resources/list': {
+          try {
+            const pattern = `webhook:latest:${server.id}:*`;
+            const prefix = `webhook:latest:${server.id}:`;
+            const keys = await scanRedisKeys(deps.redis, pattern);
+
+            const resources = keys
+              .map((key) => key.slice(prefix.length))
+              .filter((name) => name.length > 0 && /^[a-zA-Z0-9_.:-]+$/.test(name))
+              .map((eventName) => ({
+                uri: `webhook://${server.slug}/${eventName}`,
+                name: eventName,
+                description: `Latest ${eventName} webhook event`,
+                mimeType: 'application/json',
+              }));
+
+            response = jsonRpcSuccess(message.id, { resources });
+          } catch (err) {
+            logger.error({ err, slug: server.slug }, 'Failed to list resources');
+            response = jsonRpcError(message.id, -32603, 'Failed to list resources');
+          }
+          break;
+        }
+
+        case 'resources/read': {
+          const params = message.params ?? {};
+          const uri = params['uri'];
+          if (typeof uri !== 'string') {
+            response = jsonRpcError(message.id, -32602, 'Missing resource URI');
+            break;
+          }
+
+          const uriMatch = uri.match(/^webhook:\/\/[^/]+\/(.+)$/);
+          if (!uriMatch) {
+            response = jsonRpcError(message.id, -32602, 'Invalid resource URI');
+            break;
+          }
+          const eventName = uriMatch[1]!;
+
+          if (!/^[a-zA-Z0-9_.:-]+$/.test(eventName) || eventName.length > 200) {
+            response = jsonRpcError(message.id, -32602, 'Invalid event name in resource URI');
+            break;
+          }
+
+          try {
+            const redisKey = `webhook:latest:${server.id}:${eventName}`;
+            const data = await deps.redis.get(redisKey);
+
+            if (!data) {
+              response = jsonRpcError(message.id, -32002, 'Resource not found');
+              break;
+            }
+
+            response = jsonRpcSuccess(message.id, {
+              contents: [{
+                uri,
+                mimeType: 'application/json',
+                text: data,
+              }],
+            });
+          } catch (err) {
+            logger.error({ err, slug: server.slug, uri }, 'Failed to read resource');
+            response = jsonRpcError(message.id, -32603, 'Failed to read resource');
           }
           break;
         }
@@ -311,4 +426,15 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
   });
 
   return router;
+}
+
+async function scanRedisKeys(redis: Redis, pattern: string): Promise<string[]> {
+  const keys: string[] = [];
+  let cursor = '0';
+  do {
+    const [nextCursor, batch] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+    keys.push(...batch);
+    cursor = nextCursor;
+  } while (cursor !== '0');
+  return keys;
 }
