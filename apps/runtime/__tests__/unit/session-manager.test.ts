@@ -4,12 +4,13 @@ import { ConnectionMonitor } from '../../src/resilience/connection-monitor.js';
 import { createTestLogger } from '../helpers.js';
 import { EventEmitter } from 'events';
 
-function createMockResponse(): EventEmitter & { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn>; writableEnded: boolean; setHeader: ReturnType<typeof vi.fn>; flushHeaders: ReturnType<typeof vi.fn> } {
+function createMockResponse(opts?: { writableLength?: number }): EventEmitter & { write: ReturnType<typeof vi.fn>; end: ReturnType<typeof vi.fn>; writableEnded: boolean; writableLength: number; setHeader: ReturnType<typeof vi.fn>; flushHeaders: ReturnType<typeof vi.fn> } {
   const emitter = new EventEmitter();
   return Object.assign(emitter, {
-    write: vi.fn(),
+    write: vi.fn(() => true),
     end: vi.fn(),
     writableEnded: false,
+    writableLength: opts?.writableLength ?? 0,
     setHeader: vi.fn(),
     flushHeaders: vi.fn(),
   });
@@ -110,5 +111,54 @@ describe('SessionManager', () => {
     const stats = monitor.getStats();
     expect(stats.activeSessions).toBe(1);
     expect(stats.totalCreated).toBe(1);
+  });
+
+  describe('backpressure handling', () => {
+    it('terminates connection when sendEvent detects high buffer', () => {
+      // 256KB + 1 byte exceeds the MAX_BUFFERED_BYTES threshold
+      const res = createMockResponse({ writableLength: 256 * 1024 + 1 });
+      const session = manager.create('slug', res as never)!;
+
+      manager.sendEvent(session, 'test', 'data');
+
+      // Should have called end() to terminate slow client, NOT write()
+      expect(res.end).toHaveBeenCalled();
+      expect(res.write).not.toHaveBeenCalled();
+    });
+
+    it('writes normally when buffer is within limits', () => {
+      const res = createMockResponse({ writableLength: 100 });
+      const session = manager.create('slug', res as never)!;
+
+      manager.sendEvent(session, 'test', 'hello');
+
+      expect(res.write).toHaveBeenCalledWith('event: test\ndata: hello\n\n');
+      expect(res.end).not.toHaveBeenCalled();
+    });
+
+    it('closes slow clients during heartbeat', () => {
+      const slowRes = createMockResponse({ writableLength: 256 * 1024 + 1 });
+      const fastRes = createMockResponse({ writableLength: 0 });
+      manager.create('slow', slowRes as never);
+      manager.create('fast', fastRes as never);
+      manager.start();
+
+      vi.advanceTimersByTime(30_000);
+
+      // Slow client should be terminated, fast client gets heartbeat
+      expect(slowRes.end).toHaveBeenCalled();
+      expect(fastRes.write).toHaveBeenCalledWith(':heartbeat\n\n');
+      expect(manager.size).toBe(1);
+    });
+
+    it('does not write to ended responses', () => {
+      const res = createMockResponse();
+      const session = manager.create('slug', res as never)!;
+      res.writableEnded = true;
+
+      manager.sendEvent(session, 'test', 'data');
+
+      expect(res.write).not.toHaveBeenCalled();
+    });
   });
 });

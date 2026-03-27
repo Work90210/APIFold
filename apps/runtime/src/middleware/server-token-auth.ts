@@ -6,6 +6,8 @@ import type { ServerRegistry } from '../registry/server-registry.js';
 
 const ENDPOINT_ID_PATTERN = /^[a-f0-9]{12}$/;
 const SCRYPT_PREFIX = 'scrypt:';
+// IMPORTANT: These scrypt parameters must match those in
+// apps/web/lib/db/repositories/server.repository.ts
 const SCRYPT_KEY_LENGTH = 64;
 const SCRYPT_COST = 16384;
 const SCRYPT_BLOCK_SIZE = 8;
@@ -278,8 +280,12 @@ export function createServerTokenAuth(
       if (isLegacyHash(server.tokenHash) && onTokenUpgrade && !upgradesInFlight.has(server.id)) {
         upgradesInFlight.add(server.id);
         const oldHash = server.tokenHash;
-        const upgraded = upgradeToScrypt(token);
-        onTokenUpgrade(server.id, oldHash, upgraded);
+        try {
+          const upgraded = upgradeToScrypt(token);
+          onTokenUpgrade(server.id, oldHash, upgraded);
+        } finally {
+          upgradesInFlight.delete(server.id);
+        }
       }
 
       // Mark request as authenticated for session binding in SSE transport

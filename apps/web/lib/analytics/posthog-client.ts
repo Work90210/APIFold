@@ -23,7 +23,7 @@ export function initPostHog(): void {
 
     autocapture: true,
     mask_all_text: true,
-    mask_all_element_attributes: false,
+    mask_all_element_attributes: true,
 
     enable_heatmaps: false,
 

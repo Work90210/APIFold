@@ -171,7 +171,7 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
     if (!verified) {
       throw new ApiError(
         ErrorCodes.VALIDATION_ERROR,
-        `TXT record not found. Expected value: ${server.domainVerificationToken}. Found: ${flatRecords.join(', ') || 'none'}`,
+        `TXT record not found for ${lookupHost}. Ensure DNS has propagated and try again.`,
         400,
       );
     }

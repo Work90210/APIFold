@@ -14,6 +14,8 @@ import { specs } from '../schema/specs';
 import { BaseRepository } from './base.repository';
 import { DEFAULT_QUERY_LIMIT } from './constants';
 
+// IMPORTANT: These scrypt parameters must match those in
+// apps/runtime/src/middleware/server-token-auth.ts
 const SCRYPT_KEY_LENGTH = 64;
 const SCRYPT_COST = 16384; // N=2^14, recommended minimum for interactive logins
 const SCRYPT_BLOCK_SIZE = 8;

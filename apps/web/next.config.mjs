@@ -25,13 +25,14 @@ const securityHeaders = [
     value: "max-age=31536000; includeSubDomains; preload",
   },
   // CSP only in production — dev needs unsafe-eval for HMR + external Clerk scripts
+  // TODO [L8]: Remove 'unsafe-inline' from style-src once Tailwind/Next.js support nonce-based style injection.
   ...(!isDev
     ? [
         {
           key: "Content-Security-Policy",
           value: [
             "default-src 'self'",
-            `script-src 'self' 'unsafe-inline' https://${clerkDomain} https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com${cdnUrl ? ` ${cdnUrl}` : ""}`,
+            `script-src 'self' https://${clerkDomain} https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com${cdnUrl ? ` ${cdnUrl}` : ""}`,
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             `img-src 'self' data: blob: https://img.clerk.com${cdnUrl ? ` ${cdnUrl}` : ""}`,
             "font-src 'self' https://fonts.gstatic.com",

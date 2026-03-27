@@ -78,9 +78,10 @@ export function GET(request: NextRequest, context: RouteParams): Promise<NextRes
     `);
 
     // 3. Time series — call volume + errors bucketed by hour/day
+    const bucketTrunc = range === '24h' ? sql`'hour'` : sql`'day'`;
     const timeSeriesResult = await db.execute(sql`
       SELECT
-        DATE_TRUNC(${sql.raw(`'${bucketInterval === '1 hour' ? 'hour' : 'day'}'`)}, timestamp) AS bucket,
+        DATE_TRUNC(${bucketTrunc}, timestamp) AS bucket,
         COUNT(*) AS calls,
         COUNT(*) FILTER (WHERE status_code >= 400) AS errors
       FROM usage_events

@@ -24,6 +24,8 @@ export interface ToolExecutorDeps {
   readonly circuitBreaker: CircuitBreaker;
   readonly authInjector: AuthInjectorDeps;
   readonly timeoutMs: number;
+  /** Allow requests to private/loopback IPs. Only for tests — never enable in production. */
+  readonly allowPrivateUpstreams?: boolean;
 }
 
 export async function executeTool(
@@ -41,6 +43,10 @@ export async function executeTool(
   }
 
   const url = buildUpstreamUrl(server.baseUrl, tool.name);
+
+  if (!deps.allowPrivateUpstreams && !validateUpstreamUrl(url)) {
+    return errorResult('SSRF_BLOCKED', 'Upstream URL targets a restricted address');
+  }
 
   let headers: Readonly<Record<string, string>>;
   try {
@@ -125,6 +131,43 @@ const MAX_RESPONSE_BYTES = 10 * 1024 * 1024; // 10 MB
 function buildUpstreamUrl(baseUrl: string, toolName: string): string {
   const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   return `${base}/tools/${encodeURIComponent(toolName)}`;
+}
+
+const PRIVATE_IP_PATTERNS = [
+  /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,       // 127.0.0.0/8
+  /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,         // 10.0.0.0/8
+  /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/, // 172.16.0.0/12
+  /^192\.168\.\d{1,3}\.\d{1,3}$/,            // 192.168.0.0/16
+  /^169\.254\.\d{1,3}\.\d{1,3}$/,            // 169.254.0.0/16
+];
+
+const BLOCKED_HOSTNAMES = new Set(['localhost', '[::1]']);
+
+function validateUpstreamUrl(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return false;
+  }
+
+  const hostname = parsed.hostname;
+
+  if (BLOCKED_HOSTNAMES.has(hostname) || hostname === '::1') {
+    return false;
+  }
+
+  for (const pattern of PRIVATE_IP_PATTERNS) {
+    if (pattern.test(hostname)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 async function readResponseWithLimit(response: Response, maxBytes: number): Promise<string> {

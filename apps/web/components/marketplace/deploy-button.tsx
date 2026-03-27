@@ -42,7 +42,18 @@ export function DeployButton({ slug, disabled = false, size = 'default' }: Deplo
       }
 
       trackMarketplaceDeploy({ slug, name: slug, category: '', success: true });
-      router.push(data.data.redirectUrl);
+
+      // Validate redirect URL to prevent open-redirect attacks
+      try {
+        const redirectUrl = new URL(data.data.redirectUrl, window.location.origin);
+        if (redirectUrl.origin !== window.location.origin) {
+          router.push('/dashboard');
+          return;
+        }
+        router.push(redirectUrl.pathname + redirectUrl.search);
+      } catch {
+        router.push('/dashboard');
+      }
     } catch {
       // Likely a redirect to sign-in that fetch can't follow
       router.push(`/sign-in?redirect_url=/marketplace/${slug}`);

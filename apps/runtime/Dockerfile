@@ -40,6 +40,8 @@ COPY --from=builder /app/packages/vault ../../packages/vault
 USER runtime
 EXPOSE 3001 9090
 ENV RUNTIME_PORT=3001
+# Cap V8 heap to 1434MB — ~70% of 2GB Fly VM, leaves room for stack, buffers, and OS overhead.
+ENV NODE_OPTIONS="--max-old-space-size=1434"
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 CMD ["node", "dist/cluster.js"]

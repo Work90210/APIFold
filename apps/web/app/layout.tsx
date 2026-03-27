@@ -55,11 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('dark')`,
-          }}
-        />
+        <script src="/theme-init.js" />
       </head>
       <body className="antialiased safe-area-padding">
         <a href="#main-content" className="skip-link">

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createPlaintextKey } from '@apifold/types';
-import { getUserId, withErrorHandler } from '../../../../lib/api-helpers';
+import { getUserId, withErrorHandler, withRateLimit } from '../../../../lib/api-helpers';
 import { getDb } from '../../../../lib/db/index';
 import { CredentialRepository } from '../../../../lib/db/repositories/credential.repository';
 import { retrieveOAuthState } from '../../../../lib/oauth/state-store';
@@ -13,13 +13,12 @@ function buildCallbackUrl(request: NextRequest): string {
   return `${url.origin}/api/oauth/callback`;
 }
 
-// Rate limiting intentionally omitted: the state token is cryptographically random
-// (256-bit) and single-use (deleted from Redis on first retrieval), so there is no
-// meaningful brute-force attack surface. Adding a rate limit here risks blocking
-// legitimate OAuth redirects from providers.
 export function GET(request: NextRequest): Promise<NextResponse> {
   return withErrorHandler(async () => {
     const userId = await getUserId();
+
+    const rateLimited = await withRateLimit(userId);
+    if (rateLimited) return rateLimited;
 
     const url = new URL(request.url);
     const code = url.searchParams.get('code');

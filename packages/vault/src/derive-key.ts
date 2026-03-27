@@ -39,6 +39,19 @@ export function deriveKey(secret: string, salt: string): Buffer {
   return Buffer.from(key);
 }
 
+/**
+ * Zero-fill and discard all cached key material.
+ *
+ * The vault is a library package and does NOT install process signal handlers.
+ * **Callers must invoke `clearKeyCache()` during graceful shutdown** (e.g. on
+ * SIGTERM / SIGINT) to ensure derived keys are scrubbed from memory.
+ *
+ * @example
+ * ```ts
+ * import { clearKeyCache } from '@apifold/vault';
+ * process.on('SIGTERM', () => { clearKeyCache(); process.exit(0); });
+ * ```
+ */
 export function clearKeyCache(): void {
   zeroAndClear();
   cachedKey = null;

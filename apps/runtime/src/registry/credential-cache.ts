@@ -10,6 +10,9 @@ export interface L2CredentialEntry {
 
 export type CredentialFetcher = (serverId: string) => Promise<Readonly<Record<string, string>>>;
 
+/** Sweep interval for removing expired credentials. */
+const CLEANUP_INTERVAL_MS = 60_000;
+
 export interface CredentialCacheDeps {
   readonly logger: Logger;
   readonly fetchHeaders: CredentialFetcher;
@@ -22,11 +25,15 @@ export class CredentialCache {
   private readonly logger: Logger;
   private readonly fetchHeaders: CredentialFetcher;
   private readonly ttlMs: number;
+  private readonly cleanupTimer: ReturnType<typeof setInterval>;
 
   constructor(deps: CredentialCacheDeps) {
     this.logger = deps.logger;
     this.fetchHeaders = deps.fetchHeaders;
     this.ttlMs = deps.ttlMs;
+
+    this.cleanupTimer = setInterval(() => this.sweep(), CLEANUP_INTERVAL_MS);
+    this.cleanupTimer.unref();
   }
 
   /** Get auth headers for a server, loading and caching with TTL on miss. */
@@ -73,6 +80,10 @@ export class CredentialCache {
     this.cache.clear();
   }
 
+  dispose(): void {
+    clearInterval(this.cleanupTimer);
+  }
+
   private async load(serverId: string): Promise<L2CredentialEntry> {
     this.logger.debug({ serverId }, 'L2 loading credentials');
     const headers = await this.fetchHeaders(serverId);
@@ -87,5 +98,20 @@ export class CredentialCache {
     metrics.incrementCounter('registry_load_total', { tier: 'L2' });
 
     return entry;
+  }
+
+  /** Proactively remove all expired entries instead of waiting for access. */
+  private sweep(): void {
+    const now = Date.now();
+    let swept = 0;
+    for (const [serverId, entry] of this.cache) {
+      if (entry.expiresAt <= now) {
+        this.cache.delete(serverId);
+        swept++;
+      }
+    }
+    if (swept > 0) {
+      this.logger.debug({ swept, remaining: this.cache.size }, 'L2 expired credentials swept');
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { safeFetch } from '../ssrf-guard.js';
+
 const TOKEN_EXCHANGE_TIMEOUT_MS = 15_000;
 const ALLOWED_PROTOCOLS = new Set(['https:']);
 const PRIVATE_HOSTNAME_PATTERNS = [
@@ -97,7 +99,7 @@ async function executeTokenRequest(
 
   let response: globalThis.Response;
   try {
-    response = await fetch(tokenEndpoint, {
+    response = await safeFetch(tokenEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
