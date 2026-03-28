@@ -7,7 +7,7 @@ import type { Redis } from 'ioredis';
 
 import type { Logger } from '../observability/logger.js';
 import type { ServerRegistry } from '../registry/server-registry.js';
-import type { ToolLoader, ToolDefinition } from '../registry/tool-loader.js';
+import type { ToolLoader } from '../registry/tool-loader.js';
 import type { ToolExecutorDeps, MCPToolResult } from '../mcp/tool-executor.js';
 import { executeTool } from '../mcp/tool-executor.js';
 import { prefixToolName, stripNamespace } from '../mcp/namespace.js';

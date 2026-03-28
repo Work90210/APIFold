@@ -30,6 +30,11 @@
     "prettier": "^3.3.0",
     "turbo": "^2.3.0"
   },
+  "pnpm": {
+    "overrides": {
+      "path-to-regexp@<0.1.13": ">=0.1.13"
+    }
+  },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "eslint --fix",
