@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Users, Plus, Trash2, Shield, Building2 } from "lucide-react";
 import { Button, Skeleton, EmptyState, Badge } from "@apifold/ui";
 import { cn } from "@apifold/ui";
@@ -23,8 +24,9 @@ const ROLE_COLORS: Record<WorkspaceRole, "default" | "secondary" | "outline"> = 
 };
 
 export default function MembersPage() {
+  const { user } = useUser();
   const searchParams = useSearchParams();
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
   // Prefer explicit workspace from URL, fall back to first owned workspace
   const explicitId = searchParams.get("workspace");
   const ownedWorkspace = workspaces?.find((w) => w.slug.startsWith("user-")) ?? workspaces?.[0];
@@ -55,7 +57,7 @@ export default function MembersPage() {
     removeMember.mutate({ workspaceId, userId });
   };
 
-  if (isLoading && workspaceId) {
+  if (workspacesLoading || (isLoading && workspaceId)) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-6 w-48" />
@@ -103,11 +105,13 @@ export default function MembersPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@example.com"
+              aria-label="Email address"
               className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm"
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as WorkspaceRole)}
+              aria-label="Role"
               className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
             >
               <option value="viewer">Viewer</option>
@@ -147,13 +151,14 @@ export default function MembersPage() {
               <Badge variant={ROLE_COLORS[member.role as WorkspaceRole] ?? "secondary"} className="text-[10px] px-1.5 py-0 shrink-0">
                 {ROLE_LABELS[member.role as WorkspaceRole] ?? member.role}
               </Badge>
-              {member.role !== "owner" && (
+              {member.role !== "owner" && member.userId !== user?.id && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive shrink-0"
                   onClick={() => handleRemove(member.userId)}
                   disabled={removeMember.isPending}
+                  aria-label={`Remove ${member.userId}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

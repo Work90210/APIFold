@@ -235,7 +235,7 @@ export class ProtocolHandler {
 
       const resources = keys
         .map((key) => key.slice(prefix.length))
-        .filter((name) => name.length > 0 && /^[a-zA-Z0-9_.:-]+$/.test(name))
+        .filter((name) => name.length > 0 && name.length <= 200 && /^[a-zA-Z0-9_.:-]+$/.test(name))
         .map((eventName) => ({
           uri: `webhook://${server.slug}/${eventName}`,
           name: eventName,
