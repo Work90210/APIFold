@@ -18,7 +18,14 @@ const createSchema = z.object({
       namespace: z.string().min(1).max(30).regex(/^[a-z0-9_]+$/),
       displayOrder: z.number().int().min(0).optional(),
     }),
-  ).min(1).max(20),
+  ).min(1).max(20).refine(
+    (members) => {
+      const serverIds = new Set(members.map((m) => m.serverId));
+      const namespaces = new Set(members.map((m) => m.namespace));
+      return serverIds.size === members.length && namespaces.size === members.length;
+    },
+    { message: 'Duplicate serverId or namespace in members' },
+  ),
 });
 
 export function GET(_request: NextRequest): Promise<NextResponse> {

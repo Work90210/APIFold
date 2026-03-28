@@ -79,6 +79,13 @@ export function createWebhookRouter(deps: WebhookReceiverDeps): Router {
     // Validate webhook signature if a validator is configured for this server
     const validator = validators?.get(server.id);
     if (validator) {
+      // Fail closed: signature validation requires the original wire bytes.
+      // If the raw body wasn't captured (body parser misconfiguration), reject.
+      if (!rawBody) {
+        logger.error({ slug: serverSlug, eventName }, 'Signature validator configured but raw body unavailable');
+        res.status(500).json({ error: 'Signature validation unavailable' });
+        return;
+      }
       const isValid = validator.validate(rawBodyStr, req.headers);
       if (!isValid) {
         logger.warn({ slug: serverSlug, eventName }, 'Webhook signature validation failed');

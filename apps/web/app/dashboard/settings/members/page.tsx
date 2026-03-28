@@ -55,11 +55,26 @@ export default function MembersPage() {
     removeMember.mutate({ workspaceId, userId });
   };
 
-  if (isLoading || !workspace) {
+  if (isLoading && workspaceId) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-6 w-48" />
         <Skeleton className="h-40 rounded-lg" />
+      </div>
+    );
+  }
+
+  if (!workspace) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-lg font-semibold tracking-tight">Members</h1>
+        <div className="rounded-lg border border-border p-12">
+          <EmptyState
+            icon={Users}
+            title="No workspace selected"
+            description="Create or select a workspace to manage members."
+          />
+        </div>
       </div>
     );
   }

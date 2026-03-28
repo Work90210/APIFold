@@ -38,25 +38,25 @@ ON CONFLICT DO NOTHING;
 UPDATE specs s
 SET workspace_id = w.id
 FROM workspaces w
-WHERE w.slug = 'user-' || SUBSTRING(s.user_id FROM 1 FOR 32)
+WHERE w.slug = 'user-' || encode(digest(s.user_id, 'sha256'), 'hex')
   AND s.workspace_id IS NULL;
 
 UPDATE mcp_servers s
 SET workspace_id = w.id
 FROM workspaces w
-WHERE w.slug = 'user-' || SUBSTRING(s.user_id FROM 1 FOR 32)
+WHERE w.slug = 'user-' || encode(digest(s.user_id, 'sha256'), 'hex')
   AND s.workspace_id IS NULL;
 
 UPDATE credentials c
 SET workspace_id = w.id
 FROM workspaces w
-WHERE w.slug = 'user-' || SUBSTRING(c.user_id FROM 1 FOR 32)
+WHERE w.slug = 'user-' || encode(digest(c.user_id, 'sha256'), 'hex')
   AND c.workspace_id IS NULL;
 
 UPDATE composite_servers cs
 SET workspace_id = w.id
 FROM workspaces w
-WHERE w.slug = 'user-' || SUBSTRING(cs.user_id FROM 1 FOR 32)
+WHERE w.slug = 'user-' || encode(digest(cs.user_id, 'sha256'), 'hex')
   AND cs.workspace_id IS NULL;
 
 -- 4. Add NOT NULL constraints and indexes now that data is backfilled

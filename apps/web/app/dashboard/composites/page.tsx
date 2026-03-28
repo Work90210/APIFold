@@ -7,7 +7,7 @@ import { cn } from "@apifold/ui";
 import { useComposites } from "@/lib/hooks";
 
 export default function CompositesPage() {
-  const { data: composites, isLoading } = useComposites();
+  const { data: composites, isLoading, isError } = useComposites();
 
   return (
     <div className="space-y-6">
@@ -25,7 +25,11 @@ export default function CompositesPage() {
         Composite servers merge tools from multiple MCP servers under a single endpoint with namespace prefixes.
       </p>
 
-      {isLoading ? (
+      {isError ? (
+        <div className="rounded-lg border border-destructive/30 p-6 text-center">
+          <p className="text-sm text-destructive">Failed to load composite servers. Please try again.</p>
+        </div>
+      ) : isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-16 rounded-lg" />
           <Skeleton className="h-16 rounded-lg" />

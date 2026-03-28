@@ -1,6 +1,9 @@
 const NAMESPACE_SEPARATOR = '__';
 
 export function prefixToolName(namespace: string, toolName: string): string {
+  if (namespace.includes(NAMESPACE_SEPARATOR)) {
+    throw new Error(`Namespace "${namespace}" must not contain the separator "${NAMESPACE_SEPARATOR}"`);
+  }
   return `${namespace}${NAMESPACE_SEPARATOR}${toolName}`;
 }
 

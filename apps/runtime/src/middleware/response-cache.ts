@@ -22,9 +22,19 @@ export interface ResponseCacheDeps {
   readonly logger: Logger;
 }
 
+function sortDeep(obj: unknown): unknown {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(sortDeep);
+  const sorted: Record<string, unknown> = {};
+  for (const key of Object.keys(obj as Record<string, unknown>).sort()) {
+    sorted[key] = sortDeep((obj as Record<string, unknown>)[key]);
+  }
+  return sorted;
+}
+
 function buildCacheKey(serverId: string, toolName: string, userId: string, input: Readonly<Record<string, unknown>>): string {
-  const sortedInput = JSON.stringify(input, Object.keys(input).sort());
-  const hash = createHash('sha256').update(sortedInput).digest('hex').slice(0, 16);
+  const canonical = JSON.stringify(sortDeep(input));
+  const hash = createHash('sha256').update(canonical).digest('hex').slice(0, 16);
   return `${CACHE_KEY_PREFIX}${serverId}:${userId}:${toolName}:${hash}`;
 }
 
@@ -34,7 +44,7 @@ export async function getCachedResponse(
   input: Readonly<Record<string, unknown>>,
 ): Promise<MCPToolResult | null> {
   if (config.cacheTtlSeconds <= 0) return null;
-  if (WRITE_METHODS.has(config.httpMethod)) return null;
+  if (WRITE_METHODS.has(config.httpMethod.toLowerCase())) return null;
 
   const key = buildCacheKey(config.serverId, config.toolName, config.userId, input);
 

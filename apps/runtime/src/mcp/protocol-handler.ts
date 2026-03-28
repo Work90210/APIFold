@@ -265,12 +265,16 @@ export class ProtocolHandler {
       return jsonRpcError(req.id, -32602, 'Missing resource URI');
     }
 
-    // Parse webhook:// URI → extract event name
-    const match = uri.match(/^webhook:\/\/[^/]+\/(.+)$/);
+    // Parse webhook:// URI — verify host matches the addressed server
+    const match = uri.match(/^webhook:\/\/([^/]+)\/(.+)$/);
     if (!match) {
       return jsonRpcError(req.id, -32602, 'Invalid resource URI');
     }
-    const eventName = match[1]!;
+    const uriHost = match[1]!;
+    const eventName = match[2]!;
+    if (uriHost !== server.slug) {
+      return jsonRpcError(req.id, -32602, 'Resource URI does not match this server');
+    }
 
     if (!/^[a-zA-Z0-9_.:-]+$/.test(eventName) || eventName.length > 200) {
       return jsonRpcError(req.id, -32602, 'Invalid event name in resource URI');

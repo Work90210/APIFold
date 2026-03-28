@@ -63,7 +63,7 @@ export default function WebhooksPage({
 }) {
   const { id } = use(params);
   const { data: server, isLoading: serverLoading } = useServer(id);
-  const { data: events, isLoading: eventsLoading } = useWebhookEvents(id);
+  const { data: events, isLoading: eventsLoading, isError: eventsError } = useWebhookEvents(id);
 
   if (serverLoading) {
     return (
@@ -117,7 +117,11 @@ export default function WebhooksPage({
           )}
         </div>
 
-        {eventsLoading ? (
+        {eventsError ? (
+          <div className="rounded-lg border border-destructive/30 p-6 text-center">
+            <p className="text-sm text-destructive">Failed to load webhook events. Please try again.</p>
+          </div>
+        ) : eventsLoading ? (
           <Skeleton className="h-64 rounded-lg" />
         ) : events && events.length > 0 ? (
           <div className="rounded-lg border border-border">

@@ -78,11 +78,12 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       headers['Authorization'] = `Bearer ${runtimeSecret}`;
     }
 
-    // Initialize session
+    // Initialize session (30s timeout to prevent hanging)
     const initRes = await fetch(runtimeUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize' }),
+      signal: AbortSignal.timeout(30_000),
     });
 
     if (!initRes.ok) {
@@ -97,7 +98,7 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
       headers['Mcp-Session-Id'] = sessionId;
     }
 
-    // Execute tool
+    // Execute tool (60s timeout for long-running calls)
     const callRes = await fetch(runtimeUrl, {
       method: 'POST',
       headers,
@@ -107,6 +108,7 @@ export function POST(request: NextRequest, context: RouteParams): Promise<NextRe
         method: 'tools/call',
         params: { name: tool.toolName, arguments: input.arguments },
       }),
+      signal: AbortSignal.timeout(60_000),
     });
 
     const result = await callRes.json();

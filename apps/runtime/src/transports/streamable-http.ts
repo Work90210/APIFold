@@ -363,12 +363,17 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
             break;
           }
 
-          const uriMatch = uri.match(/^webhook:\/\/[^/]+\/(.+)$/);
+          const uriMatch = uri.match(/^webhook:\/\/([^/]+)\/(.+)$/);
           if (!uriMatch) {
             response = jsonRpcError(message.id, -32602, 'Invalid resource URI');
             break;
           }
-          const eventName = uriMatch[1]!;
+          const uriHost = uriMatch[1]!;
+          const eventName = uriMatch[2]!;
+          if (uriHost !== server.slug) {
+            response = jsonRpcError(message.id, -32602, 'Resource URI does not match this server');
+            break;
+          }
 
           if (!/^[a-zA-Z0-9_.:-]+$/.test(eventName) || eventName.length > 200) {
             response = jsonRpcError(message.id, -32602, 'Invalid event name in resource URI');
