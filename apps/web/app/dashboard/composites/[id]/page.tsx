@@ -2,8 +2,8 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Layers, Plus, Trash2, GripVertical, Wrench } from "lucide-react";
-import { Button, Skeleton, Badge, CopyButton, EmptyState } from "@apifold/ui";
+import { Plus, Trash2, GripVertical, Wrench } from "lucide-react";
+import { Button, Skeleton, Badge, CopyButton } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { useComposite, useUpdateComposite, useDeleteComposite, useServers, useTools } from "@/lib/hooks";
 import type { CompositeMember } from "@apifold/types";

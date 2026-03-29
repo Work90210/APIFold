@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { Users, Plus, Trash2, Shield, Building2 } from "lucide-react";
+import { Users, Plus, Trash2, Shield } from "lucide-react";
 import { Button, Skeleton, EmptyState, Badge } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { useWorkspaces, useWorkspace, useInviteMember, useRemoveMember } from "@/lib/hooks";

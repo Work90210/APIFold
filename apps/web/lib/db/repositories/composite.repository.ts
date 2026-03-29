@@ -3,7 +3,6 @@ import { randomBytes, scryptSync } from 'node:crypto';
 import type {
   CompositeServer,
   CompositeServerWithMembers,
-  CompositeMember,
   CreateCompositeInput,
   UpdateCompositeInput,
 } from '@apifold/types';

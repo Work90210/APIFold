@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Plus, Check, Building2 } from "lucide-react";
-import { Button } from "@apifold/ui";
 import { cn } from "@apifold/ui";
 import { useWorkspaces } from "@/lib/hooks";
 
