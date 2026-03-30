@@ -80,6 +80,7 @@ export interface ResolvedOpenAPISpec {
   readonly openapi: string;
   readonly info: OpenAPIInfo;
   readonly paths: Readonly<Record<string, OpenAPIPathItem>>;
+  readonly webhooks?: Readonly<Record<string, OpenAPIPathItem>>;
   readonly components?: Readonly<Record<string, unknown>>;
 }
 
@@ -120,6 +121,26 @@ export interface MCPToolDefinition {
     readonly responseDescription?: string;
     readonly responseContentType?: string;
   };
+}
+
+export interface MCPResourceDefinition {
+  readonly uri: string;
+  readonly name: string;
+  readonly description: string;
+  readonly mimeType: string;
+  readonly schema: JSONSchema;
+}
+
+export interface MCPNotificationDefinition {
+  readonly method: string;
+  readonly description: string;
+  readonly params: JSONSchema;
+}
+
+export interface WebhookTransformResult {
+  readonly resources: readonly MCPResourceDefinition[];
+  readonly notifications: readonly MCPNotificationDefinition[];
+  readonly warnings: readonly TransformWarning[];
 }
 
 export interface TransformResult {

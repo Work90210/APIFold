@@ -5,4 +5,5 @@ useDefault = true
 paths = [
   "^\\.github/workflows/lighthouse\\.yml$",
   "^\\.github/workflows/bundle-analysis\\.yml$",
+  "^apps/runtime/__tests__/",
 ]

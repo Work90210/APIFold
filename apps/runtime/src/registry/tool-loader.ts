@@ -7,6 +7,8 @@ export interface ToolDefinition {
   readonly name: string;
   readonly description: string | null;
   readonly inputSchema: Record<string, unknown>;
+  readonly cacheTtlSeconds?: number;
+  readonly httpMethod?: string;
 }
 
 /** L1: On-demand tool definition cache per server. */

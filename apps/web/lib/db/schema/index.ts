@@ -18,3 +18,5 @@ export { emailEvents } from './email-events';
 export { emailPreferences } from './email-preferences';
 export { emailSuppressions } from './email-suppressions';
 export { emailThresholdState } from './email-threshold-state';
+export { compositeServers, compositeMembers } from './composite-servers';
+export { workspaces, workspaceMembers } from './workspaces';

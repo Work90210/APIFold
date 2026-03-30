@@ -1,7 +1,9 @@
 export { parseSpec } from './parse.js';
 export { transformSpec } from './transform.js';
+export { transformWebhooks } from './webhooks.js';
 export { autoConvert } from './convert.js';
 export type { ConvertResult } from './convert.js';
+export type { WebhookTransformOptions } from './webhooks.js';
 
 export type {
   ParseInput,
@@ -11,6 +13,9 @@ export type {
   TransformResult,
   TransformWarning,
   MCPToolDefinition,
+  MCPResourceDefinition,
+  MCPNotificationDefinition,
+  WebhookTransformResult,
   ResolvedOpenAPISpec,
   OpenAPIOperation,
   OpenAPIParameter,

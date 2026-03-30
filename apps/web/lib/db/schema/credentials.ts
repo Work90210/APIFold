@@ -27,6 +27,7 @@ export const credentials = pgTable(
     encryptedClientSecret: text('encrypted_client_secret'),
     tokenExpiresAt: timestamp('token_expires_at', { withTimezone: true }),
     provider: text('provider'),
+    workspaceId: uuid('workspace_id'),
   },
   (table) => ({
     serverIdIdx: index('idx_credentials_server_id').on(table.serverId),

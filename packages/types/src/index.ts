@@ -55,6 +55,28 @@ export type { SpecVersion, CreateSpecVersionInput } from './spec-version.js';
 // Spec Release
 export type { SpecRelease, CreateReleaseInput, ReleaseEnvironment } from './spec-release.js';
 
+// Workspace
+export type {
+  Workspace,
+  WorkspaceMember,
+  WorkspaceWithMembers,
+  WorkspacePlan,
+  WorkspaceRole,
+  CreateWorkspaceInput,
+  UpdateWorkspaceInput,
+  InviteMemberInput,
+} from './workspace.js';
+
+// Composite
+export type {
+  CompositeServer,
+  CompositeMember,
+  CompositeServerWithMembers,
+  CreateCompositeInput,
+  CreateCompositeMemberInput,
+  UpdateCompositeInput,
+} from './composite.js';
+
 // API Response
 export type {
   ApiResponse,
