@@ -1,4 +1,4 @@
-import { safeFetch } from '../ssrf-guard.js';
+import { safeFetch } from '../ssrf-guard';
 
 const TOKEN_EXCHANGE_TIMEOUT_MS = 15_000;
 const ALLOWED_PROTOCOLS = new Set(['https:']);
