@@ -26,6 +26,8 @@ export interface SSESession {
   lastActivityAt: number;
   readonly res: Response;
   readonly authenticated: boolean;
+  /** Caller-supplied API key for public servers. Never logged or persisted. */
+  readonly userKey?: string;
 }
 
 export interface SessionProfileContext {
@@ -80,7 +82,7 @@ export class SessionManager {
     return this.sessions.size < this.maxSessions;
   }
 
-  create(slug: string, res: Response, clientIp: string, authenticated: boolean = false, profile?: SessionProfileContext): SSESession | null {
+  create(slug: string, res: Response, clientIp: string, authenticated: boolean = false, profile?: SessionProfileContext, userKey?: string): SSESession | null {
     if (!this.hasCapacity()) {
       this.logger.warn({ slug, maxSessions: this.maxSessions }, 'Max sessions reached');
       return null;
@@ -97,6 +99,7 @@ export class SessionManager {
       lastActivityAt: now,
       res,
       authenticated,
+      userKey,
     };
 
     this.sessions.set(session.id, session);

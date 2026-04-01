@@ -1,0 +1,533 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mailchimp Marketing API",
+    "version": "1.0.0",
+    "description": "Mailchimp is an email marketing platform for managing audiences (contact lists), email campaigns, and performance reports. IMPORTANT: The server URL is data-center-specific. Replace 'us1' in the base URL with your account's data center prefix, which is the string after the dash in your API key (e.g. if your key ends in '-us6', use 'https://us6.api.mailchimp.com/3.0'). Authenticate with a Bearer token using your Mailchimp API key."
+  },
+  "servers": [
+    {
+      "url": "https://us1.api.mailchimp.com/3.0"
+    }
+  ],
+  "paths": {
+    "/lists": {
+      "get": {
+        "operationId": "listAudiences",
+        "summary": "List audiences",
+        "description": "Retrieve all email audiences (formerly called lists) in the Mailchimp account. Audiences are the core containers for your subscribers. Use this to get audience IDs needed for member management and campaign operations, or to audit what audiences exist. Use the 'fields' parameter to limit the response to only the fields you need to reduce payload size.",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of audiences to return per page (max 1000). Defaults to 10.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based offset for pagination. Use with count to page through results.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "Comma-separated list of fields to include in the response (e.g. 'lists.id,lists.name,lists.stats.member_count'). Omit for all fields.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with a 'lists' array and 'total_items' count. Each audience includes id, name, stats (member_count, open_rate, click_rate), date_created, permission_reminder, and campaign_defaults."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAudience",
+        "summary": "Create an audience",
+        "description": "Create a new email audience (list) in Mailchimp. Audiences organize your subscribers and are required before adding members or creating campaigns. The contact object provides the physical address shown in email footers (required by anti-spam law). The permission_reminder tells subscribers how they signed up. campaign_defaults set the default from name, reply-to email, subject, and language for campaigns using this audience.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "contact", "permission_reminder", "campaign_defaults", "email_type_option"],
+                "properties": {
+                  "name": { "type": "string", "description": "The name of the audience as it appears in the Mailchimp dashboard." },
+                  "contact": {
+                    "type": "object",
+                    "description": "The physical mailing address for this audience, shown in email footers as required by CAN-SPAM. Include company, address1, city, state, zip, country.",
+                    "properties": {
+                      "company": { "type": "string" },
+                      "address1": { "type": "string" },
+                      "city": { "type": "string" },
+                      "state": { "type": "string" },
+                      "zip": { "type": "string" },
+                      "country": { "type": "string", "description": "Two-letter country code (e.g. 'US')." }
+                    }
+                  },
+                  "permission_reminder": { "type": "string", "description": "Text explaining why recipients are receiving emails (e.g. 'You signed up on our website'). Required for compliance." },
+                  "campaign_defaults": {
+                    "type": "object",
+                    "description": "Default settings for campaigns sent to this audience.",
+                    "properties": {
+                      "from_name": { "type": "string", "description": "Default sender name." },
+                      "from_email": { "type": "string", "description": "Default reply-to email address." },
+                      "subject": { "type": "string", "description": "Default email subject line." },
+                      "language": { "type": "string", "description": "Default language code (e.g. 'en')." }
+                    }
+                  },
+                  "email_type_option": { "type": "boolean", "description": "If true, subscribers can choose between HTML and plain-text emails." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created audience object with its Mailchimp-assigned id and all configuration fields."
+          }
+        }
+      }
+    },
+    "/lists/{listId}": {
+      "get": {
+        "operationId": "getAudience",
+        "summary": "Get an audience",
+        "description": "Retrieve the full details of a specific audience by its ID, including current subscriber counts, engagement statistics, and all configuration. Use this to get the latest member_count, open_rate, or click_rate for reporting, or to inspect an audience's settings before creating a campaign.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "description": "The unique alphanumeric ID of the Mailchimp audience. Obtain from listAudiences.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The audience object with id, name, stats (member_count, unsubscribe_count, open_rate, click_rate), date_created, permission_reminder, campaign_defaults, and contact address."
+          }
+        }
+      }
+    },
+    "/lists/{listId}/members": {
+      "get": {
+        "operationId": "listMembers",
+        "summary": "List audience members",
+        "description": "Retrieve a paginated list of members in a specific audience. Filter by subscription status to find active subscribers, unsubscribes, or cleaned (bounced) addresses. Use email_address to find a specific subscriber. Returns member data including merge fields (first name, last name, etc.) and engagement stats.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the audience to list members from.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by subscription status. 'subscribed' = active, 'unsubscribed' = opted out, 'cleaned' = hard bounced, 'pending' = awaiting double opt-in confirmation.",
+            "schema": {
+              "type": "string",
+              "enum": ["subscribed", "unsubscribed", "cleaned", "pending"]
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of members to return per page (max 1000). Defaults to 10.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based index for pagination.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "email_address",
+            "in": "query",
+            "description": "Filter to a specific subscriber by email address. Returns zero or one result.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of member objects with total_items count. Each member includes id (MD5 hash of email), email_address, status, merge_fields (FNAME, LNAME, etc.), tags, and stats (avg_open_rate, avg_click_rate)."
+          }
+        }
+      },
+      "post": {
+        "operationId": "addMember",
+        "summary": "Add a member to an audience",
+        "description": "Add a new subscriber to a Mailchimp audience. Use status 'subscribed' to add them as an immediately active subscriber, or 'pending' to trigger a double opt-in confirmation email (recommended for GDPR compliance). Merge fields correspond to audience-specific form fields like FNAME and LNAME. Tags let you segment the contact from the start.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the audience to add the member to.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email_address", "status"],
+                "properties": {
+                  "email_address": { "type": "string", "description": "The subscriber's email address. Must be a valid email." },
+                  "status": {
+                    "type": "string",
+                    "enum": ["subscribed", "pending"],
+                    "description": "'subscribed' to add as active immediately; 'pending' to send a double opt-in confirmation email first."
+                  },
+                  "merge_fields": {
+                    "type": "object",
+                    "description": "Audience-specific merge field values (e.g. {\"FNAME\": \"Jane\", \"LNAME\": \"Doe\"}). Keys are the merge field tags defined for the audience."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Array of tag name strings to apply to this member on creation."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created member object with id (MD5 of email), email_address, status, merge_fields, tags, and timestamps."
+          }
+        }
+      }
+    },
+    "/lists/{listId}/members/{subscriberHash}": {
+      "get": {
+        "operationId": "getMember",
+        "summary": "Get a member",
+        "description": "Retrieve the full profile of a specific audience member by their subscriber hash. The subscriberHash is the MD5 hash of the subscriber's lowercase email address (e.g. MD5('jane@example.com')). Returns all stored data including status, merge fields, tags, and engagement stats.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the audience containing the member.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subscriberHash",
+            "in": "path",
+            "required": true,
+            "description": "The MD5 hash of the lowercase subscriber email address (e.g. MD5('jane@example.com') = 'dc5258f70e5...''). This uniquely identifies the member within the audience.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The member object with email_address, status, merge_fields, tags, stats (open/click rates), timestamp_opt, and last_changed."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateMember",
+        "summary": "Update a member",
+        "description": "Update a subscriber's information in an audience. Use this to change subscription status (e.g. resubscribe someone), update merge field values (name, phone), or modify tags. Pass only the fields you want to change. To unsubscribe someone, set status to 'unsubscribed'.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the audience containing the member.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subscriberHash",
+            "in": "path",
+            "required": true,
+            "description": "The MD5 hash of the lowercase subscriber email address.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["subscribed", "unsubscribed", "pending", "cleaned"],
+                    "description": "Updated subscription status. Use 'unsubscribed' to opt someone out."
+                  },
+                  "merge_fields": {
+                    "type": "object",
+                    "description": "Updated merge field values (e.g. {\"FNAME\": \"John\"})."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Updated tag list. Replaces the existing tags."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated member object with all current field values."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeMember",
+        "summary": "Remove a member",
+        "description": "Permanently remove a subscriber from an audience. The contact's email address is archived and cannot be re-added to the same audience. To simply unsubscribe someone while preserving their record, use updateMember with status 'unsubscribed' instead.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the audience to remove the member from.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subscriberHash",
+            "in": "path",
+            "required": true,
+            "description": "The MD5 hash of the lowercase subscriber email address to remove.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Empty response confirming the member was successfully removed."
+          }
+        }
+      }
+    },
+    "/campaigns": {
+      "get": {
+        "operationId": "listCampaigns",
+        "summary": "List campaigns",
+        "description": "Retrieve a paginated list of email campaigns in the Mailchimp account. Filter by type (regular email, A/B test, RSS, etc.) and status (draft, scheduled, sending, sent) to find specific campaigns. Use this to audit campaign history, find a campaign ID, or check send status.",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by campaign type. 'regular' = standard email, 'plaintext' = plain-text only, 'absplit' = A/B test, 'rss' = RSS-triggered, 'variate' = multivariate test.",
+            "schema": {
+              "type": "string",
+              "enum": ["regular", "plaintext", "absplit", "rss", "variate"]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by campaign status. 'save' = draft, 'paused' = paused RSS, 'schedule' = scheduled, 'sending' = actively sending, 'sent' = completed.",
+            "schema": {
+              "type": "string",
+              "enum": ["save", "paused", "schedule", "sending", "sent"]
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of campaigns to return per page (max 1000). Defaults to 10.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based pagination offset.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of campaign objects with total_items count. Each campaign includes id, type, status, create_time, send_time, recipients (list_id, recipient_count), settings (subject_line, from_name), and report_summary (if sent)."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createCampaign",
+        "summary": "Create a campaign",
+        "description": "Create a new email campaign in Mailchimp. This creates the campaign shell — you'll need to set the email content separately via the Mailchimp dashboard or content API. The recipients object links the campaign to an audience (list_id). Settings control the subject line, from name, and reply-to address shown to subscribers.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type", "recipients", "settings"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["regular", "plaintext", "absplit", "rss", "variate"],
+                    "description": "The campaign type. 'regular' is the most common — a standard HTML email."
+                  },
+                  "recipients": {
+                    "type": "object",
+                    "description": "Defines who receives the campaign.",
+                    "properties": {
+                      "list_id": { "type": "string", "description": "The Mailchimp audience ID to send the campaign to. Obtain from listAudiences." }
+                    }
+                  },
+                  "settings": {
+                    "type": "object",
+                    "description": "Campaign send settings.",
+                    "properties": {
+                      "subject_line": { "type": "string", "description": "The email subject line shown in inboxes." },
+                      "from_name": { "type": "string", "description": "The sender name shown in inboxes (e.g. 'Acme Team')." },
+                      "reply_to": { "type": "string", "description": "The reply-to email address." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created campaign object with its Mailchimp id, type, status ('save' = draft), and all configuration settings."
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}": {
+      "get": {
+        "operationId": "getCampaign",
+        "summary": "Get a campaign",
+        "description": "Retrieve the full details of a specific campaign by its ID, including its current status, settings, recipient configuration, and report summary if it has been sent. Use this to check send status, get subject line details, or retrieve the report_summary for quick performance stats.",
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "description": "The unique alphanumeric ID of the Mailchimp campaign. Obtain from listCampaigns.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The campaign object with id, type, status, create_time, send_time, recipients, settings, tracking options, and report_summary (opens_total, unique_opens, clicks_total, unique_clicks) if the campaign has been sent."
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/actions/send": {
+      "post": {
+        "operationId": "sendCampaign",
+        "summary": "Send a campaign immediately",
+        "description": "Send a campaign to its recipients immediately. The campaign must have content set, a valid audience, and status of 'save' (draft). Once sent, this action cannot be undone. Use scheduleCampaign instead if you want to send at a specific future time. After sending, the campaign status changes to 'sending' and eventually 'sent'.",
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the campaign to send. Must be a draft campaign with content configured.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Empty response confirming the campaign send was initiated. The campaign status will transition to 'sending'."
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/actions/schedule": {
+      "post": {
+        "operationId": "scheduleCampaign",
+        "summary": "Schedule a campaign",
+        "description": "Schedule a campaign to be sent at a specific future date and time. The campaign must have content and a valid audience configured. The schedule_time must be in ISO 8601 format in UTC. Use sendCampaign instead to send immediately. Once scheduled, the campaign status changes to 'schedule'.",
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the campaign to schedule.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["schedule_time"],
+                "properties": {
+                  "schedule_time": {
+                    "type": "string",
+                    "description": "The UTC datetime to send the campaign, in ISO 8601 format (e.g. '2024-09-15T14:00:00Z'). Must be in the future."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Empty response confirming the campaign was scheduled. The campaign status changes to 'schedule'."
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "operationId": "listReports",
+        "summary": "List campaign reports",
+        "description": "Retrieve performance reports for sent campaigns. Reports include open rates, click rates, bounces, and unsubscribes. Use this for an overview of all campaign performance or filter by type to focus on specific campaign types. Returns summary-level stats — use getCampaignReport for detailed metrics on a specific campaign.",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of reports to return per page (max 1000). Defaults to 10.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based pagination offset.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter reports by campaign type (e.g. 'regular', 'absplit', 'variate', 'rss').",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of report objects with total_items. Each report includes campaign_title, type, emails_sent, opens (opens_total, unique_opens, open_rate), clicks (clicks_total, unique_clicks, click_rate), and bounces (hard_bounces, soft_bounces)."
+          }
+        }
+      }
+    },
+    "/reports/{campaignId}": {
+      "get": {
+        "operationId": "getCampaignReport",
+        "summary": "Get a campaign report",
+        "description": "Retrieve the detailed performance report for a specific sent campaign. Returns comprehensive engagement metrics including open rate, click rate, bounce counts, unsubscribes, and abuse complaints. Use this after a campaign has been sent to evaluate its effectiveness. The campaignId here is the same as the campaign's id field.",
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the campaign to get the report for. Must be a sent campaign.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A detailed report object with campaign_title, emails_sent, send_time, opens (opens_total, unique_opens, open_rate, last_open), clicks (clicks_total, unique_clicks, click_rate, unique_subscriber_clicks), bounces (hard_bounces, soft_bounces, syntax_errors), and unsubscribes."
+          }
+        }
+      }
+    }
+  }
+}

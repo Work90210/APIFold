@@ -1,0 +1,435 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cal.com API",
+    "version": "1.0.0",
+    "description": "Cal.com is an open-source scheduling platform. Use this API to manage event types, bookings, availability, and calendar integrations. IMPORTANT: All requests must include the header 'cal-api-version: 2024-08-13'. Authenticate with a Bearer token obtained from the Cal.com dashboard under Settings > API Keys."
+  },
+  "servers": [
+    {
+      "url": "https://api.cal.com/v2"
+    }
+  ],
+  "paths": {
+    "/event-types": {
+      "get": {
+        "operationId": "listEventTypes",
+        "summary": "List event types",
+        "description": "Retrieve all event types (meeting templates) configured for the authenticated user. Event types define the meeting duration, availability, booking page URL slug, and other settings. Use this to discover what meeting types are available before creating a booking, or to audit the user's current scheduling setup. Returns an array of event type objects including id, title, slug, length (in minutes), description, and booking URL.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An array of event type objects. Each includes id, title, slug, length (duration in minutes), description, locations, and the booking URL where attendees can schedule."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEventType",
+        "summary": "Create an event type",
+        "description": "Create a new event type (meeting template) for the authenticated user. Event types define a reusable meeting format with a set duration, title, and booking URL slug. Use this when the user wants to add a new type of meeting to their scheduling page, such as a '30-minute intro call' or '1-hour consulting session'. The slug must be URL-safe and unique for the user.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "slug", "length"],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The display name of the event type shown to bookers (e.g. '30-Minute Meeting' or 'Product Demo')."
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "URL-safe identifier for the booking link (e.g. '30min' or 'product-demo'). Must be unique for the user and contain only lowercase letters, numbers, and hyphens."
+                  },
+                  "length": {
+                    "type": "integer",
+                    "description": "Duration of the event in minutes (e.g. 30, 60). This is how long each booked meeting will last."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Optional description shown on the booking page explaining the purpose or agenda of the meeting."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created event type object with its assigned id, title, slug, length, and booking URL."
+          }
+        }
+      }
+    },
+    "/event-types/{eventTypeId}": {
+      "get": {
+        "operationId": "getEventType",
+        "summary": "Get an event type",
+        "description": "Retrieve the full details of a specific event type by its numeric ID. Use this to inspect a particular meeting template's configuration including duration, description, available locations (video call, in-person, phone), and any custom questions asked during booking. Useful before updating an event type or when you need the full configuration of a known event type.",
+        "parameters": [
+          {
+            "name": "eventTypeId",
+            "in": "path",
+            "required": true,
+            "description": "The numeric ID of the event type to retrieve. Obtain this from the listEventTypes operation.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event type object with full details including id, title, slug, length, description, locations, custom fields, and booking URL."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateEventType",
+        "summary": "Update an event type",
+        "description": "Partially update an existing event type by its ID. Use this to change the title, duration, description, or other settings of an existing meeting template. Only include the fields you want to change — unspecified fields remain unchanged. Returns the updated event type object.",
+        "parameters": [
+          {
+            "name": "eventTypeId",
+            "in": "path",
+            "required": true,
+            "description": "The numeric ID of the event type to update.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "New display name for the event type."
+                  },
+                  "length": {
+                    "type": "integer",
+                    "description": "New duration in minutes."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "New description shown on the booking page."
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "New URL slug for the booking link. Must be unique and URL-safe."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated event type object reflecting the applied changes."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEventType",
+        "summary": "Delete an event type",
+        "description": "Permanently delete an event type by its ID. This removes the meeting template and its booking URL. Existing bookings made through this event type are not automatically cancelled. Use with caution — this action cannot be undone.",
+        "parameters": [
+          {
+            "name": "eventTypeId",
+            "in": "path",
+            "required": true,
+            "description": "The numeric ID of the event type to delete.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation that the event type was successfully deleted."
+          }
+        }
+      }
+    },
+    "/bookings": {
+      "get": {
+        "operationId": "listBookings",
+        "summary": "List bookings",
+        "description": "Retrieve a paginated list of bookings for the authenticated user. Use this to view upcoming meetings, past sessions, or bookings in a specific state. The status filter is the most important parameter — use 'upcoming' for future meetings, 'past' for completed ones, 'cancelled' for cancelled ones, and 'unconfirmed' for bookings awaiting confirmation. Supports cursor-based pagination for large result sets.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter bookings by status. Options: 'upcoming' (future confirmed bookings), 'recurring' (recurring meeting instances), 'past' (completed meetings), 'cancelled' (cancelled bookings), 'unconfirmed' (awaiting host confirmation).",
+            "schema": {
+              "type": "string",
+              "enum": ["upcoming", "recurring", "past", "cancelled", "unconfirmed"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of bookings to return per page. Defaults to 10.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor from the previous response's nextCursor field. Omit for the first page.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of booking objects. Each booking includes uid, title, start/end datetimes, attendees, status, eventTypeId, and meeting link (if applicable). Response also includes nextCursor for pagination."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBooking",
+        "summary": "Create a booking",
+        "description": "Book a meeting slot for an attendee on behalf of the authenticated user. Use this to programmatically schedule a meeting without going through the booking page UI. You must first call getAvailableSlots to find a valid start time, and have the eventTypeId from listEventTypes. The attendee's timeZone must be a valid IANA timezone string (e.g. 'America/New_York'). Returns the created booking with its unique UID and any generated meeting link.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["eventTypeId", "start", "attendee"],
+                "properties": {
+                  "eventTypeId": {
+                    "type": "integer",
+                    "description": "The ID of the event type being booked. Determines duration, location, and other meeting settings."
+                  },
+                  "start": {
+                    "type": "string",
+                    "description": "ISO 8601 datetime string for the start of the booking (e.g. '2024-09-01T10:00:00Z'). Must be a slot returned by getAvailableSlots."
+                  },
+                  "attendee": {
+                    "type": "object",
+                    "description": "The person booking the meeting.",
+                    "properties": {
+                      "name": { "type": "string", "description": "Full name of the attendee." },
+                      "email": { "type": "string", "description": "Email address of the attendee. Used for confirmation and reminders." },
+                      "timeZone": { "type": "string", "description": "IANA timezone of the attendee (e.g. 'Europe/London'). Used to display correct local times in confirmations." }
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "Optional key-value pairs to store custom data with the booking (e.g. CRM contact ID, campaign source)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created booking object with uid, title, start, end, attendees, status ('accepted' or 'pending'), and meeting link if a video conferencing integration is set up."
+          }
+        }
+      }
+    },
+    "/bookings/{bookingUid}": {
+      "get": {
+        "operationId": "getBooking",
+        "summary": "Get a booking",
+        "description": "Retrieve the full details of a specific booking by its unique identifier (UID). Use this to check the status of a particular meeting, get the meeting join link, or retrieve attendee information. The bookingUid is a string like 'abc123xyz' returned when a booking is created.",
+        "parameters": [
+          {
+            "name": "bookingUid",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier (UID) of the booking. This is a string token, not a numeric ID.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The booking object with uid, title, description, start, end, attendees (name, email, timeZone), status, eventTypeId, meetingUrl, and any metadata."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateBooking",
+        "summary": "Update a booking",
+        "description": "Update the details of an existing booking. Use this to change the title, description, or the start/end times of a meeting without going through the full cancel-and-rebook flow. Note: changing times does NOT notify attendees automatically unless configured. Returns the updated booking object.",
+        "parameters": [
+          {
+            "name": "bookingUid",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier (UID) of the booking to update.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "description": "Updated meeting title." },
+                  "description": { "type": "string", "description": "Updated meeting description or agenda." },
+                  "start": { "type": "string", "description": "New start time as ISO 8601 datetime string." },
+                  "end": { "type": "string", "description": "New end time as ISO 8601 datetime string." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated booking object with the applied changes."
+          }
+        }
+      }
+    },
+    "/bookings/{bookingUid}/cancel": {
+      "post": {
+        "operationId": "cancelBooking",
+        "summary": "Cancel a booking",
+        "description": "Cancel an existing booking by its UID. This marks the booking as cancelled and sends cancellation notifications to the attendee and host. Provide a cancellationReason to explain why the meeting is being cancelled — this is included in the notification email. Use this when a user or attendee needs to cancel a scheduled meeting.",
+        "parameters": [
+          {
+            "name": "bookingUid",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier (UID) of the booking to cancel.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cancellationReason": {
+                    "type": "string",
+                    "description": "Human-readable reason for cancellation (e.g. 'Schedule conflict' or 'Event postponed'). Included in notification emails to the attendee."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Confirmation that the booking was cancelled. The booking status is updated to 'cancelled'."
+          }
+        }
+      }
+    },
+    "/bookings/{bookingUid}/reschedule": {
+      "post": {
+        "operationId": "rescheduleBooking",
+        "summary": "Reschedule a booking",
+        "description": "Move an existing booking to a new date and time. This cancels the current booking slot and creates a new one at the specified time, sending rescheduling notifications to all attendees. Call getAvailableSlots first to ensure the new time is available. The rescheduledTo datetime must be in ISO 8601 format.",
+        "parameters": [
+          {
+            "name": "bookingUid",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier (UID) of the booking to reschedule.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rescheduledTo"],
+                "properties": {
+                  "rescheduledTo": {
+                    "type": "string",
+                    "description": "The new meeting start time as an ISO 8601 datetime string (e.g. '2024-09-15T14:00:00Z'). Must be a valid available slot."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new booking object created for the rescheduled time. The original booking is marked as rescheduled."
+          }
+        }
+      }
+    },
+    "/slots/available": {
+      "get": {
+        "operationId": "getAvailableSlots",
+        "summary": "Get available time slots",
+        "description": "Retrieve available booking slots for a specific event type within a date range. Use this BEFORE creating a booking to find valid start times that the host is available. Returns time slots respecting the host's availability schedule, buffer times, and existing bookings. The timeZone parameter controls the timezone in which slots are returned — use the attendee's timezone for best UX. Slots are returned as ISO 8601 datetime strings.",
+        "parameters": [
+          {
+            "name": "eventTypeId",
+            "in": "query",
+            "description": "The ID of the event type to check availability for. Required — determines which host schedule and duration to use.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "description": "Start of the date range to check, as an ISO 8601 datetime (e.g. '2024-09-01T00:00:00Z'). Must be in the future.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "description": "End of the date range to check, as an ISO 8601 datetime (e.g. '2024-09-07T23:59:59Z'). Typically 1–7 days after startTime.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "timeZone",
+            "in": "query",
+            "description": "IANA timezone to return slots in (e.g. 'America/Chicago'). Affects how slot times are expressed in the response.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object keyed by date (YYYY-MM-DD) with arrays of available time slot objects. Each slot has a 'time' field with an ISO 8601 datetime string that can be passed directly to createBooking."
+          }
+        }
+      }
+    },
+    "/schedules": {
+      "get": {
+        "operationId": "listSchedules",
+        "summary": "List availability schedules",
+        "description": "Retrieve all availability schedules configured for the authenticated user. Schedules define the days and hours when the user is available for bookings (e.g. Monday–Friday 9am–5pm). Each schedule has a name, timezone, and a set of availability rules per day. Use this to understand or audit the user's working hours configuration.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An array of schedule objects. Each schedule includes id, name, timeZone, isDefault, and availability rules specifying which days and hours are open for bookings."
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Get authenticated user profile",
+        "description": "Retrieve the profile and settings of the currently authenticated Cal.com user. Returns information such as username, email, name, time zone, locale, avatar, and account plan. Use this to identify the current user, get their timezone for availability queries, or display their profile information.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The user profile object including id, username, email, name, timeZone, locale, avatarUrl, plan, and weekStart setting."
+          }
+        }
+      }
+    },
+    "/calendars": {
+      "get": {
+        "operationId": "listCalendars",
+        "summary": "List connected calendars",
+        "description": "Retrieve all calendar integrations connected to the authenticated user's Cal.com account. This includes Google Calendar, Outlook, iCloud, and other connected calendars. Each calendar entry shows whether it is used for checking conflicts (to avoid double-booking) and whether new bookings are written to it. Use this to understand which external calendars are influencing availability.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An array of connected calendar objects. Each includes integration type (e.g. 'google_calendar'), email, name, whether it is the primary calendar, and whether it is checked for conflicts or used to add events."
+          }
+        }
+      }
+    }
+  }
+}

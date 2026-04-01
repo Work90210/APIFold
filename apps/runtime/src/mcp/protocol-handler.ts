@@ -188,7 +188,7 @@ export class ProtocolHandler {
     }
 
     const toolInput = (params['arguments'] ?? {}) as Readonly<Record<string, unknown>>;
-    const context = { requestId: randomUUID(), sessionId: session.id };
+    const context = { requestId: randomUUID(), sessionId: session.id, userKey: session.userKey };
 
     metrics.incrementCounter('total_tool_calls');
     const start = performance.now();

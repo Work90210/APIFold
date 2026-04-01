@@ -250,6 +250,14 @@ export function createServerTokenAuth(
       return;
     }
 
+    // Case 0: Public server — no af_ bearer token required.
+    // userKey extraction and validation happens in the transport layer.
+    if (server.isPublic) {
+      (req as unknown as Record<string, unknown>)['serverTokenVerified'] = true;
+      next();
+      return;
+    }
+
     // Extract token from header or query parameter
     const header = req.headers['authorization'];
     const headerToken = typeof header === 'string' && header.startsWith('Bearer ')

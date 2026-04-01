@@ -16,6 +16,8 @@ export interface L0ServerMeta {
   readonly isActive: boolean;
   readonly customDomain: string | null;
   readonly tokenHash: string | null;
+  /** When true, no af_ bearer token is required. Callers supply their own API key via ?userKey or X-User-Key. */
+  readonly isPublic: boolean;
 }
 
 export interface ServerRegistryDeps {

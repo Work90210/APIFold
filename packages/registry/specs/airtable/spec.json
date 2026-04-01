@@ -1,0 +1,576 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Airtable API",
+    "version": "v0",
+    "description": "Airtable is a cloud-based database and spreadsheet platform. Use this API to read and write records in bases, manage table schemas, and paginate through large datasets. Airtable organizes data into bases (databases), tables, and records (rows) with typed fields (columns)."
+  },
+  "servers": [
+    {
+      "url": "https://api.airtable.com"
+    }
+  ],
+  "paths": {
+    "/v0/{baseId}/{tableIdOrName}": {
+      "get": {
+        "operationId": "listRecords",
+        "summary": "List records",
+        "description": "Retrieve a list of records from a table, with optional filtering, sorting, and field selection. Use this to query data from an Airtable table. Supports Airtable formula syntax for filtering (e.g. filterByFormula='{Status}=\"Active\"'). Pagination is handled via the 'offset' token returned in each response. Returns record IDs, creation timestamps, and the requested field values.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base (database) to query. Starts with 'app' (e.g. 'appXyz123'). Found in the base URL or via the listBases endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID (e.g. 'tblXyz123') or the URL-encoded table name (e.g. 'My%20Table'). Table IDs are preferred as they are stable even if the table is renamed.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields[]",
+            "in": "query",
+            "description": "An array of field names to include in the response. If omitted, all fields are returned. Use this to limit response size when you only need specific columns.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "filterByFormula",
+            "in": "query",
+            "description": "An Airtable formula to filter records (e.g. '{Status}=\"Active\"' or 'AND({Age}>18,{Country}=\"US\")' ). Only records where the formula evaluates to true are returned.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxRecords",
+            "in": "query",
+            "description": "The maximum total number of records to return across all pages. Defaults to no limit. Use this to cap large queries.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sort[]",
+            "in": "query",
+            "description": "Sort records by one or more fields. Each sort item specifies a field name and direction ('asc' or 'desc'). Example: sort[0][field]=Name&sort[0][direction]=asc.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "description": "The name or ID of a saved view to use. Applies the view's filter, sort, and hidden-field settings. Records not visible in the view will be excluded.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination cursor returned by a previous listRecords response. Pass this value to retrieve the next page of results.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of records. Each record contains id, createdTime, and a fields object with the record's column values. If more pages exist, an 'offset' token is included for pagination."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createRecords",
+        "summary": "Create records",
+        "description": "Create one or more new records in a table in a single request (up to 10 records per call). Each record is defined by a 'fields' object mapping field names to values. Returns the newly created records with their assigned IDs. Use this for bulk inserts to reduce API calls.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base (database) containing the target table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID (e.g. 'tblXyz123') or URL-encoded table name where records will be created.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["records"],
+                "properties": {
+                  "records": {
+                    "type": "array",
+                    "description": "An array of record objects to create. Each object must have a 'fields' key whose value is an object mapping field names to their values. Maximum 10 records per request.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fields": {
+                          "type": "object",
+                          "description": "A mapping of field names to values for this record. Field types must match the table schema (text, number, date, etc.).",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An array of the newly created record objects, each containing id, createdTime, and fields with the values that were saved."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateRecords",
+        "summary": "Update records",
+        "description": "Update multiple existing records in a table in a single request (up to 10 per call). Only fields specified in each record's 'fields' object are updated; all other fields remain unchanged. This is a partial update (PATCH semantics). Returns the updated record objects.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base containing the table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID or URL-encoded table name containing the records to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["records"],
+                "properties": {
+                  "records": {
+                    "type": "array",
+                    "description": "An array of record objects to update. Each must include an 'id' (the record ID) and a 'fields' object with the field values to update. Maximum 10 records per request.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the record to update (e.g. 'recXyz123')."
+                        },
+                        "fields": {
+                          "type": "object",
+                          "description": "Fields to update. Only listed fields will change; unlisted fields retain their current values.",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An array of the updated record objects, each containing id, createdTime, and the full updated fields."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRecords",
+        "summary": "Delete records",
+        "description": "Permanently delete one or more records from a table in a single request (up to 10 per call). Provide the record IDs as query parameters. This action is irreversible. Returns the IDs of the deleted records and a deleted flag.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base containing the table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID or URL-encoded table name containing the records to delete.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "records[]",
+            "in": "query",
+            "description": "An array of record IDs to delete (e.g. records[]=recAbc&records[]=recDef). Maximum 10 records per request.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of objects each containing id and deleted:true confirming which records were removed."
+          }
+        }
+      }
+    },
+    "/v0/{baseId}/{tableIdOrName}/{recordId}": {
+      "get": {
+        "operationId": "getRecord",
+        "summary": "Get a record",
+        "description": "Retrieve a single record by its ID from a specific table. Use this when you already know the record ID and want to fetch its current field values without listing all records. Returns the record's id, createdTime, and all field values.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base containing the table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID or URL-encoded table name containing the target record.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the record to retrieve (e.g. 'recXyz123'). Record IDs always start with 'rec'.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The record object containing id, createdTime, and a fields object with all column values for the record."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateRecord",
+        "summary": "Update a record",
+        "description": "Partially update a single record by its ID. Only the fields provided in the request body are modified; all other fields retain their current values. Use this for targeted updates when you know the specific record ID. Returns the full updated record.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base containing the table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID or URL-encoded table name containing the record to update.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the record to update (e.g. 'recXyz123'). Record IDs always start with 'rec'.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["fields"],
+                "properties": {
+                  "fields": {
+                    "type": "object",
+                    "description": "A mapping of field names to new values. Only the fields listed here will be updated.",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated record object containing id, createdTime, and the full fields object after the update."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRecord",
+        "summary": "Delete a record",
+        "description": "Permanently delete a single record from a table by its ID. This action is irreversible. Use this when you need to remove a specific record and already know its ID. Returns the deleted record's ID and a deleted:true confirmation.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base containing the table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "description": "The table ID or URL-encoded table name containing the record to delete.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the record to delete (e.g. 'recXyz123'). Record IDs always start with 'rec'.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object containing id and deleted:true confirming the record was removed."
+          }
+        }
+      }
+    },
+    "/v0/meta/bases": {
+      "get": {
+        "operationId": "listBases",
+        "summary": "List bases",
+        "description": "Retrieve a list of all Airtable bases (databases) accessible to the authenticated token. Use this to discover available base IDs before querying their tables or records. Returns each base's ID, name, and permission level. Supports pagination via the 'offset' parameter.",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination cursor returned by a previous listBases response. Pass this to retrieve the next page of bases.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of base objects. Each base includes id, name, and permissionLevel (create, comment, edit, or read). An offset token is included if more pages exist."
+          }
+        }
+      }
+    },
+    "/v0/meta/bases/{baseId}/tables": {
+      "get": {
+        "operationId": "listTables",
+        "summary": "List tables in a base",
+        "description": "Retrieve all tables within a specific base along with their field schemas. Use this to discover the structure of a base before reading or writing records — you can see each table's fields, their types, and configuration options without fetching any record data.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base whose tables to list. Starts with 'app' (e.g. 'appXyz123').",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of table objects. Each table includes id, name, description, primaryFieldId, fields (array of field schema objects with id, name, type, and options), and views."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTable",
+        "summary": "Create a table",
+        "description": "Create a new table within an existing base. Define the table's name, optional description, and initial field schema. Use this to programmatically scaffold a new data structure in Airtable. The first field in the fields array becomes the primary field.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base in which to create the new table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "fields"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The display name for the new table. Must be unique within the base."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "An optional description for the table explaining its purpose or contents."
+                  },
+                  "fields": {
+                    "type": "array",
+                    "description": "An array of field definitions to create with the table. Each field requires a name and type. The first field becomes the primary field and must be a text-compatible type.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "The field name as it will appear in the table header."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "The field type (e.g. 'singleLineText', 'number', 'date', 'checkbox', 'singleSelect', 'multipleAttachments')."
+                        },
+                        "options": {
+                          "type": "object",
+                          "description": "Type-specific field options (e.g. choices for singleSelect, precision for number fields).",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created table object including id, name, description, primaryFieldId, and the fields array with each field's assigned ID."
+          }
+        }
+      }
+    },
+    "/v0/meta/bases/{baseId}/tables/{tableId}": {
+      "patch": {
+        "operationId": "updateTable",
+        "summary": "Update a table",
+        "description": "Update the name or description of an existing table. Use this to rename a table or update its description without affecting its records or field schema. Returns the updated table metadata.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base containing the table. Starts with 'app'.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tableId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the table to update. Starts with 'tbl' (e.g. 'tblXyz123'). Use listTables to find the ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The new display name for the table. Must be unique within the base."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Updated description for the table."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated table metadata object including id, name, and description."
+          }
+        }
+      }
+    },
+    "/v0/meta/bases/{baseId}": {
+      "get": {
+        "operationId": "getBase",
+        "summary": "Get a base",
+        "description": "Retrieve metadata for a single Airtable base by its ID. Use this to confirm a base exists and check the authenticated user's permission level before performing read or write operations. Returns the base's id, name, and permissionLevel.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the Airtable base to retrieve. Starts with 'app' (e.g. 'appXyz123'). Obtain this from the listBases endpoint or the base URL.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The base metadata object including id, name, and permissionLevel (create, comment, edit, or read)."
+          }
+        }
+      }
+    }
+  }
+}

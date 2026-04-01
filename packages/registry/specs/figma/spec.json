@@ -1,0 +1,376 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Figma API",
+    "version": "1.0.0",
+    "description": "The Figma API provides programmatic access to Figma design files, components, comments, and team resources. Authenticate using OAuth 2.0 Bearer tokens (recommended) or a personal access token via the X-Figma-Token header. When using Bearer tokens, include 'Authorization: Bearer <token>'. File keys are the alphanumeric IDs found in Figma file URLs (e.g. for https://www.figma.com/file/ABC123/..., the fileKey is 'ABC123')."
+  },
+  "servers": [
+    {
+      "url": "https://api.figma.com/v1"
+    }
+  ],
+  "paths": {
+    "/files/{fileKey}": {
+      "get": {
+        "operationId": "getFigmaFile",
+        "summary": "Get a Figma file",
+        "description": "Retrieve the full document tree of a Figma file, including all pages, frames, layers, and their properties. The response is a deeply nested JSON structure representing every node in the file. Use this to understand the design structure, extract layer names, discover frame IDs for export, or read design tokens. The fileKey is the alphanumeric ID from the Figma file URL (e.g. 'HkHMaSqcyn...'). Note: large files can produce very large responses — use getFileNodes for specific nodes when possible.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique alphanumeric key identifying the Figma file. Found in the file's URL: figma.com/file/{fileKey}/...",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "How many levels deep to traverse the document tree. Lower values return less data. Omit for the full tree.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A document object containing the file name, last modified date, thumbnailUrl, version, and a 'document' node with the full page and layer tree. Each node has an id, name, type, and type-specific properties."
+          }
+        }
+      }
+    },
+    "/files/{fileKey}/nodes": {
+      "get": {
+        "operationId": "getFileNodes",
+        "summary": "Get specific nodes from a file",
+        "description": "Retrieve detailed data for specific nodes within a Figma file, identified by their node IDs. Use this instead of getFigmaFile when you only need particular frames or components, avoiding the overhead of fetching the entire file. Node IDs are in the format '1:23' or '1234:5678'. You can get node IDs by first calling getFigmaFile and reading the 'id' field of each node.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file containing the nodes.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "Comma-separated list of node IDs to retrieve (e.g. '1:2,3:4,5:6'). Each ID must exist in the specified file.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with a 'nodes' map keyed by node ID. Each value contains the node document, components used, styles, and the schema version."
+          }
+        }
+      }
+    },
+    "/files/{fileKey}/images": {
+      "get": {
+        "operationId": "exportImages",
+        "summary": "Export node images",
+        "description": "Generate export URLs for specific nodes in a Figma file in various formats (PNG, JPG, SVG, PDF). Use this to programmatically export design assets, icons, or screenshots of frames. The API returns pre-signed URLs that are valid for a limited time — download the images promptly. SVG is best for icons and vector assets; PNG/JPG for rasterized previews; PDF for print-ready exports.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file containing the nodes to export.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "Comma-separated list of node IDs to export (e.g. '1:2,3:4'). Required.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Export format. One of: 'jpg', 'png', 'svg', 'pdf'. Defaults to 'png'. Use 'svg' for vector/icon assets, 'png' for screenshots, 'pdf' for documents.",
+            "schema": {
+              "type": "string",
+              "enum": ["jpg", "png", "svg", "pdf"]
+            }
+          },
+          {
+            "name": "scale",
+            "in": "query",
+            "description": "Export scale multiplier for raster formats (0.01–4). Use 2 for @2x retina exports, 1 for standard resolution. Ignored for SVG and PDF.",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with an 'images' map keyed by node ID, where each value is a URL string to the exported image. URLs expire after a short time — download images immediately."
+          }
+        }
+      }
+    },
+    "/files/{fileKey}/comments": {
+      "get": {
+        "operationId": "listComments",
+        "summary": "List comments on a file",
+        "description": "Retrieve all comments on a Figma file, including threaded replies. Use this to read design feedback, review annotations, or sync comments to an external system. Comments can be placed on the canvas at specific coordinates or attached to a specific node. Returns both resolved and unresolved comments.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file to list comments for.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with a 'comments' array. Each comment includes id, message, created_at, resolved_at (if resolved), user (name, email, handle), client_meta (position), parent_id (for replies), and order_id."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createComment",
+        "summary": "Add a comment to a file",
+        "description": "Post a new comment on a Figma file, either at a canvas coordinate or attached to a specific node. Use this to programmatically add design feedback, annotations, or notes. To attach to a node, provide node_id in client_meta. To place at canvas coordinates, provide x and y. Comments support plain text messages.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file to comment on.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "The text content of the comment. Plain text only — Figma does not support rich text in comments."
+                  },
+                  "client_meta": {
+                    "type": "object",
+                    "description": "Positioning metadata for the comment. Include 'node_id' to attach to a specific node, or 'x' and 'y' (numbers) to place at canvas coordinates.",
+                    "properties": {
+                      "node_id": { "type": "string", "description": "ID of the node to attach the comment to." },
+                      "x": { "type": "number", "description": "Canvas x-coordinate for the comment pin." },
+                      "y": { "type": "number", "description": "Canvas y-coordinate for the comment pin." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created comment object with id, message, created_at, user, and client_meta."
+          }
+        }
+      }
+    },
+    "/files/{fileKey}/comments/{commentId}": {
+      "delete": {
+        "operationId": "deleteComment",
+        "summary": "Delete a comment",
+        "description": "Delete a specific comment from a Figma file by its comment ID. Only the comment author or file editors can delete comments. Deleting a parent comment also removes its replies. Use this to clean up resolved feedback or remove outdated annotations.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file containing the comment.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the comment to delete. Obtain from listComments.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An empty response body confirming successful deletion."
+          }
+        }
+      }
+    },
+    "/files/{fileKey}/versions": {
+      "get": {
+        "operationId": "listFileVersions",
+        "summary": "List file version history",
+        "description": "Retrieve the version history of a Figma file. Figma automatically saves named versions when editors use 'Save to Version History'. Use this to audit changes, find a specific version to restore, or understand the evolution of a design. Returns a paginated list of versions with timestamps and optional labels.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file to get version history for.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of version objects. Each version includes id, created_at, label (if named), description, user (who saved it), and thumbnail_url."
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/projects": {
+      "get": {
+        "operationId": "listTeamProjects",
+        "summary": "List projects in a team",
+        "description": "Retrieve all projects within a Figma team. Projects are folders that organize files within a team workspace. Use this to discover what projects exist before listing files within them. The teamId can be found in the Figma URL when viewing a team: figma.com/team/{teamId}/...",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "description": "The unique numeric ID of the Figma team. Found in the team URL: figma.com/team/{teamId}/...",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with a 'projects' array. Each project has an id and name."
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/files": {
+      "get": {
+        "operationId": "listProjectFiles",
+        "summary": "List files in a project",
+        "description": "Retrieve all Figma files within a specific project. Use this after listTeamProjects to enumerate files in a project folder. Returns basic file metadata — use getFigmaFile with the returned fileKey to get full file content.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique numeric ID of the project. Obtain from listTeamProjects.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with a 'files' array. Each file entry includes key (fileKey), name, thumbnail_url, last_modified, and editor_type."
+          }
+        }
+      }
+    },
+    "/components/{key}": {
+      "get": {
+        "operationId": "getComponent",
+        "summary": "Get a published component",
+        "description": "Retrieve metadata for a specific published component by its key. Published components are reusable design elements shared across a team's design system. Use this to get the component's name, description, file reference, and thumbnail. The component key is different from a node ID — it's a stable identifier assigned when the component is published.",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the published component. Obtain from listTeamComponents or from the component's entry in a file's 'components' map.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A component metadata object including key, name, description, file_key, node_id, thumbnail_url, created_at, updated_at, and the containing file/page information."
+          }
+        }
+      }
+    },
+    "/component_sets/{key}": {
+      "get": {
+        "operationId": "getComponentSet",
+        "summary": "Get a component set",
+        "description": "Retrieve metadata for a component set (a group of related component variants) by its key. Component sets in Figma group multiple variants of a component (e.g. Button with variants for size and state). Use this to understand what variants exist for a given component.",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the published component set. Obtain from listTeamComponents or the file's component_sets map.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A component set metadata object including key, name, description, file_key, node_id, thumbnail_url, and timestamps."
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/components": {
+      "get": {
+        "operationId": "listTeamComponents",
+        "summary": "List published components in a team",
+        "description": "Retrieve all published components in a Figma team's design system. Use this to browse available design system components, find component keys for use in getComponent, or audit what's been published. Supports cursor-based pagination for teams with large component libraries.",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "description": "The unique numeric ID of the Figma team.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of components to return per page (max 100). Defaults to 30.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor from the previous response to fetch the next page.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of component metadata objects and a cursor for the next page. Each component includes key, name, description, thumbnail_url, file_key, and timestamps."
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "getFigmaUser",
+        "summary": "Get authenticated Figma user",
+        "description": "Retrieve the profile of the currently authenticated Figma user. Returns the user's name, email, handle (username), and avatar image URL. Use this to verify authentication is working, identify who is connected, or display user info.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The user profile object including id, email, handle (username), img_url (avatar), and teams the user belongs to."
+          }
+        }
+      }
+    },
+    "/files/{fileKey}/variables/local": {
+      "get": {
+        "operationId": "getLocalVariables",
+        "summary": "Get local variables in a file",
+        "description": "Retrieve all local variables (design tokens) defined in a Figma file. Variables can store color, number, string, or boolean values and are used to implement design tokens for theming and consistency. Returns variable collections (groups), individual variables, and their values across modes (e.g. light/dark theme values). Use this to extract design tokens programmatically for use in a code design system.",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "in": "path",
+            "required": true,
+            "description": "The unique key of the Figma file to retrieve local variables from.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object with 'meta' containing 'variables' (map of variable ID to variable definition) and 'variableCollections' (map of collection ID to collection with modes). Each variable has a name, resolvedType (COLOR/FLOAT/STRING/BOOLEAN), and valuesByMode."
+          }
+        }
+      }
+    }
+  }
+}

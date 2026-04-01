@@ -1,0 +1,547 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Vercel API",
+    "version": "v9",
+    "description": "Vercel is a cloud platform for deploying and scaling web applications. Use this API to manage projects, deployments, environment variables, and domains. Ideal for automating CI/CD workflows, inspecting deployment status, and configuring project settings programmatically."
+  },
+  "servers": [
+    {
+      "url": "https://api.vercel.com"
+    }
+  ],
+  "paths": {
+    "/v9/projects": {
+      "get": {
+        "operationId": "listProjects",
+        "summary": "List projects",
+        "description": "Retrieve a paginated list of all Vercel projects associated with the authenticated account or team. Use this to browse available projects, find a project by name, or enumerate projects for bulk operations. Returns each project's id, name, framework, linked Git repository, and most recent deployment information.",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of projects to return per page (1-100). Defaults to 20. Use alongside 'since' or 'until' for pagination.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Filter projects by name using a case-insensitive substring match. Useful when you know part of the project name but not the exact ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of project objects. Each project includes id, name, framework, accountId, createdAt, updatedAt, latestDeployments, and link (Git repository info)."
+          }
+        }
+      }
+    },
+    "/v9/projects/{projectId}": {
+      "get": {
+        "operationId": "getProject",
+        "summary": "Get a project",
+        "description": "Retrieve the full details of a single Vercel project by its ID or name. Use this to inspect a project's configuration, framework setting, Git repository linkage, environment variable count, and the URL of its latest production deployment.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique project ID (e.g. 'prj_abc123') or the project name. Both are accepted as path identifiers.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The project object including id, name, framework, accountId, createdAt, updatedAt, link (Git repository), latestDeployments, and targets (production alias URL)."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateProject",
+        "summary": "Update a project",
+        "description": "Update configuration fields on an existing Vercel project. Use this to rename a project, change its detected framework, or toggle public source visibility. Only fields provided in the request body are modified; omitted fields retain their current values.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique project ID (e.g. 'prj_abc123') or project name to update.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "New name for the project. Must be unique within the account or team. Changing the name updates the default deployment URL slug."
+                  },
+                  "framework": {
+                    "type": "string",
+                    "description": "The framework preset to use for builds (e.g. 'nextjs', 'vite', 'create-react-app', 'svelte'). Affects build commands and output directory defaults."
+                  },
+                  "publicSource": {
+                    "type": "boolean",
+                    "description": "When true, the project's source code is publicly accessible. Set to false to keep source private even if the deployment URL is public."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated project object reflecting the new configuration values."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteProject",
+        "summary": "Delete a project",
+        "description": "Permanently delete a Vercel project and all of its deployments, environment variables, and domain associations. This action is irreversible. Use with caution — all deployment history will be lost and previously assigned domains will be unlinked.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique project ID (e.g. 'prj_abc123') or project name to delete.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Project successfully deleted. No content is returned."
+          }
+        }
+      }
+    },
+    "/v10/projects": {
+      "post": {
+        "operationId": "createProject",
+        "summary": "Create a project",
+        "description": "Create a new Vercel project, optionally linking it to a Git repository for automatic deployments on push. Specify the framework so Vercel can apply the correct build preset. Returns the newly created project object with its assigned ID and default settings.",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the new project. Must be unique within the account or team. This name forms the basis of the default deployment URL."
+                  },
+                  "framework": {
+                    "type": "string",
+                    "description": "The framework preset for the project (e.g. 'nextjs', 'vite', 'gatsby', 'nuxtjs'). Determines default build command, output directory, and install command."
+                  },
+                  "gitRepository": {
+                    "type": "object",
+                    "description": "Links the project to a Git repository for automatic deployments. Provide the repository type and the full repo name.",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "The Git provider. One of: 'github', 'gitlab', 'bitbucket'.",
+                        "enum": ["github", "gitlab", "bitbucket"]
+                      },
+                      "repo": {
+                        "type": "string",
+                        "description": "The full repository name in 'owner/repo' format (e.g. 'acme/my-app')."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created project object including id, name, framework, accountId, createdAt, and link (Git repository info if provided)."
+          }
+        }
+      }
+    },
+    "/v6/deployments": {
+      "get": {
+        "operationId": "listDeployments",
+        "summary": "List deployments",
+        "description": "Retrieve a paginated list of deployments, optionally filtered by project and state. Use this to monitor build activity, find failed deployments that need attention, or audit the deployment history for a specific project. Each deployment includes its URL, state, creator, and Git commit metadata.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "query",
+            "description": "Filter deployments to those belonging to this project ID or project name. Omit to list deployments across all projects.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of deployments to return per page (1-100). Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Filter deployments by their current state. One of: BUILDING, ERROR, INITIALIZING, QUEUED, READY, CANCELED. Use 'ERROR' to find failed deployments or 'READY' to list successful ones.",
+            "schema": {
+              "type": "string",
+              "enum": ["BUILDING", "ERROR", "INITIALIZING", "QUEUED", "READY", "CANCELED"]
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of deployment objects. Each deployment includes uid, url, name, state, createdAt, creator, meta (Git branch, commit SHA, commit message), and target (production or preview)."
+          }
+        }
+      }
+    },
+    "/v13/deployments/{deploymentId}": {
+      "get": {
+        "operationId": "getDeployment",
+        "summary": "Get a deployment",
+        "description": "Retrieve the full details of a single deployment by its ID or URL. Use this to check the current build state, inspect error logs references, see which Git commit triggered it, and get the public deployment URL. Useful for polling build completion in CI pipelines.",
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "description": "The deployment ID (e.g. 'dpl_abc123') or the full deployment URL (e.g. 'my-app-xyz.vercel.app'). Both are accepted.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deployment object including uid, url, name, state, createdAt, buildingAt, ready, creator, meta (Git info), and target (production/preview)."
+          }
+        }
+      }
+    },
+    "/v13/deployments/{deploymentId}/cancel": {
+      "post": {
+        "operationId": "cancelDeployment",
+        "summary": "Cancel a deployment",
+        "description": "Cancel a deployment that is currently in a QUEUED or BUILDING state. Use this to stop an unwanted build, for example when a bad commit was pushed and you want to prevent it from going live. Has no effect on deployments that are already READY, ERROR, or CANCELED.",
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "required": true,
+            "description": "The unique deployment ID (e.g. 'dpl_abc123') of the deployment to cancel.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated deployment object with state set to CANCELED."
+          }
+        }
+      }
+    },
+    "/v9/projects/{projectId}/env": {
+      "get": {
+        "operationId": "listEnvVars",
+        "summary": "List environment variables",
+        "description": "Retrieve all environment variables configured for a project. Use this to audit existing configuration, verify which targets (production, preview, development) a variable is assigned to, or check variable types. Sensitive secret values are redacted in the response; only the key, type, and target are returned in plain text.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique project ID (e.g. 'prj_abc123') or project name whose environment variables to list.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of environment variable objects. Each entry includes id, key, value (redacted for secrets), type (plain/secret/encrypted/system), target (array of environments), and createdAt."
+          }
+        }
+      }
+    },
+    "/v10/projects/{projectId}/env": {
+      "post": {
+        "operationId": "createEnvVar",
+        "summary": "Create an environment variable",
+        "description": "Add a new environment variable to a project. Specify which deployment targets (production, preview, development) the variable applies to. Use type 'plain' for non-sensitive values and 'encrypted' or 'secret' for sensitive values like API keys. The variable becomes available in the next deployment for the specified targets.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique project ID (e.g. 'prj_abc123') or project name to add the environment variable to.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["key", "value", "type", "target"],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "description": "The environment variable name (e.g. 'DATABASE_URL', 'NEXT_PUBLIC_API_KEY'). Convention is UPPER_SNAKE_CASE."
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "The environment variable value. For sensitive values use type 'encrypted' or 'secret' so the value is stored securely."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "How the value is stored. 'plain' stores it in plain text, 'encrypted' encrypts it at rest, 'secret' references a Vercel secret, 'system' is a built-in Vercel variable.",
+                    "enum": ["plain", "secret", "encrypted", "system"]
+                  },
+                  "target": {
+                    "type": "array",
+                    "description": "The deployment environments this variable is available in. Provide an array containing any combination of 'production', 'preview', 'development'.",
+                    "items": {
+                      "type": "string",
+                      "enum": ["production", "preview", "development"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created environment variable object including id, key, type, target, and createdAt."
+          }
+        }
+      }
+    },
+    "/v9/projects/{projectId}/env/{envId}": {
+      "delete": {
+        "operationId": "deleteEnvVar",
+        "summary": "Delete an environment variable",
+        "description": "Permanently remove an environment variable from a project. The variable will no longer be injected into future deployments. Use listEnvVars first to retrieve the envId of the variable you want to delete.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "The unique project ID (e.g. 'prj_abc123') or project name that owns the environment variable.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "envId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the environment variable to delete. Obtain this from the listEnvVars response.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted environment variable object confirming its removal."
+          }
+        }
+      }
+    },
+    "/v2/domains": {
+      "get": {
+        "operationId": "listDomains",
+        "summary": "List domains",
+        "description": "Retrieve a list of all domains registered or added to the authenticated Vercel account or team. Use this to audit domain ownership, check DNS configuration status, check if a domain has been verified, or look up the project a domain is currently assigned to.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of domains to return per page. Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "The team ID to scope the request to. Required when the token belongs to a team rather than a personal account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of domain objects. Each domain includes name, verified status, nameservers, intendedNameservers, serviceType, projectId, and createdAt."
+          }
+        }
+      }
+    },
+    "/v2/user": {
+      "get": {
+        "operationId": "getUser",
+        "summary": "Get the authenticated user",
+        "description": "Retrieve profile information for the currently authenticated user. Use this to verify the token is valid, get the user's account ID (needed for certain team-scoped requests), or display the user's name and email in a UI.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The authenticated user object including uid, email, name, username, avatar, createdAt, and billing plan information."
+          }
+        }
+      }
+    },
+    "/v2/teams": {
+      "get": {
+        "operationId": "listTeams",
+        "summary": "List teams",
+        "description": "Retrieve all teams that the authenticated user is a member of. Use this to discover available teamIds for scoping subsequent API calls, or to let a user choose which team context to operate in when they belong to multiple organizations.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of teams to return per page. Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Timestamp (ms) used as a cursor for pagination. Returns teams created after this timestamp.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of team objects. Each team includes id, slug, name, avatar, membership role, and createdAt."
+          }
+        }
+      }
+    }
+  }
+}
