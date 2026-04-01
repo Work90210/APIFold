@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Users, Plus, Trash2, Shield } from "lucide-react";
@@ -23,7 +23,7 @@ const ROLE_COLORS: Record<WorkspaceRole, "default" | "secondary" | "outline"> = 
   viewer: "outline",
 };
 
-export default function MembersPage() {
+function MembersPageContent() {
   const { user } = useUser();
   const searchParams = useSearchParams();
   const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
@@ -187,5 +187,13 @@ export default function MembersPage() {
         </dl>
       </div>
     </div>
+  );
+}
+
+export default function MembersPage() {
+  return (
+    <Suspense>
+      <MembersPageContent />
+    </Suspense>
   );
 }
