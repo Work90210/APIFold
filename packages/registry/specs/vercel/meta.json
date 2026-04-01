@@ -1,0 +1,1 @@
+{"id":"vercel","name":"Vercel","description":"Deploy and manage web projects, deployments, domains, and environment variables","category":"developer-tools","authType":"bearer","docsUrl":"https://vercel.com/docs/rest-api","tags":["deployments","hosting","serverless","domains","ci-cd"]}

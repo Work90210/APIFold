@@ -1,0 +1,493 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Intercom API",
+    "version": "1.0.0",
+    "description": "Intercom is a customer messaging and support platform. Use this API to manage contacts (users and leads), conversations (support threads), companies, tags, and admins. IMPORTANT: All requests must include the header 'Intercom-Version: 2.11'. Authenticate with a Bearer token (access token) from your Intercom Developer Hub app settings. The workspace is determined by the access token."
+  },
+  "servers": [
+    {
+      "url": "https://api.intercom.io"
+    }
+  ],
+  "paths": {
+    "/contacts": {
+      "get": {
+        "operationId": "listContacts",
+        "summary": "List contacts",
+        "description": "Retrieve a paginated list of contacts (users or leads) in the Intercom workspace. Use query parameters to filter by email or phone number to find a specific contact, or list all contacts. Contacts represent real people — 'user' role means a signed-up customer, 'lead' means a prospective customer. Use cursor-based pagination via the starting_after parameter for large result sets.",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Filter contacts by exact email address. Useful for looking up a specific person.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "Filter contacts by phone number.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of contacts to return per page (max 150). Defaults to 50.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "starting_after",
+            "in": "query",
+            "description": "Pagination cursor. Pass the value from the previous response's 'starting_after' field to get the next page.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of contact objects. Each contact includes id, role (user/lead), email, name, phone, created_at, last_seen_at, custom_attributes, companies, and tags."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createContact",
+        "summary": "Create a contact",
+        "description": "Create a new contact (user or lead) in Intercom. Use role 'user' for signed-up customers with a known email or external_id, and 'lead' for anonymous prospects. The external_id allows you to link the Intercom contact to a user in your own system. Custom attributes let you store additional data on the contact (fields must be defined in Intercom settings first).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["role"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the contact. Required for users — used as the primary identifier."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Full name of the contact."
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Phone number of the contact in E.164 format (e.g. '+15005550006')."
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "lead"],
+                    "description": "Type of contact. 'user' for signed-up customers, 'lead' for prospective/anonymous contacts."
+                  },
+                  "external_id": {
+                    "type": "string",
+                    "description": "Your system's unique ID for this person. Allows linking Intercom contacts to your own user records."
+                  },
+                  "custom_attributes": {
+                    "type": "object",
+                    "description": "Key-value pairs of custom attributes to set on the contact. Keys must match attributes defined in Intercom workspace settings."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created contact object with all fields including the Intercom-generated id."
+          }
+        }
+      }
+    },
+    "/contacts/{contactId}": {
+      "get": {
+        "operationId": "getContact",
+        "summary": "Get a contact",
+        "description": "Retrieve the full details of a specific contact by their Intercom contact ID. Returns all stored data including email, name, role, custom attributes, associated companies, tags, and engagement statistics (last seen, session count). Use this to get the complete profile of a known contact.",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "description": "The unique Intercom-generated ID of the contact (e.g. '6329bd9ffe4e9081dcb7e0e4'). Obtain from listContacts.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contact object with all fields: id, role, email, name, phone, external_id, created_at, updated_at, last_seen_at, custom_attributes, companies list, tags, and avatar."
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateContact",
+        "summary": "Update a contact",
+        "description": "Update the details of an existing contact by their Intercom ID. Use this to sync profile changes from your system to Intercom, update custom attributes, or correct contact information. All fields in the request body are applied — use only the fields you want to update.",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "description": "The unique Intercom ID of the contact to update.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "description": "Updated email address." },
+                  "name": { "type": "string", "description": "Updated full name." },
+                  "phone": { "type": "string", "description": "Updated phone number." },
+                  "custom_attributes": {
+                    "type": "object",
+                    "description": "Custom attribute key-value pairs to update. Only specified keys are changed."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated contact object with all current field values."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteContact",
+        "summary": "Delete a contact",
+        "description": "Permanently delete a contact from the Intercom workspace by their ID. This removes all associated data including conversation history links. This action is irreversible. Use with caution — consider archiving instead if you need to preserve history.",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "description": "The unique Intercom ID of the contact to permanently delete.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A deletion confirmation object with the deleted contact's id and a 'deleted: true' flag."
+          }
+        }
+      }
+    },
+    "/conversations": {
+      "get": {
+        "operationId": "listConversations",
+        "summary": "List conversations",
+        "description": "Retrieve a paginated list of support conversations in the Intercom workspace. Conversations represent threads between contacts and your support team. Use the 'order' parameter to sort by activity or creation date. By default returns all conversation types — filter further using the Intercom search endpoint for complex filtering by assignee, state, or tag.",
+        "parameters": [
+          {
+            "name": "display_as",
+            "in": "query",
+            "description": "Format of the conversation list. Use 'plaintext' to strip HTML from message bodies. Defaults to rich text.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of conversations per page (max 150). Defaults to 20.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order. 'desc' for newest first (default), 'asc' for oldest first.",
+            "schema": { "type": "string", "enum": ["asc", "desc"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of conversation objects. Each includes id, created_at, updated_at, state (open/closed/snoozed), read status, assignee (admin), source (first message), conversation_parts (reply history), and contact participants."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createConversation",
+        "summary": "Start a new conversation",
+        "description": "Initiate a new conversation from a contact to your Intercom inbox. Use this to programmatically create support tickets or inbound messages on behalf of a contact. The 'from' object must reference an existing contact by their Intercom ID and type ('user' or 'lead'). The body is the initial message text.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["from", "body"],
+                "properties": {
+                  "from": {
+                    "type": "object",
+                    "description": "The contact initiating the conversation.",
+                    "required": ["type", "id"],
+                    "properties": {
+                      "type": { "type": "string", "enum": ["user", "lead"], "description": "Contact role type." },
+                      "id": { "type": "string", "description": "The Intercom contact ID of the sender." }
+                    }
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "The text of the opening message. Plain text or HTML depending on your workspace settings."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created conversation object with id, created_at, state, source (initial message), and contact details."
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}": {
+      "get": {
+        "operationId": "getConversation",
+        "summary": "Get a conversation",
+        "description": "Retrieve the full thread of a specific conversation including all message parts, replies, and internal notes. Use this to read the complete history of a support thread, find the current assignee, or check the conversation state (open/closed/snoozed). Returns up to the last 500 conversation parts.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "The unique numeric ID of the conversation (e.g. '12345'). Obtain from listConversations.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The full conversation object with id, state, assignee, contacts, source (first message), and conversation_parts array containing all replies and notes with their authors, body text, and timestamps."
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/reply": {
+      "post": {
+        "operationId": "replyToConversation",
+        "summary": "Reply to a conversation",
+        "description": "Send a reply to an existing conversation from an admin or a contact. Use type 'admin' to send a reply from an admin/agent, or 'user' to reply on behalf of the contact. The message_type 'comment' sends a visible reply; 'note' sends an internal note visible only to your team (prefer the addConversationNote endpoint for clarity). Replying to a closed conversation will reopen it.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the conversation to reply to.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type", "message_type", "body"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["admin", "user"],
+                    "description": "Who is replying. 'admin' for a support agent, 'user' for the contact."
+                  },
+                  "message_type": {
+                    "type": "string",
+                    "enum": ["comment", "note"],
+                    "description": "'comment' for a visible customer-facing reply; 'note' for an internal-only note."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "The text of the reply. HTML is supported for admin replies."
+                  },
+                  "admin_id": {
+                    "type": "string",
+                    "description": "Required when type is 'admin'. The Intercom ID of the admin sending the reply."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated conversation object with the new reply appended to conversation_parts."
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/parts": {
+      "post": {
+        "operationId": "addConversationNote",
+        "summary": "Add an internal note to a conversation",
+        "description": "Add an internal note to a conversation that is only visible to your support team and not to the contact. Use this to leave context for teammates, log actions taken, or collaborate internally on how to handle a case. Notes appear in the conversation thread but are clearly marked as internal and hidden from customers.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the conversation to add a note to.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type", "message_type", "body", "admin_id"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["admin"],
+                    "description": "Must be 'admin' for internal notes."
+                  },
+                  "message_type": {
+                    "type": "string",
+                    "enum": ["note"],
+                    "description": "Must be 'note' to create an internal note."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "The content of the internal note. HTML is supported."
+                  },
+                  "admin_id": {
+                    "type": "string",
+                    "description": "The Intercom ID of the admin authoring the note. Obtain from listAdmins."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated conversation with the new internal note appended to conversation_parts, marked with noteable: true."
+          }
+        }
+      }
+    },
+    "/admins": {
+      "get": {
+        "operationId": "listAdmins",
+        "summary": "List admins",
+        "description": "Retrieve all admins (support agents and teammates) in the Intercom workspace. Use this to find admin IDs needed when assigning conversations, posting replies as an admin, or adding notes. Returns each admin's id, name, email, and role in the workspace.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An object with an 'admins' array. Each admin has id, type ('admin'), name, email, job_title, avatar, and has_inbox_seat (whether they can be assigned conversations)."
+          }
+        }
+      }
+    },
+    "/companies": {
+      "get": {
+        "operationId": "listCompanies",
+        "summary": "List companies",
+        "description": "Retrieve a paginated list of companies in the Intercom workspace. Companies represent organizations that your contacts belong to. Use company_id to find a specific company by your own system's identifier, or name to search by company name.",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "description": "Your system's unique identifier for the company (not the Intercom id). Use this to look up a company by your own ID.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter companies by name (exact match).",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of companies per page (max 60). Defaults to 15.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of company objects. Each includes id, company_id, name, plan, monthly_spend, session_count, user_count, created_at, and custom_attributes."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createOrUpdateCompany",
+        "summary": "Create or update a company",
+        "description": "Create a new company or update an existing one by company_id. If a company with the given company_id already exists, it is updated (upsert behavior). The company_id is YOUR system's identifier for the company, not Intercom's internal id. Use this to sync company data from your CRM or billing system into Intercom.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "company_id"],
+                "properties": {
+                  "name": { "type": "string", "description": "The company's display name." },
+                  "company_id": { "type": "string", "description": "Your system's unique identifier for the company. Used to match and upsert existing records." },
+                  "plan": { "type": "string", "description": "The pricing plan the company is on (e.g. 'Starter', 'Pro', 'Enterprise')." },
+                  "monthly_spend": { "type": "number", "description": "Monthly revenue from this company in your account's currency. Used for revenue reporting in Intercom." },
+                  "website": { "type": "string", "description": "The company's website URL." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created or updated company object with Intercom id, company_id, name, plan, monthly_spend, user_count, and custom_attributes."
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "operationId": "listTags",
+        "summary": "List tags",
+        "description": "Retrieve all tags defined in the Intercom workspace. Tags are labels used to categorize contacts, companies, and conversations for filtering and reporting. Use this to discover available tag IDs before applying them to conversations or contacts.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An object with a 'data' array of tag objects. Each tag has an id, name, and type."
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/tags": {
+      "post": {
+        "operationId": "tagConversation",
+        "summary": "Tag a conversation",
+        "description": "Apply a tag to a conversation to categorize it. Tags help with filtering, reporting, and routing conversations. You must provide both the tag's Intercom ID (from listTags) and an admin_id to attribute the action. Multiple tags can be applied to the same conversation over time.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the conversation to tag.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "admin_id"],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The Intercom ID of the tag to apply. Obtain from listTags."
+                  },
+                  "admin_id": {
+                    "type": "string",
+                    "description": "The Intercom ID of the admin performing the tagging action. Required for attribution."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tag object that was applied to the conversation, confirming the tagging action."
+          }
+        }
+      }
+    }
+  }
+}

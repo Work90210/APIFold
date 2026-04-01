@@ -1,0 +1,592 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cloudflare API",
+    "version": "v4",
+    "description": "Cloudflare provides DNS management, CDN, DDoS protection, and security services for websites. Use this API to manage DNS zones, DNS records, cache purging, zone settings, and account resources. All responses are wrapped in a standard envelope with success, errors, messages, and result fields."
+  },
+  "servers": [
+    {
+      "url": "https://api.cloudflare.com/client/v4"
+    }
+  ],
+  "paths": {
+    "/zones": {
+      "get": {
+        "operationId": "listZones",
+        "summary": "List zones",
+        "description": "Retrieve a paginated list of DNS zones accessible to the authenticated account. A zone corresponds to a domain (e.g. example.com). Use this to find a zone's ID (needed for all zone-scoped operations), check zone status, or enumerate all managed domains. Results can be filtered by domain name or activation status.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter zones by exact domain name (e.g. 'example.com'). Use this to look up the zone ID for a specific domain.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter zones by activation status. One of: 'active' (fully operational), 'pending' (awaiting nameserver change), 'initializing', 'moved', 'deleted', 'deactivated'.",
+            "schema": {
+              "type": "string",
+              "enum": ["active", "pending", "initializing", "moved", "deleted", "deactivated"]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number of paginated results. Starts at 1. Use with per_page to paginate through large zone lists.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of zones to return per page (5-50). Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 50,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of zone objects. Each zone includes id, name, status, paused, type (full/partial), nameservers, original_nameservers, account, plan, and created_on."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createZone",
+        "summary": "Create a zone",
+        "description": "Add a new domain (zone) to Cloudflare for DNS management. Use type 'full' when you will point the domain's nameservers to Cloudflare, or 'partial' (CNAME setup) when you want Cloudflare to proxy specific records without changing nameservers. Returns the new zone ID and the Cloudflare nameservers to configure at your registrar.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "account"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The domain name to add as a zone (e.g. 'example.com'). Must be a valid registered domain."
+                  },
+                  "account": {
+                    "type": "object",
+                    "description": "The Cloudflare account that will own this zone.",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The account ID. Obtain this from the listAccounts endpoint."
+                      }
+                    }
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Zone setup type. 'full' requires pointing nameservers to Cloudflare (recommended for full proxy features). 'partial' uses CNAME setup without changing nameservers.",
+                    "enum": ["full", "partial"],
+                    "default": "full"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created zone object including id, name, status ('pending' until nameservers propagate), nameservers (Cloudflare NS records to set), and plan."
+          }
+        }
+      }
+    },
+    "/zones/{zoneId}": {
+      "get": {
+        "operationId": "getZone",
+        "summary": "Get a zone",
+        "description": "Retrieve the full details of a single DNS zone by its ID. Use this to check a zone's current activation status, confirm nameserver configuration, view the current plan, and see whether the zone is paused. Useful for polling zone activation after adding a new domain.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone (e.g. '023e105f4ecef8ad9ca31a8372d0c353'). Obtain this from the listZones endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The zone object including id, name, status, paused, type, nameservers, original_nameservers, account, plan, and created_on."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateZone",
+        "summary": "Update a zone",
+        "description": "Update settings on an existing zone. Use this to pause a zone (disabling Cloudflare's proxy while keeping DNS active) or change the vanity nameservers. Pausing a zone is useful for troubleshooting — it bypasses Cloudflare but keeps DNS records intact.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paused": {
+                    "type": "boolean",
+                    "description": "When true, Cloudflare's proxy is disabled for all records in the zone and traffic flows directly to the origin. Set to false to re-enable the proxy."
+                  },
+                  "vanity_name_servers": {
+                    "type": "array",
+                    "description": "An array of custom vanity nameserver hostnames. Only available on Business and Enterprise plans.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated zone object reflecting the new settings."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteZone",
+        "summary": "Delete a zone",
+        "description": "Permanently remove a zone from Cloudflare. This removes all DNS records, settings, and cached data associated with the zone. The domain will stop using Cloudflare's nameservers after DNS propagation. This action is irreversible.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone to delete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object containing the id of the deleted zone."
+          }
+        }
+      }
+    },
+    "/zones/{zoneId}/dns_records": {
+      "get": {
+        "operationId": "listDnsRecords",
+        "summary": "List DNS records",
+        "description": "Retrieve DNS records for a zone, with optional filtering by type and name. Use this to audit DNS configuration, look up a specific record before updating it, or verify a record exists. Returns all record details including whether each record is proxied through Cloudflare.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone whose DNS records to list.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter records by DNS type (e.g. 'A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SRV'). Omit to return all types.",
+            "schema": {
+              "type": "string",
+              "enum": ["A", "AAAA", "CAA", "CERT", "CNAME", "DNSKEY", "DS", "HTTPS", "LOC", "MX", "NAPTR", "NS", "PTR", "SMIMEA", "SPF", "SRV", "SSHFP", "SVCB", "TLSA", "TXT", "URI"]
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter records by exact hostname or FQDN (e.g. 'www.example.com'). Use to find a specific subdomain record.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "Filter records by content value (e.g. an IP address '1.2.3.4' or a CNAME target). Useful for finding which record points to a specific destination.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number of paginated results. Starts at 1.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of DNS records to return per page (5-100). Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of DNS record objects. Each record includes id, type, name, content, ttl, proxied (boolean), proxiable, and created_on."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDnsRecord",
+        "summary": "Create a DNS record",
+        "description": "Create a new DNS record in a zone. Set proxied to true to route traffic through Cloudflare's CDN and security layer (only valid for A, AAAA, and CNAME records). Use ttl=1 for automatic TTL when proxied is true. Returns the created record with its assigned ID.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone in which to create the DNS record.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type", "name", "content"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The DNS record type (e.g. 'A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS'). Determines what content format is expected.",
+                    "enum": ["A", "AAAA", "CAA", "CNAME", "MX", "NS", "SRV", "TXT"]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The DNS record name. Use '@' for the root domain, or a subdomain prefix (e.g. 'www', 'api', 'mail')."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The record content. For A records: an IPv4 address. For AAAA: IPv6. For CNAME: target hostname. For MX: mail server hostname. For TXT: the text string."
+                  },
+                  "ttl": {
+                    "type": "integer",
+                    "description": "Time to live in seconds. Use 1 for automatic TTL (required when proxied is true). Minimum value for non-proxied records is 60.",
+                    "default": 1
+                  },
+                  "proxied": {
+                    "type": "boolean",
+                    "description": "When true, traffic to this record is routed through Cloudflare's proxy (CDN, DDoS protection, etc.). Only valid for A, AAAA, and CNAME records.",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly created DNS record object including id, type, name, content, ttl, proxied, and created_on."
+          }
+        }
+      }
+    },
+    "/zones/{zoneId}/dns_records/{dnsRecordId}": {
+      "get": {
+        "operationId": "getDnsRecord",
+        "summary": "Get a DNS record",
+        "description": "Retrieve the details of a single DNS record by its ID. Use this to fetch the current configuration of a specific record before modifying it, or to verify a record's exact content and TTL after creation.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone containing the DNS record.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dnsRecordId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the DNS record to retrieve. Obtain this from the listDnsRecords endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The DNS record object including id, type, name, content, ttl, proxied, proxiable, created_on, and modified_on."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateDnsRecord",
+        "summary": "Update a DNS record",
+        "description": "Modify an existing DNS record. Use this to change a record's content (e.g. update an A record to point to a new IP), toggle proxying, or adjust TTL. Only fields included in the request body are changed. Useful for DNS-based infrastructure changes like blue-green deployments.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone containing the DNS record.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dnsRecordId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the DNS record to update.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The DNS record type. Changing type may require updating content to match the new format.",
+                    "enum": ["A", "AAAA", "CAA", "CNAME", "MX", "NS", "SRV", "TXT"]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The DNS record name or subdomain (e.g. 'www', '@' for root)."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The new content/value for the record (e.g. a new IP address for an A record)."
+                  },
+                  "ttl": {
+                    "type": "integer",
+                    "description": "Time to live in seconds. Use 1 for automatic TTL when proxied is true."
+                  },
+                  "proxied": {
+                    "type": "boolean",
+                    "description": "When true, traffic is proxied through Cloudflare. Only valid for A, AAAA, and CNAME records."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated DNS record object reflecting the new values."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDnsRecord",
+        "summary": "Delete a DNS record",
+        "description": "Permanently remove a DNS record from a zone. After deletion, DNS resolution for that record name stops immediately from Cloudflare's authoritative servers (though TTL caching on resolvers may cause a delay). This action is irreversible.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone containing the DNS record.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dnsRecordId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the DNS record to delete.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object containing the id of the deleted DNS record."
+          }
+        }
+      }
+    },
+    "/zones/{zoneId}/purge_cache": {
+      "post": {
+        "operationId": "purgeCache",
+        "summary": "Purge cached content",
+        "description": "Purge cached content from Cloudflare's edge network for a zone. Use purge_everything:true to clear the entire cache (useful after a major deployment), or provide a list of specific file URLs to purge only targeted assets. Cache purging ensures users receive fresh content from your origin.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone whose cache to purge.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "purge_everything": {
+                    "type": "boolean",
+                    "description": "When true, purges all cached files for the zone. Cannot be used together with the 'files' parameter. Use with caution as it increases origin load until cache is repopulated."
+                  },
+                  "files": {
+                    "type": "array",
+                    "description": "An array of specific file URLs to purge from cache (e.g. ['https://example.com/style.css', 'https://example.com/image.png']). Cannot be used with purge_everything. Maximum 30 URLs per request.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An object containing id confirming the purge request was accepted and queued for processing."
+          }
+        }
+      }
+    },
+    "/zones/{zoneId}/settings": {
+      "get": {
+        "operationId": "listZoneSettings",
+        "summary": "List zone settings",
+        "description": "Retrieve all configurable settings for a zone. Returns a comprehensive list of settings including SSL mode, security level, caching level, minification options, browser cache TTL, Always Online, and many more. Use this to audit a zone's current configuration or discover which settings are available to change.",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "in": "path",
+            "required": true,
+            "description": "The unique 32-character hex ID of the zone whose settings to list.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of zone setting objects. Each setting includes id (the setting name), value, editable (boolean), and modified_on timestamp."
+          }
+        }
+      }
+    },
+    "/accounts": {
+      "get": {
+        "operationId": "listAccounts",
+        "summary": "List accounts",
+        "description": "Retrieve a list of Cloudflare accounts accessible to the authenticated token. Use this to find the account ID needed when creating zones or managing account-level resources. Returns each account's id, name, and settings.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number of paginated results, starting at 1.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of accounts to return per page (5-100). Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of account objects. Each account includes id, name, type, and settings."
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "getUser",
+        "summary": "Get the authenticated user",
+        "description": "Retrieve profile information for the currently authenticated Cloudflare user. Use this to verify the API token is valid, get the user's account details, or display user information. Returns the user's id, email, username, and account memberships.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The authenticated user object including id, email, username, first_name, last_name, telephone, country, zipcode, created_on, modified_on, and two_factor_authentication_enabled."
+          }
+        }
+      }
+    },
+    "/user/tokens": {
+      "get": {
+        "operationId": "listApiTokens",
+        "summary": "List API tokens",
+        "description": "Retrieve a list of all API tokens associated with the authenticated user account. Use this to audit active tokens, find tokens by name, or check which tokens are currently active vs expired. Note: token values are never returned — only metadata like name, status, and permissions.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number of paginated results, starting at 1.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of tokens to return per page (5-100). Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of API token objects. Each token includes id, name, status (active/disabled/expired), issued_on, modified_on, expiration_on, and policies (permission groups)."
+          }
+        }
+      }
+    }
+  }
+}

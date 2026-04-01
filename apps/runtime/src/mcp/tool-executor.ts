@@ -19,6 +19,8 @@ export interface MCPToolResult {
 export interface ExecutionContext {
   readonly requestId: string;
   readonly sessionId: string;
+  /** Caller-supplied API key for public servers. Never logged. */
+  readonly userKey?: string;
 }
 
 export interface ToolExecutorDeps {
@@ -44,7 +46,7 @@ export async function executeTool(
     return errorResult('CIRCUIT_OPEN', 'Upstream API temporarily unavailable');
   }
 
-  const url = buildUpstreamUrl(server.baseUrl, tool.name);
+  const { url, method, body: requestBody, hasBody } = buildRequest(server.baseUrl, tool, input);
 
   if (!deps.allowPrivateUpstreams) {
     try {
@@ -56,7 +58,7 @@ export async function executeTool(
 
   let headers: Readonly<Record<string, string>>;
   try {
-    headers = await buildAuthHeaders(authInjector, server.id, server.authMode);
+    headers = await buildAuthHeaders(authInjector, server.id, server.authMode, context.userKey);
   } catch (err) {
     if (err instanceof CredentialExpiredError) {
       logger.warn({ serverId: server.id, slug: server.slug }, 'OAuth credential expired — re-authorization required');
@@ -70,17 +72,19 @@ export async function executeTool(
 
   const allHeaders: Record<string, string> = {
     ...headers,
-    'Content-Type': 'application/json',
     'X-Request-ID': context.requestId,
   };
+  if (hasBody) {
+    allHeaders['Content-Type'] = 'application/json';
+  }
 
   const startTime = performance.now();
 
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method,
       headers: allHeaders,
-      body: JSON.stringify(input),
+      body: hasBody ? JSON.stringify(requestBody) : undefined,
       signal: AbortSignal.timeout(timeoutMs),
     });
 
@@ -134,9 +138,64 @@ export async function executeTool(
 
 const MAX_RESPONSE_BYTES = 10 * 1024 * 1024; // 10 MB
 
-function buildUpstreamUrl(baseUrl: string, toolName: string): string {
+interface BuiltRequest {
+  readonly url: string;
+  readonly method: string;
+  readonly body: Readonly<Record<string, unknown>>;
+  readonly hasBody: boolean;
+}
+
+/**
+ * Build the upstream HTTP request from a tool definition and input.
+ *
+ * When the tool has routing metadata (httpMethod + httpPath), we route directly
+ * to the correct API endpoint with path-param substitution and query-string
+ * separation. Otherwise we fall back to the legacy POST {baseUrl}/tools/{name}.
+ */
+function buildRequest(
+  baseUrl: string,
+  tool: ToolDefinition,
+  input: Readonly<Record<string, unknown>>,
+): BuiltRequest {
   const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-  return `${base}/tools/${encodeURIComponent(toolName)}`;
+
+  // Legacy fallback — no routing metadata stored
+  if (!tool.httpMethod || !tool.httpPath) {
+    return {
+      url: `${base}/tools/${encodeURIComponent(tool.name)}`,
+      method: 'POST',
+      body: input,
+      hasBody: true,
+    };
+  }
+
+  const method = tool.httpMethod.toUpperCase();
+  const paramMap = tool.paramMap ?? {};
+
+  // Substitute path parameters
+  let path = tool.httpPath;
+  const queryPairs: string[] = [];
+  const bodyParams: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(input)) {
+    if (value === undefined || value === null) continue;
+    const location = paramMap[key] ?? 'body';
+
+    if (location === 'path') {
+      path = path.replace(`{${key}}`, encodeURIComponent(String(value)));
+    } else if (location === 'query') {
+      queryPairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+    } else {
+      // body or header (headers handled via auth injector; unknown locations default to body)
+      bodyParams[key] = value;
+    }
+  }
+
+  const queryString = queryPairs.length > 0 ? `?${queryPairs.join('&')}` : '';
+  const url = `${base}${path}${queryString}`;
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(method);
+
+  return { url, method, body: bodyParams, hasBody };
 }
 
 const PRIVATE_IP_PATTERNS = [

@@ -33,6 +33,8 @@ interface StreamableSession {
   readonly clientIp: string;
   readonly profileSlug?: string;
   readonly createdAt: number;
+  /** Caller-supplied API key for public servers. Never logged or persisted. */
+  readonly userKey?: string;
 }
 
 const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -133,6 +135,20 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
       return;
     }
 
+    // Extract caller-supplied key for public servers (used instead of stored credentials)
+    let requestUserKey: string | undefined;
+    if (server.isPublic) {
+      const qp = typeof req.query['userKey'] === 'string' ? req.query['userKey'] : undefined;
+      const hdr = typeof req.headers['x-user-key'] === 'string' ? req.headers['x-user-key'] : undefined;
+      requestUserKey = (qp ?? hdr)?.replace(/[\r\n]/g, '');
+      if (!requestUserKey || requestUserKey.length === 0 || requestUserKey.length > 1000) {
+        res.status(400).json({
+          error: 'This is a public server. Provide your API key via ?userKey=<value> or X-User-Key header.',
+        });
+        return;
+      }
+    }
+
     if (server.transport !== 'streamable-http') {
       res.status(400).json({ error: 'This server uses SSE transport. Use GET /mcp/:identifier/sse instead.' });
       return;
@@ -210,6 +226,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
             profileSlug,
             clientIp: req.ip ?? 'unknown',
             createdAt: Date.now(),
+            userKey: requestUserKey,
           };
           sessions.set(sessionId, session);
 
@@ -272,7 +289,7 @@ export function createStreamableHTTPRouter(deps: StreamableHTTPDeps): Router {
           }
 
           const toolInput = (params['arguments'] ?? {}) as Readonly<Record<string, unknown>>;
-          const context = { requestId: randomUUID(), sessionId: sessionId ?? 'anonymous' };
+          const context = { requestId: randomUUID(), sessionId: sessionId ?? 'anonymous', userKey: session?.userKey ?? requestUserKey };
 
           metrics.incrementCounter('total_tool_calls');
           const start = performance.now();

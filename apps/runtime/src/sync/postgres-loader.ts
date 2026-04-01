@@ -74,7 +74,8 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
   const { rows } = await db.query<ServerRow>(
     `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active,
             CASE WHEN domain_verified_at IS NOT NULL THEN custom_domain ELSE NULL END AS custom_domain,
-            token_hash
+            token_hash,
+            is_public
      FROM mcp_servers
      WHERE is_active = true`,
   );
@@ -92,6 +93,7 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
       isActive: row.is_active,
       customDomain: row.custom_domain ?? null,
       tokenHash: row.token_hash ?? null,
+      isPublic: row.is_public,
     }),
   );
 
@@ -109,7 +111,8 @@ export async function reloadServer(
   const { rows } = await db.query<ServerRow>(
     `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active,
             CASE WHEN domain_verified_at IS NOT NULL THEN custom_domain ELSE NULL END AS custom_domain,
-            token_hash
+            token_hash,
+            is_public
      FROM mcp_servers
      WHERE id = $1`,
     [serverId],
@@ -133,6 +136,7 @@ export async function reloadServer(
     isActive: row.is_active,
     customDomain: row.custom_domain ?? null,
     tokenHash: row.token_hash ?? null,
+    isPublic: row.is_public,
   });
 
   registry.upsert(server);
@@ -145,7 +149,7 @@ export async function fetchToolsForServer(
   serverId: string,
 ): Promise<readonly ToolDefinition[]> {
   const { rows } = await db.query<ToolRow>(
-    `SELECT id, name, description, input_schema
+    `SELECT id, name, description, input_schema, http_method, http_path, param_map
      FROM mcp_tools
      WHERE server_id = $1 AND is_active = true`,
     [serverId],
@@ -157,6 +161,9 @@ export async function fetchToolsForServer(
       name: row.name,
       description: row.description,
       inputSchema: row.input_schema as Record<string, unknown>,
+      httpMethod: row.http_method ?? undefined,
+      httpPath: row.http_path ?? undefined,
+      paramMap: row.param_map as Record<string, 'path' | 'query' | 'header' | 'body'> ?? undefined,
     }),
   );
 }
@@ -272,6 +279,7 @@ interface ServerRow {
   readonly is_active: boolean;
   readonly custom_domain: string | null;
   readonly token_hash: string | null;
+  readonly is_public: boolean;
 }
 
 interface ToolRow {
@@ -279,6 +287,9 @@ interface ToolRow {
   readonly name: string;
   readonly description: string | null;
   readonly input_schema: unknown;
+  readonly http_method: string | null;
+  readonly http_path: string | null;
+  readonly param_map: unknown;
 }
 
 interface OAuthCredentialRow {

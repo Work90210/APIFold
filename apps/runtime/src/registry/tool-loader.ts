@@ -8,7 +8,12 @@ export interface ToolDefinition {
   readonly description: string | null;
   readonly inputSchema: Record<string, unknown>;
   readonly cacheTtlSeconds?: number;
+  /** HTTP method for the upstream API call (GET, POST, PUT, PATCH, DELETE). */
   readonly httpMethod?: string;
+  /** URL path template for the upstream API call, e.g. /v1/customers/{customerId}. */
+  readonly httpPath?: string;
+  /** Maps input parameter names to their location: path, query, header, or body. */
+  readonly paramMap?: Readonly<Record<string, 'path' | 'query' | 'header' | 'body'>>;
 }
 
 /** L1: On-demand tool definition cache per server. */

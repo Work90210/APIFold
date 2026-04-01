@@ -1,0 +1,1 @@
+{"id":"cloudflare","name":"Cloudflare","description":"Manage DNS zones, records, cache purging, and CDN settings","category":"developer-tools","authType":"bearer","docsUrl":"https://developers.cloudflare.com/api","tags":["dns","cdn","security","ddos","proxy","zones"]}

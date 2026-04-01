@@ -5,6 +5,8 @@ export type Category =
   | 'crm'
   | 'ai'
   | 'productivity'
+  | 'marketing'
+  | 'design'
   | 'demo';
 
 export type AuthType = 'bearer' | 'api_key' | 'oauth' | 'basic' | 'none';

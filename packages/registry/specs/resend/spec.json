@@ -1,0 +1,385 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Resend API",
+    "version": "v1",
+    "description": "Resend is a developer-focused email sending platform built for modern applications. Use this API to send transactional and marketing emails, manage verified sending domains, organize contacts into audiences, and manage API keys. All emails are sent from verified domains with built-in DKIM and SPF support."
+  },
+  "servers": [
+    {
+      "url": "https://api.resend.com"
+    }
+  ],
+  "paths": {
+    "/emails": {
+      "post": {
+        "operationId": "sendEmail",
+        "summary": "Send an email",
+        "description": "Send a single transactional email. Specify HTML and/or plain-text content; if both are provided, a multipart email is sent so mail clients can choose the appropriate version. The 'from' address must use a verified sending domain. Use tags to label emails for analytics tracking in the Resend dashboard.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["from", "to", "subject"],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "description": "The sender email address. Must use a domain that has been verified in your Resend account. Can include a display name (e.g. 'Acme <no-reply@acme.com>')."
+                  },
+                  "to": {
+                    "type": "array",
+                    "description": "An array of recipient email addresses. Can include display names (e.g. 'User <user@example.com>'). Maximum 50 recipients per email.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "The email subject line. Keep under 70 characters for best deliverability and display across mail clients."
+                  },
+                  "html": {
+                    "type": "string",
+                    "description": "The HTML body of the email. If provided alongside 'text', a multipart email is sent. Use responsive HTML for best cross-client rendering."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "The plain-text body of the email. Used as a fallback for mail clients that do not render HTML, and improves deliverability."
+                  },
+                  "cc": {
+                    "type": "array",
+                    "description": "An array of CC recipient email addresses. CC recipients are visible to all other recipients.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "bcc": {
+                    "type": "array",
+                    "description": "An array of BCC recipient email addresses. BCC recipients are hidden from all other recipients.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reply_to": {
+                    "type": "array",
+                    "description": "An array of email addresses that receive replies when the recipient clicks 'Reply'. If omitted, replies go to the 'from' address.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "attachments": {
+                    "type": "array",
+                    "description": "An array of file attachments. Each attachment requires a filename and base64-encoded content. Use sparingly as attachments increase email size and may affect deliverability.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "filename": {
+                          "type": "string",
+                          "description": "The filename as it will appear to the recipient (e.g. 'invoice.pdf')."
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "The file content encoded as a base64 string."
+                        }
+                      }
+                    }
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "Custom email headers to include in the outgoing message (e.g. {'X-Entity-Ref-ID': 'order-123'}). Useful for tracking and filtering.",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "An array of name/value tag objects for categorizing this email in the Resend dashboard (e.g. [{\"name\":\"category\",\"value\":\"transactional\"}]).",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "The tag key/category name."
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "The tag value."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The sent email object containing id (the email ID for tracking) and the from, to, and created_at fields."
+          }
+        }
+      }
+    },
+    "/emails/{emailId}": {
+      "get": {
+        "operationId": "getEmail",
+        "summary": "Get an email",
+        "description": "Retrieve the details and delivery status of a previously sent email by its ID. Use this to check whether an email was delivered, opened, bounced, or marked as spam. The status field reflects the latest delivery event received from receiving mail servers.",
+        "parameters": [
+          {
+            "name": "emailId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the sent email (e.g. '5e9f1234-5678-abcd-ef01-2345678901ab'). Returned in the sendEmail response.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The email object including id, object, to, from, subject, html, text, created_at, and last_event (sent/delivered/bounced/complained/opened/clicked)."
+          }
+        }
+      }
+    },
+    "/emails/batch": {
+      "post": {
+        "operationId": "sendEmailBatch",
+        "summary": "Send a batch of emails",
+        "description": "Send up to 100 emails in a single API call. Each email in the array is independent with its own recipients, subject, and content — this is not a bulk send to many recipients but rather a batch of distinct emails. Use this for efficiency when you need to send multiple different emails (e.g. order confirmations for multiple orders) without making many sequential API calls.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "description": "An array of email objects to send. Each object has the same structure as a single sendEmail request body (from, to, subject, html/text, cc, bcc, etc.). Maximum 100 emails per batch request.",
+                "items": {
+                  "type": "object",
+                  "required": ["from", "to", "subject"],
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "description": "The sender email address for this email. Must use a verified sending domain."
+                    },
+                    "to": {
+                      "type": "array",
+                      "description": "Array of recipient email addresses for this email.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "subject": {
+                      "type": "string",
+                      "description": "The subject line for this email."
+                    },
+                    "html": {
+                      "type": "string",
+                      "description": "The HTML body content for this email."
+                    },
+                    "text": {
+                      "type": "string",
+                      "description": "The plain-text body content for this email."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An object containing a 'data' array of sent email objects, each with an id for tracking. The array preserves the same order as the input."
+          }
+        }
+      }
+    },
+    "/domains": {
+      "get": {
+        "operationId": "listDomains",
+        "summary": "List domains",
+        "description": "Retrieve all sending domains registered in your Resend account. Use this to audit your verified domains, check DNS verification status, or find the domain name and region before sending emails. Only emails sent from verified domains are accepted by Resend.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An object containing a 'data' array of domain objects. Each domain includes id, name, status (not_started/pending/verified/failure/temporary_failure), region, created_at, and DNS records needed for verification."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDomain",
+        "summary": "Create a domain",
+        "description": "Register a new sending domain with Resend. After creation, Resend returns the DNS records (DKIM, SPF, DMARC) you must add to your domain's DNS to complete verification. Choose the region closest to your infrastructure for lowest latency. The domain cannot be used for sending until DNS verification is complete.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The domain name to add as a sending domain (e.g. 'acme.com' or 'mail.acme.com'). You must own and control DNS for this domain."
+                  },
+                  "region": {
+                    "type": "string",
+                    "description": "The AWS region where emails will be sent from. Choose the region geographically closest to your servers for lower latency. One of: 'us-east-1' (N. Virginia), 'eu-west-1' (Ireland), 'sa-east-1' (São Paulo), 'ap-northeast-1' (Tokyo).",
+                    "enum": ["us-east-1", "eu-west-1", "sa-east-1", "ap-northeast-1"],
+                    "default": "us-east-1"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created domain object including id, name, status ('not_started'), region, created_at, and the DNS records (SPF, DKIM, DMARC) that must be added to your DNS provider."
+          }
+        }
+      }
+    },
+    "/domains/{domainId}": {
+      "get": {
+        "operationId": "getDomain",
+        "summary": "Get a domain",
+        "description": "Retrieve the current details and DNS verification status of a specific sending domain. Use this to check whether DNS records have propagated and the domain is verified, or to fetch the required DNS records if you need to reconfigure them.",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the domain to retrieve (e.g. 'd91cd9bd-1176-453e-8fc1-35364d380206'). Obtain this from the listDomains or createDomain response.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The domain object including id, name, status (not_started/pending/verified/failure), region, created_at, and records (the DNS record objects needed for verification)."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDomain",
+        "summary": "Delete a domain",
+        "description": "Permanently remove a sending domain from your Resend account. After deletion, you can no longer send emails from this domain via Resend. Any scheduled emails or API keys scoped to this domain will also be affected. This action is irreversible.",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the domain to delete. Obtain this from the listDomains response.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object confirming the domain deletion with the domain id and a deleted:true field."
+          }
+        }
+      }
+    },
+    "/domains/{domainId}/verify": {
+      "post": {
+        "operationId": "verifyDomain",
+        "summary": "Verify a domain",
+        "description": "Trigger a DNS verification check for a domain. After you have added the required DKIM, SPF, and DMARC records to your DNS provider, call this endpoint to prompt Resend to re-check the records immediately rather than waiting for the next automatic check. Returns the updated domain status.",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the domain to verify. The domain must have DNS records added at your DNS provider before calling this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object indicating whether verification succeeded. The domain's status will update to 'verified' if all required DNS records are correctly configured."
+          }
+        }
+      }
+    },
+    "/audiences": {
+      "get": {
+        "operationId": "listAudiences",
+        "summary": "List audiences",
+        "description": "Retrieve all contact audiences (mailing lists) in your Resend account. Audiences are used to organize contacts for marketing email campaigns. Use this to find an audience ID before adding contacts or sending to a list.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An object containing a 'data' array of audience objects. Each audience includes id, name, and created_at."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAudience",
+        "summary": "Create an audience",
+        "description": "Create a new contact audience (mailing list). Audiences group contacts for targeted email campaigns. After creation, add contacts to the audience and use the audience ID to manage subscribers. Returns the new audience's ID and name.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The display name for the audience (e.g. 'Newsletter Subscribers', 'Beta Users'). Should be descriptive enough to identify the audience's purpose."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created audience object including id, object, name, and created_at."
+          }
+        }
+      }
+    },
+    "/audiences/{id}": {
+      "delete": {
+        "operationId": "deleteAudience",
+        "summary": "Delete an audience",
+        "description": "Permanently delete a contact audience and all its contact associations. This does not delete the underlying contacts, but removes the audience list and all memberships. This action is irreversible. Use with caution if any active campaigns target this audience.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique ID of the audience to delete. Obtain this from the listAudiences or createAudience response.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object confirming the deletion with the audience id and a deleted:true field."
+          }
+        }
+      }
+    },
+    "/api-keys": {
+      "get": {
+        "operationId": "listApiKeys",
+        "summary": "List API keys",
+        "description": "Retrieve all API keys associated with your Resend account. Use this to audit active keys, find keys by name, or check key permissions before rotating credentials. Note: the actual key value is never returned after initial creation — only the key's metadata (name, id, created_at) is shown.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An object containing a 'data' array of API key objects. Each key includes id, name, and created_at. The actual key value is not returned."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,462 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Linear API",
+    "version": "1.0.0",
+    "description": "Linear is a project management and issue tracking tool built for software teams. Linear uses GraphQL exclusively — all operations are POST requests to the /graphql endpoint with a 'query' string (for reads) or 'mutation' string (for writes) and an optional 'variables' object. Authenticate with a Bearer token (OAuth access token or personal API key from Linear Settings > API). The workspace is determined by the access token."
+  },
+  "servers": [
+    {
+      "url": "https://api.linear.app"
+    }
+  ],
+  "paths": {
+    "/graphql#listIssues": {
+      "post": {
+        "operationId": "graphqlListIssues",
+        "summary": "List issues",
+        "description": "Fetch a list of issues from Linear with optional filtering. Use the filter variable to narrow results by team (filter.team.key.eq), workflow state name (filter.state.name.in), or assignee email (filter.assignee.email.eq). Use 'first' to limit the number of results (default 50, max 250). Returns issue nodes with id, identifier (e.g. ENG-123), title, state, assignee, priority, and createdAt. Useful for listing a team's backlog, finding open bugs, or checking a user's assigned work.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. For listing issues use: `query ListIssues($filter: IssueFilter, $first: Int) { issues(filter: $filter, first: $first) { nodes { id identifier title priority state { name } assignee { name email } createdAt updatedAt } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "GraphQL variables object. Supported keys: 'filter' (object with optional team.key.eq, state.name.in, assignee.email.eq), 'first' (integer, max 250).",
+                    "properties": {
+                      "filter": {
+                        "type": "object",
+                        "description": "Filter object. Example: {\"team\": {\"key\": {\"eq\": \"ENG\"}}, \"state\": {\"name\": {\"in\": [\"Todo\", \"In Progress\"]}}, \"assignee\": {\"email\": {\"eq\": \"user@example.com\"}}}"
+                      },
+                      "first": { "type": "integer", "description": "Maximum number of issues to return (default 50, max 250)." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.issues.nodes array. Each issue node contains id, identifier (e.g. ENG-42), title, priority (0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low), state.name, assignee.name/email, and timestamps."
+          }
+        }
+      }
+    },
+    "/graphql#getIssue": {
+      "post": {
+        "operationId": "graphqlGetIssue",
+        "summary": "Get a single issue",
+        "description": "Retrieve the full details of a specific Linear issue by its ID. Returns the issue's title, description (Markdown), state, assignee, priority, labels, comments count, parent issue, and project. Use this when you have an issue ID (from search or listing) and need complete details including the full description body.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query GetIssue($id: String!) { issue(id: $id) { id identifier title description priority state { id name type } assignee { id name email } team { id name key } labels { nodes { name color } } createdAt updatedAt } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object.",
+                    "properties": {
+                      "id": { "type": "string", "description": "The Linear issue ID (UUID). Obtain from graphqlListIssues or graphqlSearchIssues." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.issue object containing full issue details: id, identifier, title, description (Markdown), state, assignee, team, labels, priority, and timestamps."
+          }
+        }
+      }
+    },
+    "/graphql#createIssue": {
+      "post": {
+        "operationId": "graphqlCreateIssue",
+        "summary": "Create an issue",
+        "description": "Create a new issue in Linear. Requires at minimum a title and teamId. Priority is a number 0-4 (0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low). Use graphqlListTeams to get teamId, graphqlListWorkflowStates to get stateId, and graphqlListUsers to get assigneeId. Returns the created issue with its ID and identifier (e.g. ENG-123).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL mutation string. Use: `mutation CreateIssue($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { id identifier title state { name } assignee { name } } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object containing the 'input' key.",
+                    "properties": {
+                      "input": {
+                        "type": "object",
+                        "description": "IssueCreateInput fields.",
+                        "properties": {
+                          "title": { "type": "string", "description": "Issue title (required)." },
+                          "description": { "type": "string", "description": "Issue body in Markdown format." },
+                          "teamId": { "type": "string", "description": "UUID of the team to create the issue in (required). Obtain from graphqlListTeams." },
+                          "assigneeId": { "type": "string", "description": "UUID of the user to assign the issue to. Obtain from graphqlListUsers." },
+                          "stateId": { "type": "string", "description": "UUID of the workflow state (e.g. In Progress). Obtain from graphqlListWorkflowStates." },
+                          "priority": { "type": "integer", "description": "Issue priority: 0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low." },
+                          "labelIds": { "type": "array", "items": { "type": "string" }, "description": "Array of label UUIDs to apply." }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.issueCreate containing success (boolean) and the created issue object with id, identifier, title, state, and assignee."
+          }
+        }
+      }
+    },
+    "/graphql#updateIssue": {
+      "post": {
+        "operationId": "graphqlUpdateIssue",
+        "summary": "Update an issue",
+        "description": "Update an existing Linear issue by its ID. Use this to change the title, description, state (e.g. move to In Progress), assignee, or priority. Only fields included in the input object are changed. Use graphqlListWorkflowStates to get valid stateIds and graphqlListUsers to get assigneeIds.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL mutation string. Use: `mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) { issueUpdate(id: $id, input: $input) { success issue { id identifier title state { name } assignee { name } priority } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object.",
+                    "properties": {
+                      "id": { "type": "string", "description": "UUID of the issue to update." },
+                      "input": {
+                        "type": "object",
+                        "description": "IssueUpdateInput fields. Only include fields to change.",
+                        "properties": {
+                          "title": { "type": "string", "description": "Updated issue title." },
+                          "description": { "type": "string", "description": "Updated issue description in Markdown." },
+                          "stateId": { "type": "string", "description": "UUID of the new workflow state." },
+                          "assigneeId": { "type": "string", "description": "UUID of the new assignee." },
+                          "priority": { "type": "integer", "description": "New priority: 0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low." }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.issueUpdate.success (boolean) and the updated issue object."
+          }
+        }
+      }
+    },
+    "/graphql#listTeams": {
+      "post": {
+        "operationId": "graphqlListTeams",
+        "summary": "List teams",
+        "description": "Retrieve all teams in the Linear workspace. Teams are the primary organizational unit in Linear — each has its own issue backlog, workflow states, and members. Returns each team's id (UUID needed for creating issues), name, key (short identifier like 'ENG'), and member count. Use this to discover team IDs before creating issues or fetching workflow states.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query { teams { nodes { id name key description memberCount timezone } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "No variables required for this query."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.teams.nodes array. Each team has id (UUID), name, key (short identifier), description, memberCount, and timezone."
+          }
+        }
+      }
+    },
+    "/graphql#listProjects": {
+      "post": {
+        "operationId": "graphqlListProjects",
+        "summary": "List projects",
+        "description": "Retrieve projects from the Linear workspace. Projects in Linear are goal-oriented groupings of issues with a target date and status. Use 'first' to limit results. Returns each project's id, name, description, state (planning/started/paused/completed/cancelled), progress percentage, and target date.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query ListProjects($first: Int, $filter: ProjectFilter) { projects(first: $first, filter: $filter) { nodes { id name description state progress targetDate startDate teams { nodes { name key } } } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object.",
+                    "properties": {
+                      "first": { "type": "integer", "description": "Maximum number of projects to return." },
+                      "filter": { "type": "object", "description": "Optional filter object (e.g. {\"state\": {\"eq\": \"started\"}} for active projects)." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.projects.nodes array. Each project has id, name, description, state (planning/started/paused/completed/cancelled), progress (0-1 float), targetDate, and teams."
+          }
+        }
+      }
+    },
+    "/graphql#listUsers": {
+      "post": {
+        "operationId": "graphqlListUsers",
+        "summary": "List workspace members",
+        "description": "Retrieve all members (users) of the Linear workspace. Use this to find user IDs for assigning issues, filtering issues by assignee, or displaying team member information. Returns each user's id (UUID for assignments), name, email, and display name.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query { users { nodes { id name displayName email avatarUrl active } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "No variables required for this query."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.users.nodes array. Each user has id (UUID for use in assigneeId), name, displayName, email, avatarUrl, and active (boolean)."
+          }
+        }
+      }
+    },
+    "/graphql#listWorkflowStates": {
+      "post": {
+        "operationId": "graphqlListWorkflowStates",
+        "summary": "List workflow states for a team",
+        "description": "Retrieve all workflow states (columns on the Kanban board) for a specific team. Workflow states represent the stages an issue moves through (e.g. Backlog, Todo, In Progress, In Review, Done). Returns each state's id (needed for creating/updating issues to a specific state), name, type (triage/backlog/unstarted/started/completed/cancelled), and color.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query ListWorkflowStates($teamId: String!) { workflowStates(filter: { team: { id: { eq: $teamId } } }) { nodes { id name type color position } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object.",
+                    "properties": {
+                      "teamId": { "type": "string", "description": "UUID of the team to list workflow states for. Obtain from graphqlListTeams." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.workflowStates.nodes array. Each state has id (UUID for stateId in issue create/update), name, type (triage/backlog/unstarted/started/completed/cancelled), color, and position (sort order)."
+          }
+        }
+      }
+    },
+    "/graphql#createComment": {
+      "post": {
+        "operationId": "graphqlCreateComment",
+        "summary": "Add a comment to an issue",
+        "description": "Post a new comment on a Linear issue. Comments support Markdown formatting. Use this to add context, ask questions, or update stakeholders on an issue's progress. The issueId is the UUID of the issue (not the human-readable identifier like ENG-123). Returns the created comment with its id and body.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL mutation string. Use: `mutation CreateComment($input: CommentCreateInput!) { commentCreate(input: $input) { success comment { id body createdAt user { name } } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object containing 'input'.",
+                    "properties": {
+                      "input": {
+                        "type": "object",
+                        "description": "CommentCreateInput fields.",
+                        "properties": {
+                          "issueId": { "type": "string", "description": "UUID of the issue to comment on. Obtain from graphqlListIssues or graphqlSearchIssues." },
+                          "body": { "type": "string", "description": "The comment text in Markdown format." }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.commentCreate.success (boolean) and the created comment object with id, body, createdAt, and user.name."
+          }
+        }
+      }
+    },
+    "/graphql#listComments": {
+      "post": {
+        "operationId": "graphqlListComments",
+        "summary": "List comments on an issue",
+        "description": "Retrieve all comments on a specific Linear issue. Use this to read the discussion thread on an issue, find context from team members, or check the latest updates. Comments are returned in chronological order with author information.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query ListComments($issueId: String!) { issue(id: $issueId) { comments { nodes { id body createdAt updatedAt user { id name email } } } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object.",
+                    "properties": {
+                      "issueId": { "type": "string", "description": "UUID of the issue to list comments for." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.issue.comments.nodes array. Each comment has id, body (Markdown), createdAt, updatedAt, and user (id, name, email)."
+          }
+        }
+      }
+    },
+    "/graphql#searchIssues": {
+      "post": {
+        "operationId": "graphqlSearchIssues",
+        "summary": "Search issues by keyword",
+        "description": "Full-text search for Linear issues matching a keyword or phrase. Use this to find issues by topic, description content, or title when you don't have an exact identifier. The 'term' is searched against issue titles and descriptions. Use 'first' to control the number of results. Returns matching issues sorted by relevance.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query SearchIssues($term: String!, $first: Int) { issueSearch(query: $term, first: $first) { nodes { id identifier title description priority state { name } assignee { name } team { key } createdAt } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variables object.",
+                    "properties": {
+                      "term": { "type": "string", "description": "Search term to match against issue titles and descriptions." },
+                      "first": { "type": "integer", "description": "Maximum number of results to return (default 10, max 250)." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.issueSearch.nodes array of matching issues. Each has id, identifier (e.g. ENG-99), title, description snippet, state, assignee, team key, and priority."
+          }
+        }
+      }
+    },
+    "/graphql#getViewer": {
+      "post": {
+        "operationId": "graphqlGetViewer",
+        "summary": "Get authenticated user profile",
+        "description": "Retrieve the profile of the currently authenticated Linear user. Returns the user's id (UUID needed for self-assignment in issue creation), name, email, display name, and the teams they belong to. Use this to identify the current user, get their ID for filtering issues assigned to them, or verify authentication is working.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "GraphQL query string. Use: `query { viewer { id name displayName email avatarUrl teams { nodes { id name key } } } }`"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "No variables required for this query."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response with data.viewer object containing id (UUID), name, displayName, email, avatarUrl, and teams.nodes (each team with id, name, key)."
+          }
+        }
+      }
+    }
+  }
+}

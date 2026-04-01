@@ -41,6 +41,10 @@ const configSchema = z.object({
   globalRateLimitWindowMs: z.coerce.number().int().min(1000).default(900_000),
   globalRateLimitMax: z.coerce.number().int().min(1).default(1000),
 
+  // Rate limiting for public (no-auth) servers — stricter, keyed by IP
+  publicRateLimitWindowMs: z.coerce.number().int().min(1000).default(60_000),
+  publicRateLimitMax: z.coerce.number().int().min(1).default(100),
+
   // Graceful shutdown
   drainTimeoutMs: z.coerce.number().int().min(1000).default(30_000),
 
@@ -82,6 +86,8 @@ export function loadConfig(): RuntimeConfig {
     corsOrigins: process.env['CORS_ORIGINS'],
     globalRateLimitWindowMs: process.env['GLOBAL_RATE_LIMIT_WINDOW_MS'],
     globalRateLimitMax: process.env['GLOBAL_RATE_LIMIT_MAX'],
+    publicRateLimitWindowMs: process.env['PUBLIC_RATE_LIMIT_WINDOW_MS'],
+    publicRateLimitMax: process.env['PUBLIC_RATE_LIMIT_MAX'],
     drainTimeoutMs: process.env['DRAIN_TIMEOUT_MS'],
     logLevel: process.env['LOG_LEVEL'],
     runtimeMaxWorkers: process.env['RUNTIME_MAX_WORKERS'],

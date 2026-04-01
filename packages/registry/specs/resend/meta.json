@@ -1,0 +1,1 @@
+{"id":"resend","name":"Resend","description":"Send transactional emails, manage domains, and track delivery","category":"communication","authType":"bearer","docsUrl":"https://resend.com/docs/api-reference/introduction","tags":["email","transactional","smtp","domains","templates"]}

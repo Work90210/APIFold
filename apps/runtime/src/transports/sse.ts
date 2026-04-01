@@ -76,6 +76,20 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       return;
     }
 
+    // Extract caller-supplied key for public servers (used instead of stored credentials)
+    let userKey: string | undefined;
+    if (server.isPublic) {
+      const qp = typeof req.query['userKey'] === 'string' ? req.query['userKey'] : undefined;
+      const hdr = typeof req.headers['x-user-key'] === 'string' ? req.headers['x-user-key'] : undefined;
+      userKey = (qp ?? hdr)?.replace(/[\r\n]/g, '');
+      if (!userKey || userKey.length === 0 || userKey.length > 1000) {
+        res.status(400).json({
+          error: 'This is a public server. Provide your API key via ?userKey=<value> or X-User-Key header.',
+        });
+        return;
+      }
+    }
+
     if (sessionManager.size >= maxConns) {
       res.status(503).json({ error: 'Worker at connection capacity' });
       return;
@@ -118,7 +132,7 @@ export function createSSETransportRouter(deps: SSETransportDeps): Router {
       }
     }
 
-    const session = sessionManager.create(server.slug, res, req.ip ?? 'unknown', true, profileContext);
+    const session = sessionManager.create(server.slug, res, req.ip ?? 'unknown', true, profileContext, userKey);
     if (!session) {
       res.status(503).json({ error: 'Too many active sessions' });
       return;

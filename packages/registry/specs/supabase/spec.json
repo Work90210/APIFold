@@ -1,0 +1,367 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Supabase Management API",
+    "version": "1.0.0",
+    "description": "The Supabase Management API allows programmatic control of Supabase projects, databases, edge functions, and storage. Authenticate with a Bearer token — use a personal access token (from supabase.com/dashboard/account/tokens) for account-level operations, or a project service role key for project-specific operations. Project reference IDs (ref) are the short alphanumeric strings found in the project URL (e.g. 'abcdefghijklmnop')."
+  },
+  "servers": [
+    {
+      "url": "https://api.supabase.com/v1"
+    }
+  ],
+  "paths": {
+    "/projects": {
+      "get": {
+        "operationId": "listProjects",
+        "summary": "List all projects",
+        "description": "Retrieve all Supabase projects associated with the authenticated account. Returns each project's reference ID, name, region, created date, and current status. Use this to discover project ref IDs needed for other API calls, or to audit all projects in the account.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An array of project objects. Each includes id, ref (the project reference string used in other API calls), name, organization_id, region, created_at, and status (e.g. 'ACTIVE_HEALTHY', 'COMING_UP')."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createProject",
+        "summary": "Create a project",
+        "description": "Create a new Supabase project in a specified organization and region. Projects provision a PostgreSQL database, Auth, Storage, Edge Functions, and Realtime infrastructure automatically. The db_pass becomes the PostgreSQL password — store it securely as it cannot be retrieved later. The plan determines billing tier. Project provisioning typically takes 1–2 minutes.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "db_pass", "region", "organization_id"],
+                "properties": {
+                  "name": { "type": "string", "description": "Display name for the project. Shown in the Supabase dashboard." },
+                  "db_pass": { "type": "string", "description": "Password for the PostgreSQL database. Must be at least 6 characters. Store this securely — it cannot be retrieved later." },
+                  "region": {
+                    "type": "string",
+                    "description": "AWS region to deploy the project in (e.g. 'us-east-1', 'eu-west-1', 'ap-southeast-1'). Choose a region close to your users."
+                  },
+                  "organization_id": { "type": "string", "description": "The ID of the Supabase organization to create the project in. Obtain from listOrganizations." },
+                  "plan": {
+                    "type": "string",
+                    "enum": ["free", "pro"],
+                    "description": "Billing plan for the project. 'free' has limits on database size and bandwidth; 'pro' for production workloads."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly created project object with ref, name, region, status, and database connection details. Note: the project will show status 'COMING_UP' for 1-2 minutes while provisioning."
+          }
+        }
+      }
+    },
+    "/projects/{ref}": {
+      "get": {
+        "operationId": "getProject",
+        "summary": "Get a project",
+        "description": "Retrieve detailed information about a specific Supabase project by its reference ID. Returns the project's status, region, creation date, and associated organization. Use this to check if a project is healthy before running operations, or to get project metadata.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique project reference ID (e.g. 'abcdefghijklmnop'). Found in the project URL: app.supabase.com/project/{ref}/...",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The project object with ref, name, organization_id, region, created_at, status, and cloud_provider."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteProject",
+        "summary": "Delete a project",
+        "description": "Permanently delete a Supabase project and all its data including the database, storage files, edge functions, and auth users. This action is irreversible — all data will be lost. Requires confirmation. Use with extreme caution.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project to permanently delete.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation that the project deletion was initiated."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/api": {
+      "get": {
+        "operationId": "getProjectApiSettings",
+        "summary": "Get project API settings",
+        "description": "Retrieve the API configuration for a Supabase project, including the public URL, anon key, service role key, and JWT secret. The anon key is safe for client-side use and respects Row Level Security policies. The service role key bypasses RLS and should only be used server-side. Use this to get the credentials needed to connect to a project programmatically.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API settings object including project_url (the REST/GraphQL/Auth endpoint base URL), anon_key (public client-safe key), service_role_key (server-side admin key that bypasses RLS), and jwt_secret."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/database/query": {
+      "get": {
+        "operationId": "runQuery",
+        "summary": "Run a SQL query",
+        "description": "Execute a SQL query directly against a project's PostgreSQL database. Use this for ad-hoc queries, schema inspection, data retrieval, or database administration tasks. The query runs with superuser privileges, bypassing Row Level Security. IMPORTANT: Use parameterized queries when user input is involved to prevent SQL injection. This endpoint is powerful — be careful with destructive operations.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project whose database to query.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The SQL query string to execute (e.g. 'SELECT * FROM users LIMIT 10' or 'CREATE TABLE ...'). Runs with superuser privileges."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An array of row objects representing the query result set. Each object's keys correspond to the selected column names. For DDL statements (CREATE, ALTER, DROP), returns an empty array on success."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/functions": {
+      "get": {
+        "operationId": "listEdgeFunctions",
+        "summary": "List edge functions",
+        "description": "Retrieve all Edge Functions deployed to a Supabase project. Edge Functions are Deno-based serverless functions that run on the Supabase edge network. Use this to audit deployed functions, get function slugs for invoking them, or check their configuration (JWT verification settings).",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project to list edge functions for.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of edge function objects. Each includes slug (the URL path segment used to invoke it), name, created_at, updated_at, version, status, and verify_jwt (whether JWT auth is required)."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEdgeFunction",
+        "summary": "Create an edge function",
+        "description": "Deploy a new Edge Function to a Supabase project. Edge Functions are written in TypeScript/Deno and run at the edge globally. The body field contains the source code of the function. The slug becomes the URL path segment (e.g. slug 'hello' is invoked at {project_url}/functions/v1/hello). Set verify_jwt to false for public functions that don't require authentication.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project to deploy the edge function to.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["slug", "name", "body"],
+                "properties": {
+                  "slug": { "type": "string", "description": "URL-safe identifier for the function (e.g. 'send-email'). Used as the path segment in the invocation URL. Must be unique within the project." },
+                  "name": { "type": "string", "description": "Human-readable display name for the function." },
+                  "body": { "type": "string", "description": "The TypeScript/Deno source code of the function as a string. Must export a default handler that accepts a Request and returns a Response." },
+                  "verify_jwt": { "type": "boolean", "description": "If true (default), requests must include a valid Supabase JWT. Set to false for publicly accessible functions." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The newly deployed edge function object with slug, name, version, status, and invocation URL."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/functions/{functionSlug}": {
+      "delete": {
+        "operationId": "deleteEdgeFunction",
+        "summary": "Delete an edge function",
+        "description": "Permanently delete an Edge Function from a Supabase project. The function will immediately stop accepting requests. This cannot be undone — you would need to redeploy the function to restore it.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "functionSlug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the edge function to delete. Obtain from listEdgeFunctions.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation that the edge function was successfully deleted."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/storage/buckets": {
+      "get": {
+        "operationId": "listStorageBuckets",
+        "summary": "List storage buckets",
+        "description": "Retrieve all storage buckets in a Supabase project. Buckets are top-level containers for files in Supabase Storage. Use this to discover existing buckets, check their public/private status, and get bucket IDs for file operations.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project to list storage buckets for.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of bucket objects. Each includes id, name, public (boolean), file_size_limit, allowed_mime_types, created_at, and updated_at."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createStorageBucket",
+        "summary": "Create a storage bucket",
+        "description": "Create a new storage bucket in a Supabase project. Public buckets serve files without authentication (useful for avatars, public assets). Private buckets require authenticated access via signed URLs. Optionally restrict file types with allowed_mime_types and enforce size limits with file_size_limit.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project to create the bucket in.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": { "type": "string", "description": "Unique identifier for the bucket, used in storage URLs (e.g. 'avatars'). Must be lowercase, URL-safe." },
+                  "name": { "type": "string", "description": "Display name for the bucket." },
+                  "public": { "type": "boolean", "description": "If true, files are publicly accessible without authentication. If false (default), files require signed URLs." },
+                  "allowed_mime_types": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "List of allowed MIME types for uploads (e.g. ['image/jpeg', 'image/png']). Omit to allow all types."
+                  },
+                  "file_size_limit": { "type": "integer", "description": "Maximum file size in bytes (e.g. 5242880 for 5MB). Omit for no limit." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Confirmation message and the created bucket object with id, name, public setting, and timestamps."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/storage/buckets/{bucketId}": {
+      "delete": {
+        "operationId": "deleteStorageBucket",
+        "summary": "Delete a storage bucket",
+        "description": "Delete a storage bucket from a Supabase project. The bucket must be empty before it can be deleted — remove all files within the bucket first. This action is irreversible.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "bucketId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the storage bucket to delete. Must be empty. Obtain from listStorageBuckets.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation message that the bucket was successfully deleted."
+          }
+        }
+      }
+    },
+    "/organizations": {
+      "get": {
+        "operationId": "listOrganizations",
+        "summary": "List organizations",
+        "description": "Retrieve all Supabase organizations the authenticated user belongs to. Organizations group projects and manage billing. Use this to get organization IDs needed when creating new projects.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "An array of organization objects. Each includes id, name, billing_email, and plan details."
+          }
+        }
+      }
+    },
+    "/projects/{ref}/health": {
+      "get": {
+        "operationId": "getProjectHealth",
+        "summary": "Get project health",
+        "description": "Check the health status of all services in a Supabase project. Returns the operational status of individual services: database (PostgreSQL), auth (GoTrue), realtime (websocket broadcast), storage (file storage), and edge functions. Use this to verify a project is fully operational before running operations, or to diagnose service degradation.",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "description": "The unique reference ID of the project to check health for.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of service health objects. Each includes name (e.g. 'db', 'auth', 'realtime', 'storage') and status ('HEALTHY', 'COMING_UP', 'UNHEALTHY', 'UNKNOWN'). All services should show 'HEALTHY' for a fully operational project."
+          }
+        }
+      }
+    }
+  }
+}
