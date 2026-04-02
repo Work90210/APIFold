@@ -15,7 +15,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformSpec, parseSpec } from '@apifold/transformer';
-import { listAll } from '@apifold/registry';
+import { listAll } from '../../../packages/registry/src/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY_SPECS_DIR = path.resolve(__dirname, '../../../packages/registry/specs');
