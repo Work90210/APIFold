@@ -57,7 +57,7 @@ export function POST(request: NextRequest): Promise<NextResponse> {
       slug: result.slug,
     });
 
-    try { serverTrackServerCreated({ userId, serverId: result.id, slug: result.slug, source: 'manual' }); } catch {}
+    try { serverTrackServerCreated({ userId, serverId: result.id, slug: result.slug, source: 'manual' }); } catch { /* best-effort analytics */ }
 
     // Return server data + plaintext token (shown once, never stored)
     // Strip tokenHash from response — only return the plaintext token

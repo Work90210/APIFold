@@ -73,7 +73,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         } catch (err) {
           console.error('[webhook] Failed to create email preferences:', err);
         }
-        try { serverTrackSignUp(data.id); } catch {}
+        try { serverTrackSignUp(data.id); } catch { /* best-effort analytics */ }
       }
       break;
     }
