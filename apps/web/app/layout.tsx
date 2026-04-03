@@ -5,7 +5,7 @@ import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import Script from "next/script";
@@ -51,12 +51,13 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const theme = (await cookies()).get("theme")?.value ?? "dark";
 
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${theme === "dark" ? "dark" : ""} ${GeistSans.variable} ${GeistMono.variable}`}
     >
       <head>
         <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
