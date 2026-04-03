@@ -87,8 +87,11 @@ export default async function BlogPostPage({
   try {
     const mod = await import(`@/content/blog/${slug}.mdx`);
     Post = mod.default;
-  } catch {
-    notFound();
+  } catch (err: unknown) {
+    if (err instanceof Error && (err.message.includes('Cannot find module') || (err as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND')) {
+      notFound();
+    }
+    throw err;
   }
 
   const jsonLd = {

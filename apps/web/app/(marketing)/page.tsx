@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Hero } from "./components/hero";
 import { WorksWithBar } from "./components/works-with-bar";
 import { FeaturesGrid } from "./components/features-grid";
@@ -43,11 +44,14 @@ const webSiteSchema = {
   },
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(organizationSchema).replace(
             /<\/script/gi,
@@ -57,6 +61,7 @@ export default function LandingPage() {
       />
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(webSiteSchema).replace(
             /<\/script/gi,

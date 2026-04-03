@@ -57,7 +57,9 @@ function generateRichShortDescription(
     if (first.length > 5 && first.length <= 200) return first;
     if (first.length > 200) return first.slice(0, 197) + '...';
   }
-  return `Connect to ${name} with ${toolCount} MCP tools for AI-powered API automation.`;
+  return toolCount > 0
+    ? `Connect to ${name} with ${toolCount} MCP tools for AI-powered API automation.`
+    : `Connect to ${name} on APIFold for AI-powered API automation.`;
 }
 
 function generateRichLongDescription(
@@ -75,7 +77,9 @@ function generateRichLongDescription(
   const toolSection =
     sampleTools.length > 0
       ? `## Available Tools\n\nThis server exposes **${toolCount} tools** including:\n\n${sampleTools.map((t) => `- \`${t}\``).join('\n')}${toolCount > 15 ? `\n- ...and ${toolCount - 15} more` : ''}`
-      : `## Capabilities\n\nThis MCP server exposes **${toolCount} tools** from the ${name} API.`;
+      : toolCount > 0
+        ? `## Capabilities\n\nThis MCP server exposes **${toolCount} tools** from the ${name} API.`
+        : `## Capabilities\n\nConnect AI agents to the ${name} API through APIFold.`;
 
   const tagSection =
     tags.length > 0
@@ -124,42 +128,46 @@ async function main() {
   let skipped = 0;
 
   for (const listing of listings) {
-    const rawSpec = listing.raw_spec as Record<string, unknown>;
-    const specInfo = (rawSpec.info ?? {}) as SpecInfo;
-    const tools = extractToolNames(rawSpec);
-    const tags = extractTags(rawSpec);
-    const toolCount = tools.length || 1;
+    try {
+      const rawSpec = listing.raw_spec as Record<string, unknown>;
+      const specInfo = (rawSpec.info ?? {}) as SpecInfo;
+      const tools = extractToolNames(rawSpec);
+      const tags = extractTags(rawSpec);
+      const toolCount = tools.length;
 
-    const newShort = generateRichShortDescription(
-      listing.name,
-      listing.short_description,
-      toolCount,
-      specInfo.description,
-    );
-    const newLong = generateRichLongDescription(
-      listing.name,
-      specInfo.description,
-      tools,
-      tags,
-      listing.category,
-      toolCount,
-    );
+      const newShort = generateRichShortDescription(
+        listing.name,
+        listing.short_description,
+        toolCount,
+        specInfo.description,
+      );
+      const newLong = generateRichLongDescription(
+        listing.name,
+        specInfo.description,
+        tools,
+        tags,
+        listing.category,
+        toolCount,
+      );
 
-    // Only update if something changed
-    if (newShort === listing.short_description && newLong === listing.long_description) {
-      skipped++;
-      continue;
-    }
+      // Only update if something changed
+      if (newShort === listing.short_description && newLong === listing.long_description) {
+        skipped++;
+        continue;
+      }
 
-    await sql`
-      UPDATE marketplace_listings
-      SET short_description = ${newShort}, long_description = ${newLong}
-      WHERE id = ${listing.id}
-    `;
-    updated++;
+      await sql`
+        UPDATE marketplace_listings
+        SET short_description = ${newShort}, long_description = ${newLong}
+        WHERE id = ${listing.id}
+      `;
+      updated++;
 
-    if (updated % 100 === 0) {
-      console.log(`[${updated} updated, ${skipped} skipped]`);
+      if (updated % 100 === 0) {
+        console.log(`[${updated} updated, ${skipped} skipped]`);
+      }
+    } catch (err) {
+      console.error(`Failed to process listing ${listing.slug}:`, err);
     }
   }
 
