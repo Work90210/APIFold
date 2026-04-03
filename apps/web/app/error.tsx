@@ -12,7 +12,8 @@ export default function ErrorBoundary({
   readonly reset: () => void;
 }) {
   useEffect(() => {
-    trackError({ error: error.message, context: 'global', fatal: true });
+    const sanitized = error.message?.replace(/https?:\/\/[^\s]+/g, '[URL]')?.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL]')?.slice(0, 200) ?? 'Unknown error';
+    trackError({ error: sanitized, context: 'global', fatal: true });
   }, [error]);
 
   return (

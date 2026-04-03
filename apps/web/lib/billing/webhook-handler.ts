@@ -282,11 +282,7 @@ async function handleSubscriptionUpdated(
   await syncPlanLimitsToRedis(user.id, plan);
 
   if (previousPlanId !== plan.id) {
-    await serverTrackPlanUpgrade({
-      userId: user.id,
-      fromPlan: previousPlanId,
-      toPlan: plan.id,
-    });
+    try { serverTrackPlanUpgrade({ userId: user.id, fromPlan: previousPlanId, toPlan: plan.id }); } catch {}
   }
 
   try {

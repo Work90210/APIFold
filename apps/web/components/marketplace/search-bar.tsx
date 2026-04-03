@@ -22,7 +22,7 @@ export function SearchBar() {
       }
       params.set('page', '1');
       if (query.trim()) {
-        trackSearch({ query: query.trim(), resultCount: 0, source: 'marketplace' });
+        trackSearch({ query: query.trim(), resultCount: -1, source: 'marketplace' });
       }
       router.push(`/marketplace?${params.toString()}`);
     },

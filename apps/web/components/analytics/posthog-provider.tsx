@@ -54,27 +54,27 @@ function PostHogPerformanceTracker() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.entryType === 'paint' && entry.name === 'first-contentful-paint') {
-          trackPagePerformance({
-            page: window.location.pathname,
-            ttfb: 0,
-            fcp: entry.startTime,
-            lcp: 0,
-            cls: 0,
-          });
-        }
-      }
-    });
-
+    let observer: PerformanceObserver | undefined;
     try {
+      observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.entryType === 'paint' && entry.name === 'first-contentful-paint') {
+            trackPagePerformance({
+              page: window.location.pathname,
+              ttfb: 0,
+              fcp: entry.startTime,
+              lcp: 0,
+              cls: 0,
+            });
+          }
+        }
+      });
       observer.observe({ entryTypes: ['paint'] });
     } catch {
       // PerformanceObserver not supported
     }
 
-    return () => observer.disconnect();
+    return () => observer?.disconnect();
   }, []);
 
   return null;

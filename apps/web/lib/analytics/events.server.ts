@@ -59,9 +59,9 @@ export async function serverTrackSpecImported(params: {
   readonly toolCount: number;
 }): Promise<void> {
   await captureAndFlush(params.userId, 'spec_imported', {
-    specId: params.specId,
+    spec_id: params.specId,
     name: params.name,
-    toolCount: params.toolCount,
+    tool_count: params.toolCount,
   });
 }
 
@@ -81,7 +81,7 @@ export async function serverTrackServerCreated(params: {
   readonly source: 'manual' | 'marketplace';
 }): Promise<void> {
   await captureAndFlush(params.userId, 'server_created', {
-    serverId: params.serverId,
+    server_id: params.serverId,
     slug: params.slug,
     source: params.source,
   });
@@ -102,7 +102,7 @@ export async function serverTrackPlanUpgrade(params: {
   readonly toPlan: string;
 }): Promise<void> {
   await captureAndFlush(params.userId, 'plan_upgrade', {
-    fromPlan: params.fromPlan,
-    toPlan: params.toPlan,
+    from_plan: params.fromPlan,
+    to_plan: params.toPlan,
   });
 }

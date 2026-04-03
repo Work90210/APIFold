@@ -31,7 +31,7 @@ export function POST(request: Request) {
       stripeCustomerId,
     );
 
-    await serverTrackCheckoutStarted({ userId, plan: planId });
+    try { serverTrackCheckoutStarted({ userId, plan: planId }); } catch {}
 
     return NextResponse.json(createSuccessResponse(result));
   });

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 const postMeta: Record<
@@ -94,6 +95,8 @@ export default async function BlogPostPage({
     throw err;
   }
 
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -118,6 +121,7 @@ export default async function BlogPostPage({
     <main className="mx-auto max-w-3xl px-6 pb-24 pt-32">
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script/gi, '<\\/script') }}
       />
       <article>

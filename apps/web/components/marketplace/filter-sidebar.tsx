@@ -42,7 +42,7 @@ export function FilterSidebar({ categories }: FilterSidebarProps) {
         <Link
           key={cat.slug}
           href={`/marketplace?category=${cat.slug}`}
-          onClick={() => trackMarketplaceBrowse({ category: cat.slug, query: '', sort: '', resultCount: 0 })}
+          onClick={() => trackMarketplaceBrowse({ category: cat.slug, query: '', sort: '', resultCount: -1 })}
           className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors ${
             activeCategory === cat.slug
               ? 'text-foreground font-medium'
