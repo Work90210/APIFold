@@ -28,7 +28,7 @@
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.0",
     "postgres": "^3.4.0",
-    "zod": "^3.23.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@apifold/eslint-config": "workspace:*",
