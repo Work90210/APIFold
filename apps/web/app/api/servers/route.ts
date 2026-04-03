@@ -7,6 +7,7 @@ import { getDb } from '../../../lib/db/index';
 import { ServerRepository } from '../../../lib/db/repositories/server.repository';
 import { publishServerEvent } from '../../../lib/redis';
 import { createServerSchema } from '../../../lib/validation/server.schema';
+import { serverTrackServerCreated } from '../../../lib/analytics/events.server';
 
 export function GET(_request: NextRequest): Promise<NextResponse> {
   return withErrorHandler(async () => {
@@ -54,6 +55,13 @@ export function POST(request: NextRequest): Promise<NextResponse> {
       type: 'server:created',
       serverId: result.id,
       slug: result.slug,
+    });
+
+    await serverTrackServerCreated({
+      userId,
+      serverId: result.id,
+      slug: result.slug,
+      source: 'manual',
     });
 
     // Return server data + plaintext token (shown once, never stored)

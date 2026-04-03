@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserId, withErrorHandler, withRateLimit } from "@/lib/api-helpers";
 import { createSuccessResponse } from "@apifold/types";
 import { createCheckoutSession } from "@/lib/billing/checkout";
+import { serverTrackCheckoutStarted } from "@/lib/analytics/events.server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 
@@ -29,6 +30,8 @@ export function POST(request: Request) {
       planId,
       stripeCustomerId,
     );
+
+    await serverTrackCheckoutStarted({ userId, plan: planId });
 
     return NextResponse.json(createSuccessResponse(result));
   });

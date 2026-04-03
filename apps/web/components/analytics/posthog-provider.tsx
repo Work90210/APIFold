@@ -4,7 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef } from 'react';
 
-import { trackPageView } from '@/lib/analytics/events.client';
+import { trackPageView, trackPagePerformance } from '@/lib/analytics/events.client';
 import { initPostHog, getPostHog } from '@/lib/analytics/posthog-client';
 
 function PostHogTracker() {
@@ -50,12 +50,43 @@ function PostHogTracker() {
   return null;
 }
 
+function PostHogPerformanceTracker() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.entryType === 'paint' && entry.name === 'first-contentful-paint') {
+          trackPagePerformance({
+            page: window.location.pathname,
+            ttfb: 0,
+            fcp: entry.startTime,
+            lcp: 0,
+            cls: 0,
+          });
+        }
+      }
+    });
+
+    try {
+      observer.observe({ entryTypes: ['paint'] });
+    } catch {
+      // PerformanceObserver not supported
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return null;
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Suspense fallback={null}>
         <PostHogTracker />
       </Suspense>
+      <PostHogPerformanceTracker />
       {children}
     </>
   );

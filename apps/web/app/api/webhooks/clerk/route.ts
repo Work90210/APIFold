@@ -3,6 +3,7 @@ import { Webhook } from 'svix';
 import { safeEnqueueEmailIntent } from '@/lib/email/enqueue';
 import { buildWelcomeIntent, buildAccountDeletedIntent } from '@/lib/email/intent-builder';
 import { getDb } from '@/lib/db';
+import { serverTrackSignUp } from '@/lib/analytics/events.server';
 import { emailPreferences } from '@/lib/db/schema/email-preferences';
 import { emailOutbox } from '@/lib/db/schema/email-outbox';
 import { emailThresholdState } from '@/lib/db/schema/email-threshold-state';
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         } catch (err) {
           console.error('[webhook] Failed to create email preferences:', err);
         }
+        await serverTrackSignUp(data.id);
       }
       break;
     }
