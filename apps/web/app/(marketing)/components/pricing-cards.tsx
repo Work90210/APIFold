@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
+import { TrackedCtaLink } from "@/components/analytics/tracked-cta-link";
 
 const TIERS = [
   {
@@ -112,8 +112,10 @@ export function PricingCards() {
             ))}
           </div>
 
-          <Link
+          <TrackedCtaLink
             href={tier.href}
+            cta={tier.cta.toLowerCase().replace(/\s+/g, '_')}
+            location="pricing"
             className={`inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
               tier.highlight
                 ? "bg-foreground text-background hover:bg-foreground/90"
@@ -122,7 +124,7 @@ export function PricingCards() {
           >
             {tier.cta}
             <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          </TrackedCtaLink>
         </div>
       ))}
     </div>

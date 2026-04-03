@@ -1,4 +1,8 @@
+'use client';
+
 import Link from 'next/link';
+
+import { trackTabChange } from '@/lib/analytics/events.client';
 
 interface ListingTabsProps {
   readonly slug: string;
@@ -24,6 +28,7 @@ export function ListingTabs({ slug, activeTab }: ListingTabsProps) {
           <Link
             key={tab.id}
             href={href}
+            onClick={() => trackTabChange({ slug, tab: tab.id })}
             className={`relative px-4 py-3 text-sm transition-colors duration-150 ${
               isActive
                 ? 'font-medium text-foreground'

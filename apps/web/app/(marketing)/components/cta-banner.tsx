@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight, Code } from "lucide-react";
+import { TrackedCtaLink } from "@/components/analytics/tracked-cta-link";
 
 const GITHUB_REPO = "https://github.com/Work90210/APIFold";
 
@@ -17,13 +17,15 @@ export function CtaBanner() {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
+          <TrackedCtaLink
             href="/dashboard"
+            cta="start_for_free"
+            location="cta_banner"
             className="inline-flex h-12 items-center gap-2 rounded-md bg-foreground px-8 text-base font-semibold text-background transition-all duration-300 hover:bg-foreground/90 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             Start for Free
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </TrackedCtaLink>
           <a
             href={GITHUB_REPO}
             className="inline-flex h-12 items-center gap-2 rounded-md border border-border bg-transparent px-8 text-base font-semibold text-foreground transition-all duration-300 hover:bg-muted/50 active:scale-[0.98]"
