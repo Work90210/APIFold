@@ -34,7 +34,7 @@
     "geist": "^1.7.0",
     "hast-util-to-html": "^9.0.5",
     "ioredis": "^5.4.0",
-    "lucide-react": "^0.577.0",
+    "lucide-react": "^1.7.0",
     "next": "^15.5.14",
     "postgres": "^3.4.8",
     "posthog-js": "^1.363.4",
