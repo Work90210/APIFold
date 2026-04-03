@@ -62,6 +62,12 @@ function generateRichShortDescription(
     : `Connect to ${name} on APIFold for AI-powered API automation.`;
 }
 
+function escapeMarkdown(value: string): string {
+  return value
+    .replace(/[[\](){}*_~`>#|\\!]/g, '\\$&')
+    .replace(/https?:\/\/[^\s)]+/g, '[link]');
+}
+
 function generateRichLongDescription(
   name: string,
   specDesc: string | undefined,
@@ -70,20 +76,20 @@ function generateRichLongDescription(
   category: string,
   toolCount: number,
 ): string {
-  const desc = specDesc?.trim() || `Connect your AI agent to the ${name} API.`;
+  const desc = specDesc?.trim() ? escapeMarkdown(specDesc.trim()) : `Connect your AI agent to the ${escapeMarkdown(name)} API.`;
 
   // Pick up to 15 representative tool names
   const sampleTools = tools.slice(0, 15);
   const toolSection =
     sampleTools.length > 0
-      ? `## Available Tools\n\nThis server exposes **${toolCount} tools** including:\n\n${sampleTools.map((t) => `- \`${t}\``).join('\n')}${toolCount > 15 ? `\n- ...and ${toolCount - 15} more` : ''}`
+      ? `## Available Tools\n\nThis server exposes **${toolCount} tools** including:\n\n${sampleTools.map((t) => `- \`${escapeMarkdown(t)}\``).join('\n')}${toolCount > 15 ? `\n- ...and ${toolCount - 15} more` : ''}`
       : toolCount > 0
         ? `## Capabilities\n\nThis MCP server exposes **${toolCount} tools** from the ${name} API.`
         : `## Capabilities\n\nConnect AI agents to the ${name} API through APIFold.`;
 
   const tagSection =
     tags.length > 0
-      ? `\n\n**Tags:** ${tags.join(', ')}`
+      ? `\n\n**Tags:** ${tags.map(escapeMarkdown).join(', ')}`
       : '';
 
   return `# ${name}
