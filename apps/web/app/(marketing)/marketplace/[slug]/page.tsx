@@ -199,7 +199,7 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
               {listing.iconUrl ? (
                 <img
                   src={listing.iconUrl}
-                  alt=""
+                  alt={listing.name}
                   className="h-8 w-8 rounded"
                 />
               ) : (

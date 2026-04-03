@@ -14,7 +14,7 @@ const postMeta: Record<
   "connect-stripe-to-claude": {
     title: "How to Connect Stripe to Claude with MCP",
     description:
-      "Step-by-step guide to connecting Stripe to Claude using the Model Context Protocol (MCP) through APIFold. Manage payments, invoices, and subscriptions with natural language.",
+      "Connect Stripe to Claude via MCP and APIFold. Manage payments, invoices, and subscriptions with natural language.",
     date: "2026-04-03",
   },
   "what-is-mcp": {
@@ -46,11 +46,19 @@ export async function generateMetadata({
   return {
     title: `${meta.title} | APIFold Blog`,
     description: meta.description,
+    alternates: { canonical: `https://apifold.dev/blog/${slug}` },
     openGraph: {
       title: meta.title,
       description: meta.description,
       type: "article",
       publishedTime: meta.date,
+      url: `https://apifold.dev/blog/${slug}`,
+      siteName: "APIFold",
+    },
+    twitter: {
+      card: "summary",
+      title: meta.title,
+      description: meta.description,
     },
   };
 }
@@ -107,7 +115,7 @@ export default async function BlogPostPage({
     <main className="mx-auto max-w-3xl px-6 pb-24 pt-32">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script/gi, '<\\/script') }}
       />
       <article>
         <time

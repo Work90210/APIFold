@@ -14,6 +14,18 @@ import { browseMarketplaceSchema } from '@/lib/validation/marketplace.schema';
 export const metadata: Metadata = {
   title: 'Marketplace - APIFold',
   description: 'Discover and deploy pre-built MCP server integrations with one click.',
+  openGraph: {
+    title: 'Marketplace - APIFold',
+    description: 'Discover and deploy pre-built MCP server integrations with one click.',
+    url: 'https://apifold.dev/marketplace',
+    siteName: 'APIFold',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Marketplace - APIFold',
+    description: 'Discover and deploy pre-built MCP server integrations with one click.',
+  },
+  alternates: { canonical: 'https://apifold.dev/marketplace' },
 };
 
 interface PageProps {

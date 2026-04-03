@@ -5,6 +5,18 @@ export const metadata: Metadata = {
   title: "Blog | APIFold",
   description:
     "Guides, tutorials, and updates from the APIFold team. Learn about MCP servers, AI integrations, and API best practices.",
+  openGraph: {
+    title: "Blog | APIFold",
+    description: "Guides, tutorials, and updates from the APIFold team.",
+    url: "https://apifold.dev/blog",
+    siteName: "APIFold",
+  },
+  twitter: {
+    card: "summary",
+    title: "Blog | APIFold",
+    description: "Guides, tutorials, and updates from the APIFold team.",
+  },
+  alternates: { canonical: "https://apifold.dev/blog" },
 };
 
 const posts = [
@@ -19,7 +31,7 @@ const posts = [
     slug: "connect-stripe-to-claude",
     title: "How to Connect Stripe to Claude with MCP",
     description:
-      "Step-by-step guide to connecting Stripe to Claude using the Model Context Protocol (MCP) through APIFold. Manage payments, invoices, and subscriptions with natural language.",
+      "Connect Stripe to Claude via MCP and APIFold. Manage payments, invoices, and subscriptions with natural language.",
     date: "2026-04-03",
   },
   {
