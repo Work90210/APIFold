@@ -17,9 +17,53 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "APIFold",
+  url: "https://apifold.dev",
+  logo: "https://apifold.dev/logo.svg",
+  description:
+    "Turn any REST API into an MCP server. No code required. Open source.",
+  sameAs: [
+    "https://github.com/Work90210/APIFold",
+    "https://www.producthunt.com/products/apifold",
+  ],
+};
+
+const webSiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "APIFold",
+  url: "https://apifold.dev",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: "https://apifold.dev/marketplace?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export default function LandingPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationSchema).replace(
+            /<\/script/gi,
+            "<\\/script"
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(webSiteSchema).replace(
+            /<\/script/gi,
+            "<\\/script"
+          ),
+        }}
+      />
       <Hero />
       <WorksWithBar />
       <FeaturesGrid />
