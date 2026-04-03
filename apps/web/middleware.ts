@@ -24,7 +24,7 @@ const cdnUrl = process.env.CDN_URL || '';
 function buildCspHeader(nonce: string): string {
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://${clerkDomain} https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com${cdnUrl ? ` ${cdnUrl}` : ''}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://${clerkDomain} https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com${cdnUrl ? ` ${cdnUrl}` : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     `img-src 'self' data: blob: https://img.clerk.com${cdnUrl ? ` ${cdnUrl}` : ''}`,
     "font-src 'self' https://fonts.gstatic.com",
