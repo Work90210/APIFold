@@ -26,7 +26,7 @@ function buildCspHeader(nonce: string): string {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://${clerkDomain} https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com${cdnUrl ? ` ${cdnUrl}` : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    `img-src 'self' data: blob: https://img.clerk.com${cdnUrl ? ` ${cdnUrl}` : ''}`,
+    `img-src 'self' data: blob: https://img.clerk.com https://api.apis.guru${cdnUrl ? ` ${cdnUrl}` : ''}`,
     "font-src 'self' https://fonts.gstatic.com",
     `connect-src 'self' https://${clerkDomain} https://api.clerk.com https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com https://apifold-runtime.fly.dev`,
     `frame-src https://challenges.cloudflare.com https://${clerkDomain}`,
