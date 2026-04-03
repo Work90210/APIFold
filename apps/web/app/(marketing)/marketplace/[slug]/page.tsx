@@ -7,6 +7,7 @@ import { CategoryIcon } from '@/components/marketplace/category-icon';
 import { DeployButton } from '@/components/marketplace/deploy-button';
 import { ListingTabs } from '@/components/marketplace/listing-tabs';
 import { MarkdownContent } from '@/components/marketplace/markdown-content';
+import { RelatedListings } from '@/components/marketplace/related-listings';
 import { VersionSelector } from '@/components/marketplace/version-selector';
 import { getReadDb } from '@/lib/db/index';
 import { MarketplaceListingRepository } from '@/lib/db/repositories/marketplace-listing.repository';
@@ -109,10 +110,67 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
     ],
   };
 
+  const authAnswer =
+    listing.recommendedAuthMode === 'none'
+      ? `${listing.name} requires no API key or authentication — connect instantly on APIFold with zero configuration.`
+      : listing.recommendedAuthMode === 'bearer'
+        ? `${listing.name} uses bearer token authentication. Add your token in the APIFold dashboard and it will be securely injected into every request.`
+        : `${listing.name} uses API key authentication. Enter your API key in the APIFold dashboard and it will be securely passed with every request.`;
+
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: `How do I connect ${listing.name} to Claude or Cursor?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Use APIFold's one-click deploy to connect ${listing.name} to Claude, Cursor, or any MCP-compatible client. No server setup required — just click Deploy and start using it immediately.`,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `What API key do I need for ${listing.name}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: authAnswer,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `What can the ${listing.name} MCP server do?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: listing.shortDescription,
+        },
+      },
+      {
+        '@type': 'Question',
+        name: `Is ${listing.name} free to use on APIFold?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Yes, ${listing.name} is available on APIFold's free tier. You can deploy and start using it at no cost, with generous usage limits included.`,
+        },
+      },
+    ],
+  };
+
+  // Fetch related listings by category
+  let relatedListings: readonly { readonly slug: string; readonly name: string; readonly shortDescription: string; readonly category: string; readonly tags: readonly string[]; readonly iconUrl: string | null; readonly authorType: 'official' | 'community' | 'verified'; readonly installCount: number; readonly createdAt: Date }[] = [];
+  try {
+    const relatedDb = getReadDb();
+    const relatedRepo = new MarketplaceListingRepository(relatedDb);
+    relatedListings = await relatedRepo.findRelatedByCategory(listing.category, listing.slug);
+  } catch {
+    // Related listings are non-critical
+  }
+
   return (
     <section className="relative px-6 py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script/gi, '<\\/script') }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/<\/script/gi, '<\\/script') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/<\/script/gi, '<\\/script') }} />
       <div className="relative z-10 mx-auto max-w-5xl">
         {/* Breadcrumbs */}
         <nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -332,6 +390,13 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
             </div>
           )}
         </div>
+
+        <RelatedListings
+          listings={relatedListings.map((r) => ({
+            ...r,
+            createdAt: r.createdAt.toISOString(),
+          }))}
+        />
       </div>
     </section>
   );

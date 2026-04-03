@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "email:dev": "email dev -p 3333 --dir lib/email/templates"
+    "email:dev": "email dev -p 3333 --dir lib/email/templates",
+    "seed:marketplace": "tsx scripts/seed-marketplace.ts",
+    "seed:marketplace:bulk": "tsx scripts/seed-marketplace-bulk.ts"
   },
   "dependencies": {
     "@apifold/registry": "workspace:^",
