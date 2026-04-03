@@ -8,10 +8,6 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 
-const isDev = process.env.NODE_ENV === "development";
-const clerkDomain = process.env.NEXT_PUBLIC_CLERK_DOMAIN || "*.clerk.accounts.dev";
-const cdnUrl = process.env.CDN_URL || "";
-
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -24,29 +20,8 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=31536000; includeSubDomains; preload",
   },
-  // CSP only in production — dev needs unsafe-eval for HMR + external Clerk scripts
-  // TODO [L8]: Remove 'unsafe-inline' from style-src once Tailwind/Next.js support nonce-based style injection.
-  ...(!isDev
-    ? [
-        {
-          key: "Content-Security-Policy",
-          value: [
-            "default-src 'self'",
-            `script-src 'self' https://${clerkDomain} https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com${cdnUrl ? ` ${cdnUrl}` : ""}`,
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            `img-src 'self' data: blob: https://img.clerk.com${cdnUrl ? ` ${cdnUrl}` : ""}`,
-            "font-src 'self' https://fonts.gstatic.com",
-            `connect-src 'self' https://${clerkDomain} https://api.clerk.com https://challenges.cloudflare.com https://plausible.io https://eu.i.posthog.com https://apifold-runtime.fly.dev`,
-            `frame-src https://challenges.cloudflare.com https://${clerkDomain}`,
-            "media-src 'none'",
-            "object-src 'none'",
-            "frame-ancestors 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-          ].join("; "),
-        },
-      ]
-    : []),
+  // CSP is now set dynamically per-request in middleware.ts (nonce-based).
+  // style-src still uses 'unsafe-inline' until Tailwind/Next.js support nonce-based style injection.
 ];
 
 const nextConfig = {
