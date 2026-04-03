@@ -38,9 +38,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${listing.name} MCP Server - APIFold Marketplace`,
     description: listing.shortDescription,
     openGraph: {
+      type: 'website',
       title: `${listing.name} MCP Server - APIFold Marketplace`,
       description: listing.shortDescription,
       url: `https://apifold.dev/marketplace/${slug}`,
+      siteName: 'APIFold',
+      ...(listing.iconUrl && { images: [{ url: listing.iconUrl, alt: `${listing.name} logo` }] }),
+    },
+    twitter: {
+      card: 'summary',
+      title: `${listing.name} MCP Server`,
+      description: listing.shortDescription,
     },
     alternates: { canonical: `https://apifold.dev/marketplace/${slug}` },
   };
@@ -70,8 +78,41 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
     // Versions table may not exist yet
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: `${listing.name} MCP Server`,
+    description: listing.shortDescription,
+    url: `https://apifold.dev/marketplace/${slug}`,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Any',
+    ...(listing.iconUrl && { image: listing.iconUrl }),
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    interactionStatistic: listing.installCount > 0
+      ? {
+          '@type': 'InteractionCounter',
+          interactionType: 'https://schema.org/DownloadAction',
+          userInteractionCount: listing.installCount,
+        }
+      : undefined,
+  };
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Marketplace', item: 'https://apifold.dev/marketplace' },
+      ...(categoryMeta
+        ? [{ '@type': 'ListItem', position: 2, name: categoryMeta.name, item: `https://apifold.dev/marketplace?category=${listing.category}` }]
+        : []),
+      { '@type': 'ListItem', position: categoryMeta ? 3 : 2, name: listing.name },
+    ],
+  };
+
   return (
     <section className="relative px-6 py-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script/gi, '<\\/script') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/<\/script/gi, '<\\/script') }} />
       <div className="relative z-10 mx-auto max-w-5xl">
         {/* Breadcrumbs */}
         <nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
