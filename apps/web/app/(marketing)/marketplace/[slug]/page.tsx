@@ -88,8 +88,12 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
     operatingSystem: 'Any',
     ...(listing.iconUrl && { image: listing.iconUrl }),
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    aggregateRating: listing.installCount > 0
-      ? { '@type': 'AggregateRating', ratingValue: '5', ratingCount: String(listing.installCount) }
+    interactionStatistic: listing.installCount > 0
+      ? {
+          '@type': 'InteractionCounter',
+          interactionType: 'https://schema.org/DownloadAction',
+          userInteractionCount: listing.installCount,
+        }
       : undefined,
   };
 
@@ -107,8 +111,8 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
 
   return (
     <section className="relative px-6 py-16">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script/gi, '<\\/script') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/<\/script/gi, '<\\/script') }} />
       <div className="relative z-10 mx-auto max-w-5xl">
         {/* Breadcrumbs */}
         <nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">

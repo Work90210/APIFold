@@ -28,8 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const db = getReadDb();
     const repo = new MarketplaceListingRepository(db);
-    const listings = await repo.searchPublished({ limit: 10_000 });
-    const listingPages: MetadataRoute.Sitemap = listings.map((listing) => ({
+    const result = await repo.searchPublished({ sort: 'newest', page: 1, limit: 10_000 });
+    const listingPages: MetadataRoute.Sitemap = result.items.map((listing) => ({
       url: `${baseUrl}/marketplace/${listing.slug}`,
       lastModified: listing.updatedAt,
       changeFrequency: "weekly" as const,
