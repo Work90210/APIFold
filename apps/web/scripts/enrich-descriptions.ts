@@ -20,6 +20,8 @@ interface SpecPath {
   };
 }
 
+const HTTP_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace']);
+
 function extractToolNames(rawSpec: Record<string, unknown>): string[] {
   const paths = rawSpec.paths as Record<string, SpecPath> | undefined;
   if (!paths) return [];
@@ -27,7 +29,7 @@ function extractToolNames(rawSpec: Record<string, unknown>): string[] {
   const tools: string[] = [];
   for (const [path, methods] of Object.entries(paths)) {
     for (const [method, op] of Object.entries(methods)) {
-      if (method === 'parameters' || method === 'summary' || method === 'description') continue;
+      if (!HTTP_METHODS.has(method)) continue;
       const name = op.operationId ?? op.summary ?? `${method.toUpperCase()} ${path}`;
       if (name) tools.push(name);
     }

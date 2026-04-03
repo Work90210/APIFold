@@ -31,7 +31,7 @@ export function POST(request: Request) {
       stripeCustomerId,
     );
 
-    try { serverTrackCheckoutStarted({ userId, plan: planId }); } catch { /* best-effort analytics */ }
+    Promise.resolve(serverTrackCheckoutStarted({ userId, plan: planId })).catch(() => {});
 
     return NextResponse.json(createSuccessResponse(result));
   });

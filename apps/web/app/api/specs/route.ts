@@ -61,7 +61,7 @@ export function POST(request: NextRequest): Promise<NextResponse> {
       const errorType = err instanceof Error && err.message.includes('parse')
         ? 'parse_error'
         : 'unknown';
-      try { serverTrackSpecValidationError({ userId, errorType }); } catch { /* best-effort analytics */ }
+      Promise.resolve(serverTrackSpecValidationError({ userId, errorType })).catch(() => {});
       throw err;
     }
 
@@ -130,7 +130,7 @@ export function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // Track spec import analytics (best effort)
-    try { serverTrackSpecImported({ userId, specId: result.spec.id, name: input.name, toolCount: transformResult.tools.length }); } catch { /* best-effort analytics */ }
+    Promise.resolve(serverTrackSpecImported({ userId, specId: result.spec.id, name: input.name, toolCount: transformResult.tools.length })).catch(() => {});
 
     // Notify runtime via Redis pub/sub (outside transaction — best effort)
     await publishServerEvent({
