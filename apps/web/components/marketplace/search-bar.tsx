@@ -4,6 +4,8 @@ import { Search } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
+import { trackSearch } from '@/lib/analytics/events.client';
+
 export function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,6 +21,9 @@ export function SearchBar() {
         params.delete('q');
       }
       params.set('page', '1');
+      if (query.trim()) {
+        trackSearch({ query: query.trim(), resultCount: -1, source: 'marketplace' });
+      }
       router.push(`/marketplace?${params.toString()}`);
     },
     [query, router, searchParams],

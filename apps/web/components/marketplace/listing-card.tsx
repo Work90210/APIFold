@@ -27,7 +27,7 @@ export function ListingCard({ listing }: ListingCardProps) {
         {listing.iconUrl ? (
           <img
             src={listing.iconUrl}
-            alt=""
+            alt={listing.name}
             className="h-7 w-7 rounded"
           />
         ) : (

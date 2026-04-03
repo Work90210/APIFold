@@ -179,6 +179,37 @@ export class MarketplaceListingRepository {
       .where(eq(marketplaceListings.id, listingId));
   }
 
+  async findRelatedByCategory(
+    category: string,
+    excludeSlug: string,
+    limit: number = 6,
+  ): Promise<readonly Pick<MarketplaceListing, 'slug' | 'name' | 'shortDescription' | 'category' | 'tags' | 'iconUrl' | 'authorType' | 'installCount' | 'createdAt'>[]> {
+    const rows = await this.db
+      .select({
+        slug: marketplaceListings.slug,
+        name: marketplaceListings.name,
+        shortDescription: marketplaceListings.shortDescription,
+        category: marketplaceListings.category,
+        tags: marketplaceListings.tags,
+        iconUrl: marketplaceListings.iconUrl,
+        authorType: marketplaceListings.authorType,
+        installCount: marketplaceListings.installCount,
+        createdAt: marketplaceListings.createdAt,
+      })
+      .from(marketplaceListings)
+      .where(
+        and(
+          eq(marketplaceListings.status, 'published'),
+          eq(marketplaceListings.category, category),
+          sql`${marketplaceListings.slug} != ${excludeSlug}`,
+        ),
+      )
+      .orderBy(desc(marketplaceListings.installCount), desc(marketplaceListings.featured))
+      .limit(limit);
+
+    return Object.freeze(rows.map((row) => Object.freeze(row)));
+  }
+
   async updateStatus(
     tx: DrizzleClient,
     id: string,

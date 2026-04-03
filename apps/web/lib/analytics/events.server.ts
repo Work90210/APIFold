@@ -51,3 +51,58 @@ export async function serverTrackTokenRotation(params: {
     server_id: params.serverId,
   });
 }
+
+export async function serverTrackSpecImported(params: {
+  readonly userId: string;
+  readonly specId: string;
+  readonly name: string;
+  readonly toolCount: number;
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'spec_imported', {
+    spec_id: params.specId,
+    name: params.name,
+    tool_count: params.toolCount,
+  });
+}
+
+export async function serverTrackSpecValidationError(params: {
+  readonly userId: string;
+  readonly errorType: string;
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'spec_validation_error', {
+    error_type: params.errorType,
+  });
+}
+
+export async function serverTrackServerCreated(params: {
+  readonly userId: string;
+  readonly serverId: string;
+  readonly slug: string;
+  readonly source: 'manual' | 'marketplace';
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'server_created', {
+    server_id: params.serverId,
+    slug: params.slug,
+    source: params.source,
+  });
+}
+
+export async function serverTrackCheckoutStarted(params: {
+  readonly userId: string;
+  readonly plan: string;
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'checkout_started', {
+    plan: params.plan,
+  });
+}
+
+export async function serverTrackPlanUpgrade(params: {
+  readonly userId: string;
+  readonly fromPlan: string;
+  readonly toPlan: string;
+}): Promise<void> {
+  await captureAndFlush(params.userId, 'plan_upgrade', {
+    from_plan: params.fromPlan,
+    to_plan: params.toPlan,
+  });
+}

@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     title: "APIFold — Your API. Any AI agent. In 30 seconds.",
     description: "Turn any REST API into a live MCP server. No code. No SDK wrappers. Open source.",
     url: APP_URL,
+    images: [{ url: "https://apifold.dev/logo.svg", alt: "APIFold" }],
   },
   twitter: {
     card: "summary_large_image",

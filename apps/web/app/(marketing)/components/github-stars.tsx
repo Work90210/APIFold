@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { TrackedGitHubStar } from "@/components/analytics/tracked-github-star";
 
 const GITHUB_REPO = "https://github.com/Work90210/APIFold";
 
@@ -35,10 +36,9 @@ export async function GithubStars() {
   const stars = await getStarCount();
 
   return (
-    <a
+    <TrackedGitHubStar
       href={GITHUB_REPO}
-      target="_blank"
-      rel="noopener noreferrer"
+      location="hero"
       className="inline-flex h-12 items-center gap-2 rounded-md border border-border bg-transparent px-6 text-base font-semibold text-foreground transition-all duration-300 hover:bg-muted/50 active:scale-[0.98]"
     >
       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -46,6 +46,6 @@ export async function GithubStars() {
       <span className="ml-1 rounded-md border border-border px-2 py-0.5 text-sm tabular-nums text-muted-foreground">
         {stars}
       </span>
-    </a>
+    </TrackedGitHubStar>
   );
 }

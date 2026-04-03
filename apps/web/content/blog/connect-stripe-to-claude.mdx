@@ -1,0 +1,77 @@
+---
+title: "How to Connect Stripe to Claude with MCP"
+description: "Connect Stripe to Claude via MCP and APIFold. Manage payments, invoices, and subscriptions with natural language."
+date: "2026-04-03"
+author: "APIFold Team"
+tags:
+  - mcp
+  - stripe
+  - claude
+  - tutorial
+---
+
+# How to Connect Stripe to Claude with MCP
+
+Want to manage your Stripe account through Claude? With the Model Context Protocol (MCP) and APIFold, you can connect Stripe to Claude in under five minutes — no custom code required. Once connected, you can check balances, create invoices, look up customers, and pull reports using plain English.
+
+This guide walks you through every step to connect Stripe to Claude.
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- A **Stripe account** with API access (any plan)
+- A **Claude** subscription (Pro or Team) with MCP support
+- An **APIFold account** — [sign up free](/dashboard) if you do not have one
+
+## Step 1: Get Your Stripe API Key
+
+Log in to the [Stripe Dashboard](https://dashboard.stripe.com/apikeys) and create a restricted API key with the permissions you need. For read-only access, enable "Read" on the resources you want Claude to query. For full management, enable both "Read" and "Write."
+
+We recommend starting with read-only access and expanding permissions as needed.
+
+## Step 2: Add the Stripe MCP Server on APIFold
+
+1. Go to the [Stripe API server page](/marketplace/stripe-api) on APIFold
+2. Click **"Add to Dashboard"**
+3. In your APIFold dashboard, paste your Stripe API key into the credentials field
+4. Save the configuration
+
+APIFold encrypts your credentials at rest and never exposes them to the AI model directly. The MCP server acts as a secure proxy between Claude and the Stripe API.
+
+## Step 3: Connect to Claude Desktop
+
+In your APIFold dashboard, click **"Copy MCP Config"** next to your Stripe server. This copies a JSON snippet to your clipboard.
+
+Open your Claude Desktop configuration file:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Paste the configuration into the `mcpServers` section and restart Claude Desktop.
+
+## Step 4: Start Using Stripe in Claude
+
+Once connected, you can ask Claude things like:
+
+- "Show me this month's revenue from Stripe"
+- "List all active subscriptions"
+- "Create an invoice for customer@example.com for $500"
+- "What's the status of charge ch_1234?"
+- "Refund the last payment from john@example.com"
+
+Claude will use the MCP tools provided by the Stripe server to execute these requests against the Stripe API in real time.
+
+## Tips for Best Results
+
+**Be specific with your requests.** Instead of "show me payments," try "show me the last 10 successful payments over $100." The more context you provide, the better Claude can select the right API call.
+
+**Use test mode first.** Stripe supports test mode API keys that operate against sandbox data. Connect a test key initially to verify everything works before using your live key.
+
+**Check permissions if a request fails.** If Claude reports an authorization error, your restricted API key may not have the required permission for that operation. Update the key in your Stripe Dashboard and refresh the credentials in APIFold.
+
+## What's Next?
+
+Now that Stripe is connected, consider adding more MCP servers to build powerful workflows. For example, connect the [Notion API](/marketplace/notion-api) to log payment events into a database, or the [Slack API](/marketplace/slack-api) to get notified about high-value transactions.
+
+Browse the full [APIFold Marketplace](/marketplace) to see all available integrations.

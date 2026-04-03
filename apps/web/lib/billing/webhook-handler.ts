@@ -11,6 +11,7 @@ import {
   buildSubscriptionCancelledIntent,
   buildPaymentFailedIntent,
 } from "@/lib/email/intent-builder";
+import { serverTrackPlanUpgrade } from "@/lib/analytics/events.server";
 
 export function verifyWebhookSignature(
   body: string,
@@ -279,6 +280,10 @@ async function handleSubscriptionUpdated(
   });
 
   await syncPlanLimitsToRedis(user.id, plan);
+
+  if (previousPlanId !== plan.id) {
+    Promise.resolve(serverTrackPlanUpgrade({ userId: user.id, fromPlan: previousPlanId, toPlan: plan.id })).catch(() => {});
+  }
 
   try {
     const userEmail = clerkUser.emailAddresses[0]?.emailAddress;

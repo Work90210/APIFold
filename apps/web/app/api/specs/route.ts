@@ -13,6 +13,7 @@ import { randomBytes } from 'node:crypto';
 import { fetchSpecFromUrl } from '../../../lib/ssrf-guard';
 import { publishServerEvent } from '../../../lib/redis';
 import { ErrorCodes } from '@apifold/types';
+import { serverTrackSpecImported, serverTrackSpecValidationError } from '../../../lib/analytics/events.server';
 
 export function GET(_request: NextRequest): Promise<NextResponse> {
   return withErrorHandler(async () => {
@@ -49,9 +50,20 @@ export function POST(request: NextRequest): Promise<NextResponse> {
 
     // Auto-convert Swagger 2.0 → OpenAPI 3.0 if needed, then parse + transform
     const { autoConvert, parseSpec, transformSpec } = await import('@apifold/transformer');
-    const convertResult = await autoConvert(rawSpec);
-    const parseResult = parseSpec({ spec: convertResult.spec as Record<string, unknown> });
-    const transformResult = transformSpec({ spec: parseResult.spec });
+    let convertResult;
+    let parseResult;
+    let transformResult;
+    try {
+      convertResult = await autoConvert(rawSpec);
+      parseResult = parseSpec({ spec: convertResult.spec as Record<string, unknown> });
+      transformResult = transformSpec({ spec: parseResult.spec });
+    } catch (err) {
+      const errorType = err instanceof Error && err.message.includes('parse')
+        ? 'parse_error'
+        : 'unknown';
+      Promise.resolve(serverTrackSpecValidationError({ userId, errorType })).catch(() => {});
+      throw err;
+    }
 
     const db = getDb();
 
@@ -116,6 +128,9 @@ export function POST(request: NextRequest): Promise<NextResponse> {
 
       return { spec, server };
     });
+
+    // Track spec import analytics (best effort)
+    Promise.resolve(serverTrackSpecImported({ userId, specId: result.spec.id, name: input.name, toolCount: transformResult.tools.length })).catch(() => {});
 
     // Notify runtime via Redis pub/sub (outside transaction — best effort)
     await publishServerEvent({

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowRight } from "lucide-react";
+import { TrackedCtaLink } from "@/components/analytics/tracked-cta-link";
 import { GithubStars } from "./github-stars";
 import { TerminalDemo } from "./terminal-demo";
 
@@ -32,13 +32,15 @@ export function Hero() {
               can connect to instantly.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link
+              <TrackedCtaLink
                 href="/dashboard"
+                cta="start_for_free"
+                location="hero"
                 className="inline-flex h-12 items-center gap-2 rounded-md bg-foreground px-8 text-base font-semibold text-background transition-all duration-300 hover:bg-foreground/90 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 Start for Free
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </TrackedCtaLink>
               <Suspense
                 fallback={
                   <div className="h-12 w-48 animate-pulse rounded-md border border-border bg-muted/50" />

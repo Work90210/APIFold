@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { TrackListingView } from '@/components/analytics/track-listing-view';
 import { CategoryIcon } from '@/components/marketplace/category-icon';
 import { DeployButton } from '@/components/marketplace/deploy-button';
 import { ListingTabs } from '@/components/marketplace/listing-tabs';
@@ -111,6 +112,7 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
 
   return (
     <section className="relative px-6 py-16">
+      <TrackListingView slug={slug} name={listing.name} category={listing.category} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script/gi, '<\\/script') }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/<\/script/gi, '<\\/script') }} />
       <div className="relative z-10 mx-auto max-w-5xl">

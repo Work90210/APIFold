@@ -1,0 +1,89 @@
+---
+title: "What is MCP? A Complete Guide for Developers"
+description: "Learn what the Model Context Protocol (MCP) is, how it works, and why it matters for developers building AI-powered applications. A comprehensive guide to MCP architecture and use cases."
+date: "2026-04-03"
+author: "APIFold Team"
+tags:
+  - mcp
+  - ai
+  - developer-guide
+---
+
+# What is MCP? A Complete Guide for Developers
+
+The Model Context Protocol (MCP) is an open standard that lets AI assistants interact with external tools and data sources through a structured interface. Think of it as a universal adapter between AI models and the APIs, databases, and services they need to access.
+
+If you have been building with AI and wondering how to give your models reliable access to real-world data and actions, MCP is the answer.
+
+## The Problem MCP Solves
+
+AI models are powerful reasoners, but they are fundamentally isolated. A language model cannot check your Stripe balance, query your database, or send a Slack message on its own. Traditionally, developers solved this with custom function-calling implementations — writing bespoke tool definitions, parsing model outputs, and handling API calls in application code.
+
+This approach works, but it does not scale. Every integration requires custom code. Every AI client needs its own implementation. There is no standard way to describe what tools are available, what parameters they accept, or how to authenticate.
+
+MCP standardizes all of this.
+
+## How MCP Works
+
+The Model Context Protocol defines three core concepts:
+
+### Tools
+
+Tools are discrete actions that an AI model can invoke. Each tool has a name, a description (so the model knows when to use it), and a schema describing its input parameters. For example, a Stripe MCP server might expose tools like `create_invoice`, `list_customers`, and `get_balance`.
+
+### Resources
+
+Resources provide read-only context that the model can reference. Unlike tools, resources do not perform actions — they supply information. A GitHub MCP server might expose repository file contents as resources, giving the model access to your codebase without executing any commands.
+
+### Prompts
+
+Prompts are reusable templates that help the model interact with tools and resources effectively. They encode domain-specific instructions — for example, a prompt that guides the model through a multi-step debugging workflow using GitHub tools.
+
+## The MCP Architecture
+
+MCP uses a client-server model:
+
+- **MCP Client**: The AI application (Claude Desktop, Cursor, or your custom app) that connects to servers and relays tool calls from the model.
+- **MCP Server**: A lightweight process that exposes tools, resources, and prompts for a specific service or data source.
+- **Transport**: The communication layer between client and server — typically stdio for local servers or HTTP with Server-Sent Events for remote servers.
+
+When a user sends a message, the AI model sees the available tools from all connected MCP servers. If the model decides a tool is relevant, it generates a tool call. The MCP client routes that call to the appropriate server, which executes it and returns the result. The model then incorporates the result into its response.
+
+## Why MCP Matters for Developers
+
+### Standardization
+
+Before MCP, every AI platform had its own tool-calling format. MCP provides a single protocol that works across Claude, Cursor, Windsurf, and any other client that implements the spec. Write your server once, use it everywhere.
+
+### Security
+
+MCP servers act as a controlled gateway between the AI model and external services. The model never sees raw API keys. Authentication is handled server-side, and you can restrict which tools are available. This is a significant improvement over embedding credentials in prompts or system messages.
+
+### Composability
+
+Because MCP servers are modular, you can combine them freely. Connect a Stripe server, a Notion server, and a Slack server simultaneously, and the AI model can orchestrate workflows across all three — pulling payment data from Stripe, logging it in Notion, and notifying your team in Slack.
+
+### Ecosystem Growth
+
+The MCP ecosystem is expanding rapidly. APIFold alone hosts hundreds of MCP servers generated from OpenAPI specifications, and the community is building servers for everything from databases to IoT devices.
+
+## Getting Started with MCP
+
+The fastest way to start using MCP is through APIFold:
+
+1. Browse the [APIFold Marketplace](/marketplace) to find servers for the APIs you use
+2. Add your API credentials in the dashboard
+3. Copy the connection configuration into your AI client
+4. Start interacting with your APIs through natural language
+
+No SDKs to install, no server infrastructure to manage. APIFold handles hosting, authentication, and protocol compliance.
+
+For developers who want to build custom MCP servers, the [MCP specification](https://spec.modelcontextprotocol.io) is open source and well-documented. Libraries are available for TypeScript, Python, and several other languages.
+
+## What's Next for MCP?
+
+The protocol is still evolving. Recent additions include streamable HTTP transport for remote servers, improved authentication flows, and better support for long-running operations. As the ecosystem matures, expect tighter integration with development tools, CI/CD pipelines, and enterprise infrastructure.
+
+MCP is not just a protocol — it is the foundation for a new generation of AI-native applications. Understanding it now puts you ahead of the curve.
+
+Ready to try it? [Explore the marketplace](/marketplace) and connect your first MCP server in minutes.
