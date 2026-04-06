@@ -29,7 +29,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "fumadocs-core": "13.4.10",
-    "fumadocs-mdx": "9.0.4",
+    "fumadocs-mdx": "14.2.11",
     "fumadocs-ui": "13.4.10",
     "geist": "^1.7.0",
     "hast-util-to-html": "^9.0.5",
