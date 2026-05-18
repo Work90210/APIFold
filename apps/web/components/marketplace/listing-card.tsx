@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { CategoryIcon } from './category-icon';
@@ -25,10 +26,13 @@ export function ListingCard({ listing }: ListingCardProps) {
     >
       <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg border border-border">
         {listing.iconUrl ? (
-          <img
+          <Image
             src={listing.iconUrl}
-            alt={listing.name}
-            className="h-7 w-7 rounded"
+            alt={`${listing.name} icon`}
+            width={28}
+            height={28}
+            className="rounded"
+            unoptimized
           />
         ) : (
           <CategoryIcon category={listing.category} className="h-5 w-5 text-foreground" />

@@ -38,8 +38,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
   },
 };
 
@@ -48,6 +49,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   userScalable: true,
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

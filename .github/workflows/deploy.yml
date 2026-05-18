@@ -53,6 +53,30 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
+  indexnow:
+    needs: auto-deploy
+    if: success()
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Submit URLs to IndexNow
+        run: pnpm exec tsx apps/web/scripts/submit-indexnow.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL: "true"
+
   manual-deploy:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest

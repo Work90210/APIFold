@@ -1,5 +1,6 @@
 import { ChevronRight, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -141,10 +142,13 @@ export default async function ListingDetailPage({ params, searchParams }: PagePr
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-border">
               {listing.iconUrl ? (
-                <img
+                <Image
                   src={listing.iconUrl}
-                  alt=""
-                  className="h-8 w-8 rounded"
+                  alt={`${listing.name} icon`}
+                  width={32}
+                  height={32}
+                  className="rounded"
+                  unoptimized
                 />
               ) : (
                 <CategoryIcon category={listing.category} className="h-7 w-7 text-foreground" />
