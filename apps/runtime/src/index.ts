@@ -41,7 +41,7 @@ export async function startWorker(): Promise<void> {
 
   const sql = postgres(config.databaseUrl, {
     max: config.databasePoolMax,
-    idle_timeout: 20,
+    idle_timeout: 5,
     connect_timeout: 10,
     ssl,
   });

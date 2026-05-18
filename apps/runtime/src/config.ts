@@ -6,7 +6,7 @@ const configSchema = z.object({
 
   // Database
   databaseUrl: z.string().url().refine((url) => url.startsWith('postgres'), { message: 'DATABASE_URL must use a postgres:// or postgresql:// scheme' }),
-  databasePoolMax: z.coerce.number().int().min(1).max(100).default(20),
+  databasePoolMax: z.coerce.number().int().min(1).max(100).default(5),
 
   // Redis
   redisUrl: z.string().url().refine((url) => url.startsWith('redis'), { message: 'REDIS_URL must use a redis:// or rediss:// scheme' }),

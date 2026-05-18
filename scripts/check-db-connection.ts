@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+/// <reference types="node" />
 /**
  * Database connectivity check script.
  * Usage: pnpm db:check
@@ -39,18 +40,22 @@ const sql = postgres(url, {
   ssl,
 });
 
-try {
-  const result = await sql`SELECT 1 AS ok`;
-  if (result[0]?.ok === 1) {
-    console.log('SUCCESS: Database connection is healthy');
-  } else {
-    console.error('ERROR: Unexpected query result');
+async function main() {
+  try {
+    const result = await sql`SELECT 1 AS ok`;
+    if (result[0]?.ok === 1) {
+      console.log('SUCCESS: Database connection is healthy');
+    } else {
+      console.error('ERROR: Unexpected query result');
+      process.exit(1);
+    }
+  } catch (err) {
+    console.error('ERROR: Database connection failed');
+    console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
+  } finally {
+    await sql.end();
   }
-} catch (err) {
-  console.error('ERROR: Database connection failed');
-  console.error(err instanceof Error ? err.message : String(err));
-  process.exit(1);
-} finally {
-  await sql.end();
 }
+
+main();

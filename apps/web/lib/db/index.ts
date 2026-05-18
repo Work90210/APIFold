@@ -25,7 +25,7 @@ function getPoolSize(): number {
       return Math.min(parsed, MAX_POOL_SIZE);
     }
   }
-  return 20;
+  return 5;
 }
 
 export function detectSsl(url: string): false | { rejectUnauthorized: boolean } {
@@ -47,7 +47,7 @@ export function getDb(): DrizzleClient {
     const ssl = detectSsl(url);
     sqlClient = postgres(url, {
       max: getPoolSize(),
-      idle_timeout: 20,
+      idle_timeout: 5,
       connect_timeout: 10,
       // Disable prepared statements for PgBouncer transaction-mode compatibility
       prepare: false,
@@ -68,7 +68,7 @@ export function getReadDb(): DrizzleClient {
     const ssl = detectSsl(readUrl);
     readSqlClient = postgres(readUrl, {
       max: getPoolSize(),
-      idle_timeout: 20,
+      idle_timeout: 5,
       connect_timeout: 10,
       prepare: false,
       ssl,
