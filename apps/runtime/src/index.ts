@@ -39,11 +39,25 @@ export async function startWorker(): Promise<void> {
     ? { rejectUnauthorized: process.env['DATABASE_SSL_REJECT_UNAUTHORIZED'] !== 'false' }
     : false;
 
+  const activeConnections = new Set<number>();
+
   const sql = postgres(config.databaseUrl, {
     max: config.databasePoolMax,
-    idle_timeout: 20,
+    idle_timeout: 5,
     connect_timeout: 10,
     ssl,
+    debug: (connId) => {
+      if (!activeConnections.has(connId)) {
+        activeConnections.add(connId);
+        metrics.incrementCounter('db_pool_connections_created_total');
+      }
+      metrics.setGauge('db_pool_active_connections', activeConnections.size);
+    },
+    onclose: (connId) => {
+      activeConnections.delete(connId);
+      metrics.incrementCounter('db_pool_connections_closed_total');
+      metrics.setGauge('db_pool_active_connections', activeConnections.size);
+    },
   });
 
   const rawDb: DbClient = {
