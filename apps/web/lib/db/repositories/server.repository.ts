@@ -169,6 +169,45 @@ export class ServerRepository extends BaseRepository<
     return this.freeze(rows[0]!);
   }
 
+  async setWebhookConfig(
+    userId: string,
+    id: string,
+    provider: string,
+    encryptedSecret: string,
+  ): Promise<McpServer> {
+    const rows = await this.db
+      .update(mcpServers)
+      .set({
+        webhookProvider: provider,
+        encryptedWebhookSecret: encryptedSecret,
+      })
+      .where(and(eq(mcpServers.id, id), eq(mcpServers.userId, userId)))
+      .returning();
+
+    if (rows.length === 0) {
+      throw new Error('Server not found or access denied');
+    }
+
+    return this.freeze(rows[0]!);
+  }
+
+  async clearWebhookConfig(userId: string, id: string): Promise<McpServer> {
+    const rows = await this.db
+      .update(mcpServers)
+      .set({
+        webhookProvider: null,
+        encryptedWebhookSecret: null,
+      })
+      .where(and(eq(mcpServers.id, id), eq(mcpServers.userId, userId)))
+      .returning();
+
+    if (rows.length === 0) {
+      throw new Error('Server not found or access denied');
+    }
+
+    return this.freeze(rows[0]!);
+  }
+
   async delete(userId: string, id: string): Promise<void> {
     const result = await this.db
       .delete(mcpServers)

@@ -18,9 +18,13 @@ export interface McpServer {
   readonly customDomain: string | null;
   readonly domainVerifiedAt: Date | null;
   readonly tokenHash: string | null;
+  /** Webhook signature provider (stripe, github, slack, generic). Null = not configured. */
+  readonly webhookProvider: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
+
+export type WebhookProvider = 'stripe' | 'github' | 'slack' | 'generic';
 
 export interface ServerTokenResponse {
   readonly token: string;

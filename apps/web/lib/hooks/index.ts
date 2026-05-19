@@ -20,5 +20,7 @@ export { useProfiles, useCreateProfile, useUpdateProfile, useDeleteProfile } fro
 export type { AccessProfile } from "./use-profiles";
 export { useWebhookEvents } from "./use-webhook-events";
 export type { WebhookEvent } from "./use-webhook-events";
+export { useWebhookConfig, useSetWebhookConfig, useClearWebhookConfig } from "./use-webhook-config";
+export type { WebhookConfig } from "./use-webhook-config";
 export { useComposites, useComposite, useCreateComposite, useUpdateComposite, useDeleteComposite } from "./use-composites";
 export { useWorkspaces, useWorkspace, useCreateWorkspace, useUpdateWorkspace, useInviteMember, useRemoveMember } from "./use-workspaces";
