@@ -61,6 +61,9 @@ describe('Connection Capacity', () => {
       isActive: true,
       tokenHash: null,
       customDomain: null,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
 
     toolLoader = new ToolLoader({

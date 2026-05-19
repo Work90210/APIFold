@@ -86,6 +86,7 @@ describe('reloadServer', () => {
     registry.upsert({
       id: 'srv-1', slug: 'test', userId: 'user-1',
       transport: 'sse', authMode: 'bearer', baseUrl: 'https://api.example.com', rateLimit: 100, isActive: true,
+      isPublic: false, webhookProvider: null, encryptedWebhookSecret: null,
     });
     const deps = { db, logger: createTestLogger(), registry };
 
@@ -101,6 +102,7 @@ describe('reloadServer', () => {
     registry.upsert({
       id: 'srv-1', slug: 'test', userId: 'user-1',
       transport: 'sse', authMode: 'bearer', baseUrl: 'https://api.example.com', rateLimit: 100, isActive: true,
+      isPublic: false, webhookProvider: null, encryptedWebhookSecret: null,
     });
     const deps = { db, logger: createTestLogger(), registry };
 

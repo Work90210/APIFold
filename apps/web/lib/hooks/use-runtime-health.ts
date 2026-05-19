@@ -6,7 +6,7 @@ const RUNTIME_BASE_URL = typeof window !== "undefined"
   ? (process.env.NEXT_PUBLIC_RUNTIME_URL || "http://localhost:3001")
   : "http://localhost:3001";
 const RUNTIME_HEALTH_URL = `${RUNTIME_BASE_URL}/health`;
-const POLL_INTERVAL_MS = 10_000;
+const POLL_INTERVAL_MS = 30_000;
 
 interface RuntimeHealthResult {
   readonly isOnline: boolean;
@@ -28,6 +28,7 @@ export function useRuntimeHealth(): RuntimeHealthResult {
     queryKey: ["runtime-health"],
     queryFn: fetchRuntimeHealth,
     refetchInterval: POLL_INTERVAL_MS,
+    refetchIntervalInBackground: false,
     staleTime: POLL_INTERVAL_MS,
     retry: false,
   });

@@ -23,6 +23,7 @@ import { createSSETransportRouter } from './transports/sse.js';
 import { createStreamableHTTPRouter } from './transports/streamable-http.js';
 import { createWebhookRouter } from './webhooks/receiver.js';
 import { WebhookNotifier } from './webhooks/notifier.js';
+import type { SignatureValidator } from './webhooks/signature.js';
 
 export interface AppDeps {
   readonly config: RuntimeConfig;
@@ -35,6 +36,8 @@ export interface AppDeps {
   readonly toolLoader?: ToolLoader;
   readonly toolExecutorDeps?: ToolExecutorDeps;
   readonly db?: DbClient;
+  /** Mutable map populated after server load — keyed by server ID. */
+  readonly webhookValidators?: Map<string, SignatureValidator>;
 }
 
 interface AccessProfileRow {
@@ -185,12 +188,14 @@ export function createApp(deps: AppDeps): Express {
     );
 
     const notifier = new WebhookNotifier({ logger, sessionManager });
+    const webhookValidators = deps.webhookValidators ?? new Map<string, SignatureValidator>();
     app.use(createWebhookRouter({
       logger,
       registry,
       redis: deps.redis,
       db: deps.db,
       notifier,
+      validators: webhookValidators,
     }));
   }
 

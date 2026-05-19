@@ -18,6 +18,9 @@ export function useLogs(
     readonly from?: string;
     readonly to?: string;
   },
+  options?: {
+    readonly refetchInterval?: number | false;
+  },
 ) {
   return useInfiniteQuery({
     queryKey: ["logs", serverId, filters],
@@ -35,5 +38,7 @@ export function useLogs(
       lastPage.hasMore ? (lastPage.cursor ?? undefined) : undefined,
     staleTime: 10_000,
     enabled: !!serverId,
+    refetchInterval: options?.refetchInterval,
+    refetchIntervalInBackground: false,
   });
 }

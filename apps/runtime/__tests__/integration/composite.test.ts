@@ -66,6 +66,9 @@ describe('Composite Dispatch Integration', () => {
       isActive: true,
       tokenHash: null,
       customDomain: null,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
     registry.upsert({
       id: 'srv-github',
@@ -79,6 +82,9 @@ describe('Composite Dispatch Integration', () => {
       isActive: true,
       tokenHash: null,
       customDomain: null,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
 
     const toolLoader = new ToolLoader({

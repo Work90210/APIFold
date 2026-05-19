@@ -15,6 +15,8 @@ export function useWebhookEvents(serverId: string) {
     queryKey: ["webhook-events", serverId],
     queryFn: () => api.get<WebhookEvent[]>(`/servers/${serverId}/webhook-events`),
     enabled: !!serverId,
-    refetchInterval: 10_000,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
+    staleTime: 25_000,
   });
 }

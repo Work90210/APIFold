@@ -10,7 +10,11 @@ import { ConnectionMonitor } from '../../src/resilience/connection-monitor.js';
 import { SessionManager } from '../../src/mcp/session-manager.js';
 import { ProtocolHandler } from '../../src/mcp/protocol-handler.js';
 import { createApp } from '../../src/server.js';
+import { GenericHmacValidator } from '../../src/webhooks/signature.js';
+import { createHmac } from 'node:crypto';
 import { createTestLogger } from '../helpers.js';
+
+const TEST_WEBHOOK_SECRET = 'test-webhook-secret-for-hmac';
 
 function createMockRedis() {
   const store = new Map<string, string>();
@@ -79,6 +83,9 @@ describe('Streamable HTTP Integration', () => {
       isActive: true,
       tokenHash: null,
       customDomain: null,
+      isPublic: false,
+      webhookProvider: 'generic',
+      encryptedWebhookSecret: TEST_WEBHOOK_SECRET,
     });
 
     const toolLoader = new ToolLoader({
@@ -169,6 +176,7 @@ describe('Streamable HTTP Integration', () => {
         timeoutMs: 5000,
         allowPrivateUpstreams: true,
       },
+      webhookValidators: new Map([['srv-http', new GenericHmacValidator(TEST_WEBHOOK_SECRET)]]),
     });
 
     server = await new Promise<Server>((resolve) => {
@@ -315,10 +323,15 @@ describe('Streamable HTTP Integration', () => {
   });
 
   it('webhook receiver stores event and returns 200', async () => {
+    const payload = JSON.stringify({ orderId: 'ord-123', total: 49.99 });
+    const signature = createHmac('sha256', TEST_WEBHOOK_SECRET).update(payload).digest('hex');
     const webhookRes = await fetch(`${baseUrl}/webhooks/http-server/order.created`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: 'ord-123', total: 49.99 }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-webhook-signature': signature,
+      },
+      body: payload,
     });
     expect(webhookRes.status).toBe(200);
     const webhookBody = await webhookRes.json();

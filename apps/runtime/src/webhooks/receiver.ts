@@ -21,7 +21,7 @@ export interface WebhookReceiverDeps {
   readonly redis: Redis;
   readonly db?: DbClient;
   readonly notifier: WebhookNotifier;
-  readonly validators?: ReadonlyMap<string, SignatureValidator>;
+  readonly validators: ReadonlyMap<string, SignatureValidator>;
 }
 
 interface RequestWithRawBody extends Request {
@@ -76,22 +76,25 @@ export function createWebhookRouter(deps: WebhookReceiverDeps): Router {
       return;
     }
 
-    // Validate webhook signature if a validator is configured for this server
-    const validator = validators?.get(server.id);
-    if (validator) {
-      // Fail closed: signature validation requires the original wire bytes.
-      // If the raw body wasn't captured (body parser misconfiguration), reject.
-      if (!rawBody) {
-        logger.error({ slug: serverSlug, eventName }, 'Signature validator configured but raw body unavailable');
-        res.status(500).json({ error: 'Signature validation unavailable' });
-        return;
-      }
-      const isValid = validator.validate(rawBodyStr, req.headers);
-      if (!isValid) {
-        logger.warn({ slug: serverSlug, eventName }, 'Webhook signature validation failed');
-        res.status(401).json({ error: 'Invalid webhook signature' });
-        return;
-      }
+    // Validate webhook signature — fail closed if no validator is configured
+    const validator = validators.get(server.id);
+    if (!validator) {
+      logger.warn({ slug: serverSlug, eventName }, 'No webhook signature validator configured — rejecting');
+      res.status(401).json({ error: 'Webhook signature validation not configured' });
+      return;
+    }
+
+    if (!rawBody) {
+      logger.error({ slug: serverSlug, eventName }, 'Signature validator configured but raw body unavailable');
+      res.status(500).json({ error: 'Signature validation unavailable' });
+      return;
+    }
+
+    const isValid = validator.validate(rawBodyStr, req.headers);
+    if (!isValid) {
+      logger.warn({ slug: serverSlug, eventName }, 'Webhook signature validation failed');
+      res.status(401).json({ error: 'Invalid webhook signature' });
+      return;
     }
 
     const payload = req.body as Record<string, unknown>;

@@ -130,6 +130,23 @@ export class GenericHmacValidator implements SignatureValidator {
   }
 }
 
+const PROVIDER_FACTORIES: Record<string, (secret: string) => SignatureValidator> = {
+  stripe: (secret) => new StripeSignatureValidator(secret),
+  github: (secret) => new GitHubSignatureValidator(secret),
+  slack: (secret) => new SlackSignatureValidator(secret),
+  generic: (secret) => new GenericHmacValidator(secret),
+};
+
+const VALID_PROVIDERS = new Set(Object.keys(PROVIDER_FACTORIES));
+
+/** Build a SignatureValidator for a known provider, or return undefined for unknown providers. */
+export function createValidatorForProvider(provider: string, secret: string): SignatureValidator | undefined {
+  const factory = PROVIDER_FACTORIES[provider];
+  return factory ? factory(secret) : undefined;
+}
+
+export { VALID_PROVIDERS };
+
 // Random key generated at process startup — unknown to external parties,
 // used only to normalise inputs to fixed-length buffers for constant-time comparison.
 const COMPARE_KEY = randomBytes(32);
