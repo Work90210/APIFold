@@ -69,6 +69,9 @@ describe('MCP Flow Integration', () => {
       isActive: true,
       tokenHash: null,
       customDomain: null,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
     registry.upsert({
       id: 'srv-2',
@@ -82,6 +85,9 @@ describe('MCP Flow Integration', () => {
       isActive: true,
       tokenHash: null,
       customDomain: null,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
 
     const toolLoader = new ToolLoader({

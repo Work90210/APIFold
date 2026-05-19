@@ -103,6 +103,9 @@ describe('Hot Reload Integration', () => {
       baseUrl: 'https://old.example.com',
       rateLimit: 50,
       isActive: true,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
 
     // Pre-load tools into cache
@@ -129,6 +132,9 @@ describe('Hot Reload Integration', () => {
       baseUrl: 'https://del.example.com',
       rateLimit: 50,
       isActive: true,
+      isPublic: false,
+      webhookProvider: null,
+      encryptedWebhookSecret: null,
     });
 
     const mockRes = new EventEmitter();

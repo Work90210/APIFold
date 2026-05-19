@@ -18,6 +18,10 @@ export interface L0ServerMeta {
   readonly tokenHash: string | null;
   /** When true, no af_ bearer token is required. Callers supply their own API key via ?userKey or X-User-Key. */
   readonly isPublic: boolean;
+  /** Webhook signature provider (stripe, github, slack, generic). Null = no webhook auth configured. */
+  readonly webhookProvider: string | null;
+  /** AES-encrypted HMAC secret for webhook signature validation. Null = no webhook auth configured. */
+  readonly encryptedWebhookSecret: string | null;
 }
 
 export interface ServerRegistryDeps {

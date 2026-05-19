@@ -7,6 +7,7 @@ export interface FallbackPollerDeps {
   readonly logger: Logger;
   readonly pgLoaderDeps: PostgresLoaderDeps;
   readonly intervalMs: number;
+  readonly onServerChange?: () => void;
 }
 
 /**
@@ -18,11 +19,13 @@ export class FallbackPoller {
   private readonly logger: Logger;
   private readonly pgDeps: PostgresLoaderDeps;
   private readonly intervalMs: number;
+  private readonly onServerChange?: () => void;
 
   constructor(deps: FallbackPollerDeps) {
     this.logger = deps.logger;
     this.pgDeps = deps.pgLoaderDeps;
     this.intervalMs = deps.intervalMs;
+    this.onServerChange = deps.onServerChange;
   }
 
   start(): void {
@@ -48,5 +51,6 @@ export class FallbackPoller {
   private async poll(): Promise<void> {
     this.logger.debug('Fallback poller: reloading from Postgres');
     await loadAllServers(this.pgDeps);
+    this.onServerChange?.();
   }
 }

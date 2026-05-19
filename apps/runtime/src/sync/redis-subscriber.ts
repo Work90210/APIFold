@@ -24,6 +24,8 @@ export interface RedisSubscriberDeps {
   readonly credentialCache: CredentialCache;
   readonly sessionManager: SessionManager;
   readonly pgLoaderDeps: PostgresLoaderDeps;
+  /** Called after a server is created, updated, or deleted so dependents can rebuild derived state. */
+  readonly onServerChange?: () => void;
 }
 
 export class RedisSubscriber {
@@ -34,6 +36,7 @@ export class RedisSubscriber {
   private readonly credentialCache: CredentialCache;
   private readonly sessionManager: SessionManager;
   private readonly pgDeps: PostgresLoaderDeps;
+  private readonly onServerChange?: () => void;
   private isSubscribed = false;
 
   constructor(deps: RedisSubscriberDeps) {
@@ -44,6 +47,7 @@ export class RedisSubscriber {
     this.credentialCache = deps.credentialCache;
     this.sessionManager = deps.sessionManager;
     this.pgDeps = deps.pgLoaderDeps;
+    this.onServerChange = deps.onServerChange;
   }
 
   async subscribe(): Promise<void> {
@@ -100,6 +104,7 @@ export class RedisSubscriber {
     await reloadServer(this.pgDeps, serverId);
     this.toolLoader.evict(serverId);
     this.credentialCache.evict(serverId);
+    this.onServerChange?.();
   }
 
   private handleDelete(serverId: string, slug: string): void {
@@ -107,6 +112,7 @@ export class RedisSubscriber {
     this.toolLoader.evict(serverId);
     this.credentialCache.evict(serverId);
     this.sessionManager.closeAllForServer(slug);
+    this.onServerChange?.();
   }
 }
 

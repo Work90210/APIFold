@@ -27,6 +27,9 @@ const mockServer: L0ServerMeta = {
   baseUrl: 'https://api.example.com',
   rateLimit: 100,
   isActive: true,
+  isPublic: false,
+  webhookProvider: null,
+  encryptedWebhookSecret: null,
 };
 
 describe('ProtocolHandler', () => {

@@ -75,7 +75,9 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
     `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active,
             CASE WHEN domain_verified_at IS NOT NULL THEN custom_domain ELSE NULL END AS custom_domain,
             token_hash,
-            is_public
+            is_public,
+            webhook_provider,
+            encrypted_webhook_secret
      FROM mcp_servers
      WHERE is_active = true`,
   );
@@ -94,6 +96,8 @@ export async function loadAllServers(deps: PostgresLoaderDeps): Promise<void> {
       customDomain: row.custom_domain ?? null,
       tokenHash: row.token_hash ?? null,
       isPublic: row.is_public,
+      webhookProvider: row.webhook_provider ?? null,
+      encryptedWebhookSecret: row.encrypted_webhook_secret ?? null,
     }),
   );
 
@@ -112,7 +116,9 @@ export async function reloadServer(
     `SELECT id, slug, endpoint_id, user_id, transport, auth_mode, base_url, rate_limit, is_active,
             CASE WHEN domain_verified_at IS NOT NULL THEN custom_domain ELSE NULL END AS custom_domain,
             token_hash,
-            is_public
+            is_public,
+            webhook_provider,
+            encrypted_webhook_secret
      FROM mcp_servers
      WHERE id = $1`,
     [serverId],
@@ -137,6 +143,8 @@ export async function reloadServer(
     customDomain: row.custom_domain ?? null,
     tokenHash: row.token_hash ?? null,
     isPublic: row.is_public,
+    webhookProvider: row.webhook_provider ?? null,
+    encryptedWebhookSecret: row.encrypted_webhook_secret ?? null,
   });
 
   registry.upsert(server);
@@ -280,6 +288,8 @@ interface ServerRow {
   readonly custom_domain: string | null;
   readonly token_hash: string | null;
   readonly is_public: boolean;
+  readonly webhook_provider: string | null;
+  readonly encrypted_webhook_secret: string | null;
 }
 
 interface ToolRow {

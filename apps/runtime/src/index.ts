@@ -5,7 +5,7 @@ import postgres from 'postgres';
 import { loadConfig } from './config.js';
 import { ProtocolHandler } from './mcp/protocol-handler.js';
 import { SessionManager } from './mcp/session-manager.js';
-import { createLogger } from './observability/logger.js';
+import { createLogger, type Logger } from './observability/logger.js';
 import { metrics } from './observability/metrics.js';
 import { createMonitoredDb } from './observability/query-monitor.js';
 import { CredentialCache } from './registry/credential-cache.js';
@@ -22,6 +22,36 @@ import { RedisSubscriber } from './sync/redis-subscriber.js';
 import { decrypt } from './vault/decrypt.js';
 import { encrypt } from './vault/encrypt.js';
 import { clearKeyCache } from './vault/derive-key.js';
+import { createValidatorForProvider, type SignatureValidator } from './webhooks/signature.js';
+
+/**
+ * Rebuild the webhook validators map from the current registry state.
+ * Mutates the provided map in place so the webhook router picks up changes
+ * without needing a new reference.
+ */
+function rebuildWebhookValidators(
+  registry: ServerRegistry,
+  decryptFn: (encrypted: string) => string,
+  validators: Map<string, SignatureValidator>,
+  logger: Logger,
+): void {
+  validators.clear();
+  for (const server of registry.getAll()) {
+    if (!server.webhookProvider || !server.encryptedWebhookSecret) continue;
+    try {
+      const secret = decryptFn(server.encryptedWebhookSecret);
+      const validator = createValidatorForProvider(server.webhookProvider, secret);
+      if (validator) {
+        validators.set(server.id, validator);
+      } else {
+        logger.warn({ serverId: server.id, provider: server.webhookProvider }, 'Unknown webhook provider — skipping');
+      }
+    } catch (err) {
+      logger.error({ err, serverId: server.id }, 'Failed to decrypt webhook secret — skipping');
+    }
+  }
+  logger.info({ count: validators.size }, 'Webhook validators built');
+}
 
 export async function startWorker(): Promise<void> {
   const config = loadConfig();
@@ -136,6 +166,10 @@ export async function startWorker(): Promise<void> {
   // Ready state
   let isReady = false;
 
+  // Mutable map — shared by reference with the webhook router.
+  // Populated after loadAllServers and refreshed on server reload.
+  const webhookValidators = new Map<string, SignatureValidator>();
+
   // Create Express app
   const app = createApp({
     config,
@@ -148,6 +182,7 @@ export async function startWorker(): Promise<void> {
     toolLoader,
     toolExecutorDeps,
     db,
+    webhookValidators,
   });
 
   // Start HTTP server
@@ -167,6 +202,12 @@ export async function startWorker(): Promise<void> {
   const pgLoaderDeps = { db, logger, registry };
   await loadAllServers(pgLoaderDeps);
 
+  // Build webhook validators from loaded server configs
+  rebuildWebhookValidators(registry, decryptFn, webhookValidators, logger);
+
+  // Callback to rebuild webhook validators whenever server state changes
+  const onServerChange = () => rebuildWebhookValidators(registry, decryptFn, webhookValidators, logger);
+
   // Redis sync
   const redisSubscriber = new RedisSubscriber({
     redis: redisSub,
@@ -176,12 +217,14 @@ export async function startWorker(): Promise<void> {
     credentialCache,
     sessionManager,
     pgLoaderDeps,
+    onServerChange,
   });
 
   const fallbackPoller = new FallbackPoller({
     logger,
     pgLoaderDeps,
     intervalMs: config.fallbackPollIntervalMs,
+    onServerChange,
   });
 
   try {

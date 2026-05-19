@@ -31,6 +31,8 @@ export const mcpServers = pgTable(
     domainVerificationToken: text('domain_verification_token'),
     tokenHash: text('token_hash'),
     workspaceId: uuid('workspace_id'),
+    webhookProvider: text('webhook_provider'),
+    encryptedWebhookSecret: text('encrypted_webhook_secret'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
